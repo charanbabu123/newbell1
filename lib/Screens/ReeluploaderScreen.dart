@@ -1,4 +1,3 @@
-
 // with progess bar
 import 'dart:convert';
 
@@ -38,14 +37,24 @@ class VideoSection {
 }
 
 class ReelUploaderScreen extends StatefulWidget {
-  const ReelUploaderScreen({super.key,this.videoPath});
+  const ReelUploaderScreen(
+      {super.key,
+      this.videoPath,
+      this.showAppBar = true,
+      this.showSkip = true,
+      });
   final String? videoPath;
+  final bool showAppBar, showSkip;
 
   @override
   _ReelUploaderScreenState createState() => _ReelUploaderScreenState();
 }
 
 class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
+  final TextEditingController caption1Controller = TextEditingController();
+  final TextEditingController caption2Controller = TextEditingController();
+  final TextEditingController caption3Controller = TextEditingController();
+
   List<VideoSection> sections = [
     VideoSection(label: "Introduction"),
     VideoSection(label: "Skills"),
@@ -53,9 +62,19 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
     VideoSection(label: "Hobbies"),
   ];
 
-  bool get allVideosUploaded => sections.every((section) => section.videoFile != null);
+  String currentCaption = "";
+
+  bool get allVideosUploaded =>
+      sections.every((section) => section.videoFile != null);
 
   final List<File> _selectedVideos = [];
+
+  @override
+  void initState() {
+    super.initState();
+    //Refresh token
+    AuthService.refreshToken();
+  }
 
   Future<void> _openCamera() async {
     final cameras = await availableCameras();
@@ -74,9 +93,9 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
     );
   }
 
-
   Future<void> pickVideo(int index) async {
-    if (sections[index].thumbnailController != null && sections[index].thumbnailController!.value.isPlaying) {
+    if (sections[index].thumbnailController != null &&
+        sections[index].thumbnailController!.value.isPlaying) {
       return;
     }
 
@@ -88,7 +107,8 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
       if (result != null && result.files.single.path != null) {
         File videoFile = File(result.files.single.path!);
 
-        final VideoPlayerController tempController = VideoPlayerController.file(videoFile);
+        final VideoPlayerController tempController =
+            VideoPlayerController.file(videoFile);
         await tempController.initialize();
         final int videoDuration = tempController.value.duration.inSeconds;
         tempController.dispose();
@@ -97,7 +117,8 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
           // Show a SnackBar message if the video duration is less than 10 seconds
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Please upload a video which is greater than 10 seconds'),
+              content: Text(
+                  'Please upload a video which is greater than 10 seconds'),
               backgroundColor: Colors.red,
             ),
           );
@@ -113,7 +134,8 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
         int estimatedDuration = fileSizeMB.clamp(3, 15);
 
         for (int i = 1; i <= 100; i++) {
-          await Future.delayed(Duration(milliseconds: (estimatedDuration * 10)));
+          await Future.delayed(
+              Duration(milliseconds: (estimatedDuration * 10)));
           if (mounted) {
             setState(() {
               sections[index].uploadProgress = i / 100;
@@ -130,7 +152,8 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
         }
 
         if (videoFile.lengthSync() < 5 * 1024 * 1024) {
-          VideoPlayerController controller = VideoPlayerController.file(videoFile);
+          VideoPlayerController controller =
+              VideoPlayerController.file(videoFile);
           await controller.initialize();
 
           await Future.delayed(Duration(seconds: estimatedDuration));
@@ -159,7 +182,8 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
 
         File compressedFile = File(compressedVideo.file!.path);
 
-        VideoPlayerController controller = VideoPlayerController.file(compressedFile);
+        VideoPlayerController controller =
+            VideoPlayerController.file(compressedFile);
         await controller.initialize();
 
         await Future.delayed(Duration(seconds: estimatedDuration));
@@ -192,8 +216,6 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
     }
   }
 
-
-
   Future<void> uploadVideo(File videoFile, int index) async {
     final String? token = await AuthService.getAuthToken();
     if (token == null) {
@@ -217,11 +239,11 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
     request.fields['position'] = index.toString();
     request.fields['tag'] = sections[index].label;
     request.fields['duration'] = sections[index]
-        .thumbnailController
-        ?.value
-        .duration
-        .inSeconds
-        .toString() ??
+            .thumbnailController
+            ?.value
+            .duration
+            .inSeconds
+            .toString() ??
         '0';
     request.fields['status'] = 'PUBLISHED';
 
@@ -257,8 +279,6 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
     }
   }
 
-
-
   Future<Map<String, dynamic>> fetchProfileData() async {
     final String? token = await AuthService.getAuthToken();
     if (token == null) {
@@ -266,7 +286,8 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
     }
 
     final response = await http.get(
-      Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/preview-videos/'),
+      Uri.parse(
+          'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/preview-videos/'),
       headers: {
         'Authorization': 'Bearer $token',
       },
@@ -297,7 +318,8 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
       return;
     }
 
-    final url = 'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/videos/detail/$videoId/';
+    final url =
+        'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/videos/detail/$videoId/';
 
     try {
       final response = await http.delete(
@@ -337,6 +359,50 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
     }
   }
 
+  Future uploadCaptions(List<String> captions, String videoId) async {
+    debugPrint('Uploading captions...${captions.length}');
+    if (captions == []) return;
+
+    const String baseUrl =
+        "https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/videos/detail/";
+    final url = Uri.parse("$baseUrl$videoId/");
+    final String? token = await AuthService.getAuthToken();
+    final headers = {
+      "Authorization": "Bearer $token",
+      "Content-Type": "application/json",
+    };
+
+    final body = <String, dynamic>{};
+    int index = 1;
+    for (var element in captions) {
+      body["caption_$index"] = element;
+      index++;
+    }
+
+    try {
+      final response = await http.put(
+        url,
+        headers: headers,
+        body: jsonEncode(body),
+      );
+
+      debugPrint('Status: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        debugPrint(jsonDecode(response.body).toString());
+        return jsonDecode(response.body);
+      } else if (response.statusCode == 400) {
+        debugPrint('Error: ${jsonDecode(response.body)["error"].toString()}');
+        return {"error": jsonDecode(response.body)["error"]};
+      } else {
+        throw Exception(
+            "Failed to update captions. Status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      throw Exception("Error updating captions: $e");
+    }
+  }
+
   void reorderSections(int oldIndex, int newIndex) {
     setState(() {
       if (newIndex > oldIndex) {
@@ -352,7 +418,8 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
 
   Widget buildVideoSection(int index) {
     VideoSection section = sections[index];
-    bool isPreviousVideoUploaded = index == 0 || sections[index - 1].videoFile != null;
+    bool isPreviousVideoUploaded =
+        index == 0 || sections[index - 1].videoFile != null;
 
     return Card(
       elevation: 4,
@@ -376,7 +443,8 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            if (section.videoFile != null && section.thumbnailController != null) ...[
+            if (section.videoFile != null &&
+                section.thumbnailController != null) ...[
               Stack(
                 alignment: Alignment.center,
                 children: [
@@ -388,7 +456,8 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.play_circle_filled, size: 50, color: Colors.white),
+                    icon: const Icon(Icons.play_circle_filled,
+                        size: 50, color: Colors.white),
                     onPressed: () {},
                   ),
                 ],
@@ -397,257 +466,408 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: section.captions != null && section.captions!.isNotEmpty
+                    child: section.captions != null &&
+                            section.captions!.isNotEmpty
                         ? Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "caption1: ${section.captions![0]}",
-                                style: TextStyle(color: Colors.pink),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "caption1: ${section.captions![0]}",
+                                      style:
+                                          const TextStyle(color: Colors.pink),
+                                    ),
+                                    Text(
+                                      "caption2: ${section.captions![1]}",
+                                      style:
+                                          const TextStyle(color: Colors.pink),
+                                    ),
+                                    Text(
+                                      "caption3: ${section.captions![2]}",
+                                      style:
+                                          const TextStyle(color: Colors.pink),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              Text(
-                                "caption2: ${section.captions![1]}",
-                                style: TextStyle(color: Colors.pink),
-                              ),
-                              Text(
-                                "caption3: ${section.captions![2]}",
-                                style: TextStyle(color: Colors.pink),
+                              IconButton(
+                                onPressed: () {
+                                  // Logic to edit captions
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      final TextEditingController
+                                          caption1Controller =
+                                          TextEditingController(
+                                              text: section.captions!.length > 0
+                                                  ? section.captions![0]
+                                                  : '');
+                                      final TextEditingController
+                                          caption2Controller =
+                                          TextEditingController(
+                                              text: section.captions!.length > 1
+                                                  ? section.captions![1]
+                                                  : '');
+                                      final TextEditingController
+                                          caption3Controller =
+                                          TextEditingController(
+                                              text: section.captions!.length > 2
+                                                  ? section.captions![2]
+                                                  : '');
+                                      return AlertDialog(
+                                        title: const Text('Edit Captions'),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            TextField(
+                                              controller: caption1Controller,
+                                              decoration: const InputDecoration(
+                                                labelText: 'Caption 1',
+                                                labelStyle: TextStyle(
+                                                    color: Colors
+                                                        .pink), // Label color
+                                                enabledBorder:
+                                                    UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color: Colors
+                                                          .pink), // Underline color when not focused
+                                                ),
+                                                focusedBorder:
+                                                    UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color: Colors
+                                                          .pink), // Underline color when focused
+                                                ),
+                                              ),
+                                            ),
+                                            TextField(
+                                              controller: caption2Controller,
+                                              decoration: const InputDecoration(
+                                                labelText: 'Caption 2',
+                                                labelStyle: TextStyle(
+                                                    color: Colors
+                                                        .pink), // Label color
+                                                enabledBorder:
+                                                    UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color: Colors
+                                                          .pink), // Underline color when not focused
+                                                ),
+                                                focusedBorder:
+                                                    UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color: Colors
+                                                          .pink), // Underline color when focused
+                                                ),
+                                              ),
+                                            ),
+                                            TextField(
+                                              controller: caption3Controller,
+                                              decoration: const InputDecoration(
+                                                labelText: 'Caption 3',
+                                                labelStyle: TextStyle(
+                                                    color: Colors
+                                                        .pink), // Label color
+                                                enabledBorder:
+                                                    UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color: Colors
+                                                          .pink), // Underline color when not focused
+                                                ),
+                                                focusedBorder:
+                                                    UnderlineInputBorder(
+                                                  borderSide: BorderSide(
+                                                      color: Colors
+                                                          .pink), // Underline color when focused
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () async {
+                                              // Validation logic
+                                              if (caption1Controller.text
+                                                          .split(' ')
+                                                          .length >
+                                                      10 ||
+                                                  caption2Controller.text
+                                                          .split(' ')
+                                                          .length >
+                                                      10 ||
+                                                  caption3Controller.text
+                                                          .split(' ')
+                                                          .length >
+                                                      10 ||
+                                                  caption1Controller
+                                                      .text.isEmpty ||
+                                                  caption2Controller
+                                                      .text.isEmpty ||
+                                                  caption3Controller
+                                                      .text.isEmpty) {
+                                                // Show an error message if validation fails
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                        'Each caption must be less than 10 words and all fields are mandatory'),
+                                                    backgroundColor: Colors.red,
+                                                  ),
+                                                );
+                                              } else {
+                                                // Save captions logic if validation passes
+                                                setState(() {
+                                                  section.captions = [
+                                                    caption1Controller.text,
+                                                    caption2Controller.text,
+                                                    caption3Controller.text
+                                                  ];
+                                                });
+                                                await uploadCaptions(
+                                                  section.captions ?? [],
+                                                  sections[index]
+                                                      .videoId
+                                                      .toString(),
+                                                );
+                                                Navigator.of(context).pop();
+                                              }
+                                            },
+                                            child: const Text('Submit'),
+                                            style: TextButton.styleFrom(
+                                              foregroundColor:
+                                                  Colors.pink, // Text color
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                                icon:
+                                    const Icon(Icons.edit, color: Colors.pink),
                               ),
                             ],
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            // Logic to edit captions
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                final TextEditingController caption1Controller =
-                                TextEditingController(text: section.captions!.length > 0 ? section.captions![0] : '');
-                                final TextEditingController caption2Controller =
-                                TextEditingController(text: section.captions!.length > 1 ? section.captions![1] : '');
-                                final TextEditingController caption3Controller =
-                                TextEditingController(text: section.captions!.length > 2 ? section.captions![2] : '');
-                                return AlertDialog(
-                                  title: const Text('Edit Captions'),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      TextField(
-                                        controller: caption1Controller,
-                                        decoration: InputDecoration(
-                                          labelText: 'Caption 1',
-                                          labelStyle: TextStyle(color: Colors.pink), // Label color
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink), // Underline color when not focused
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink), // Underline color when focused
-                                          ),
-                                        ),
-                                      ),
-                                      TextField(
-                                        controller: caption2Controller,
-                                        decoration: InputDecoration(
-                                          labelText: 'Caption 2',
-                                          labelStyle: TextStyle(color: Colors.pink), // Label color
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink), // Underline color when not focused
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink), // Underline color when focused
-                                          ),
-                                        ),
-                                      ),
-                                      TextField(
-                                        controller: caption3Controller,
-                                        decoration: InputDecoration(
-                                          labelText: 'Caption 3',
-                                          labelStyle: TextStyle(color: Colors.pink), // Label color
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink), // Underline color when not focused
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink), // Underline color when focused
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        // Validation logic
-                                        if (caption1Controller.text.split(' ').length > 10 ||
-                                            caption2Controller.text.split(' ').length > 10 ||
-                                            caption3Controller.text.split(' ').length > 10 ||
-                                            caption1Controller.text.isEmpty ||
-                                            caption2Controller.text.isEmpty ||
-                                            caption3Controller.text.isEmpty) {
-                                          // Show an error message if validation fails
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text('Each caption must be less than 10 words and all fields are mandatory'),
-                                              backgroundColor: Colors.red,
+                          )
+                        : (caption1Controller.text.isEmpty)
+                            ? TextButton.icon(
+                                onPressed: () {
+                                  // Logic to add captions based on video duration
+                                  // For example, you can show a dialog to input captions
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return StatefulBuilder(
+                                        builder: (context, setState) {
+                                          return AlertDialog(
+                                            title: const Text('Add Captions'),
+                                            content: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                TextField(
+                                                  controller:
+                                                      caption1Controller,
+                                                  onChanged: (text) {
+                                                    if (text.length > 10) {
+                                                      caption1Controller.text =
+                                                          text.substring(0, 10);
+                                                      caption1Controller
+                                                              .selection =
+                                                          TextSelection.fromPosition(
+                                                              TextPosition(
+                                                                  offset: caption1Controller
+                                                                      .text
+                                                                      .length));
+                                                    }
+                                                    setState(
+                                                        () {}); // Update the UI
+                                                  },
+                                                  decoration: InputDecoration(
+                                                    labelText: 'Caption 1 *',
+                                                    labelStyle: const TextStyle(
+                                                        color: Colors
+                                                            .pink), // Label color
+                                                    helperText:
+                                                        '${caption1Controller.text.length}/10',
+                                                    enabledBorder:
+                                                        const UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Colors
+                                                              .pink), // Underline color when not focused
+                                                    ),
+                                                    focusedBorder:
+                                                        const UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Colors
+                                                              .pink), // Underline color when focused
+                                                    ),
+                                                  ),
+                                                ),
+                                                TextField(
+                                                  controller:
+                                                      caption2Controller,
+                                                  onChanged: (text) {
+                                                    if (text.length > 10) {
+                                                      caption2Controller.text =
+                                                          text.substring(0, 10);
+                                                      caption2Controller
+                                                              .selection =
+                                                          TextSelection.fromPosition(
+                                                              TextPosition(
+                                                                  offset: caption2Controller
+                                                                      .text
+                                                                      .length));
+                                                    }
+                                                    setState(
+                                                        () {}); // Update the UI
+                                                  },
+                                                  decoration: InputDecoration(
+                                                    labelText: 'Caption 2 *',
+                                                    labelStyle: const TextStyle(
+                                                        color: Colors
+                                                            .pink), // Label color
+                                                    helperText:
+                                                        '${caption2Controller.text.length}/10',
+                                                    enabledBorder:
+                                                        const UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Colors
+                                                              .pink), // Underline color when not focused
+                                                    ),
+                                                    focusedBorder:
+                                                        const UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Colors
+                                                              .pink), // Underline color when focused
+                                                    ),
+                                                  ),
+                                                ),
+                                                TextField(
+                                                  controller:
+                                                      caption3Controller,
+                                                  onChanged: (text) {
+                                                    if (text.length > 10) {
+                                                      caption3Controller.text =
+                                                          text.substring(0, 10);
+                                                      caption3Controller
+                                                              .selection =
+                                                          TextSelection.fromPosition(
+                                                              TextPosition(
+                                                                  offset: caption3Controller
+                                                                      .text
+                                                                      .length));
+                                                    }
+                                                    setState(
+                                                        () {}); // Update the UI
+                                                  },
+                                                  decoration: InputDecoration(
+                                                    labelText: 'Caption 3 *',
+                                                    labelStyle: const TextStyle(
+                                                        color: Colors
+                                                            .pink), // Label color
+                                                    helperText:
+                                                        '${caption3Controller.text.length}/10',
+                                                    enabledBorder:
+                                                        const UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Colors
+                                                              .pink), // Underline color when not focused
+                                                    ),
+                                                    focusedBorder:
+                                                        const UnderlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Colors
+                                                              .pink), // Underline color when focused
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () async {
+                                                  // Validation logic
+                                                  if (caption1Controller.text.length > 10 ||
+                                                      caption2Controller.text.length >
+                                                          10 ||
+                                                      caption3Controller
+                                                              .text.length >
+                                                          10 ||
+                                                      caption1Controller
+                                                          .text.isEmpty ||
+                                                      caption2Controller
+                                                          .text.isEmpty ||
+                                                      caption3Controller
+                                                          .text.isEmpty) {
+                                                    // Show an error message if validation fails
+                                                    ScaffoldMessenger.of(
+                                                            context)
+                                                        .showSnackBar(
+                                                      const SnackBar(
+                                                        content: Text(
+                                                            'Each caption must be less than or equal to 10 characters and all fields are mandatory'),
+                                                        backgroundColor:
+                                                            Colors.red,
+                                                      ),
+                                                    );
+                                                  } else {
+                                                    // Save captions logic if validation passes
+                                                    setState(() {
+                                                      section.captions = [
+                                                        caption1Controller.text,
+                                                        caption2Controller.text,
+                                                        caption3Controller.text
+                                                      ];
+                                                    });
+                                                    await uploadCaptions(
+                                                      section.captions ?? [],
+                                                      sections[index]
+                                                          .videoId
+                                                          .toString(),
+                                                    );
+                                                    Navigator.of(context).pop();
+                                                  }
+                                                },
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor:
+                                                      Colors.pink, // Text color
+                                                ),
+                                                child: const Text('Submit'),
+                                              ),
+                                            ],
                                           );
-                                        } else {
-                                          // Save captions logic if validation passes
-                                          setState(() {
-                                            section.captions = [
-                                              caption1Controller.text,
-                                              caption2Controller.text,
-                                              caption3Controller.text
-                                            ];
-                                          });
-                                          Navigator.of(context).pop();
-                                        }
-                                      },
-                                      child: Text('Submit'),
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.pink, // Text color
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          icon: Icon(Icons.edit, color: Colors.pink),
-                        ),
-                      ],
-                    )
-                        : TextButton.icon(
-                      onPressed: () {
-                        // Logic to add captions based on video duration
-                        // For example, you can show a dialog to input captions
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            final TextEditingController caption1Controller = TextEditingController();
-                            final TextEditingController caption2Controller = TextEditingController();
-                            final TextEditingController caption3Controller = TextEditingController();
-
-                            return StatefulBuilder(
-                              builder: (context, setState) {
-                                return AlertDialog(
-                                  title: const Text('Add Captions'),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      TextField(
-                                        controller: caption1Controller,
-                                        onChanged: (text) {
-                                          if (text.length > 10) {
-                                            caption1Controller.text = text.substring(0, 10);
-                                            caption1Controller.selection = TextSelection.fromPosition(TextPosition(offset: caption1Controller.text.length));
-                                          }
-                                          setState(() {}); // Update the UI
                                         },
-                                        decoration: InputDecoration(
-                                          labelText: 'Caption 1 *',
-                                          labelStyle: TextStyle(color: Colors.pink), // Label color
-                                          helperText: '${caption1Controller.text.length}/10',
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink), // Underline color when not focused
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink), // Underline color when focused
-                                          ),
-                                        ),
-                                      ),
-                                      TextField(
-                                        controller: caption2Controller,
-                                        onChanged: (text) {
-                                          if (text.length > 10) {
-                                            caption2Controller.text = text.substring(0, 10);
-                                            caption2Controller.selection = TextSelection.fromPosition(TextPosition(offset: caption2Controller.text.length));
-                                          }
-                                          setState(() {}); // Update the UI
-                                        },
-                                        decoration: InputDecoration(
-                                          labelText: 'Caption 2 *',
-                                          labelStyle: TextStyle(color: Colors.pink), // Label color
-                                          helperText: '${caption2Controller.text.length}/10',
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink), // Underline color when not focused
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink), // Underline color when focused
-                                          ),
-                                        ),
-                                      ),
-                                      TextField(
-                                        controller: caption3Controller,
-                                        onChanged: (text) {
-                                          if (text.length > 10) {
-                                            caption3Controller.text = text.substring(0, 10);
-                                            caption3Controller.selection = TextSelection.fromPosition(TextPosition(offset: caption3Controller.text.length));
-                                          }
-                                          setState(() {}); // Update the UI
-                                        },
-                                        decoration: InputDecoration(
-                                          labelText: 'Caption 3 *',
-                                          labelStyle: TextStyle(color: Colors.pink), // Label color
-                                          helperText: '${caption3Controller.text.length}/10',
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink), // Underline color when not focused
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink), // Underline color when focused
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                      );
+                                    },
+                                  );
+                                },
+                                icon: const Icon(Icons.add),
+                                label: const Text('Add Captions'),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Colors.pink,
+                                ),
+                              )
+                            : Column(
+                                children: [
+                                  Text(
+                                    caption1Controller.text,
                                   ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () {
-                                        // Validation logic
-                                        if (caption1Controller.text.length > 10 ||
-                                            caption2Controller.text.length > 10 ||
-                                            caption3Controller.text.length > 10 ||
-                                            caption1Controller.text.isEmpty ||
-                                            caption2Controller.text.isEmpty ||
-                                            caption3Controller.text.isEmpty) {
-                                          // Show an error message if validation fails
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Each caption must be less than or equal to 10 characters and all fields are mandatory'),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
-                                        } else {
-                                          // Save captions logic if validation passes
-                                          setState(() {
-                                            section.captions = [
-                                              caption1Controller.text,
-                                              caption2Controller.text,
-                                              caption3Controller.text
-                                            ];
-                                          });
-                                          Navigator.of(context).pop();
-                                        }
-                                      },
-                                      child: Text('Submit'),
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.pink, // Text color
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        );
-                      },
-                      icon: const Icon(Icons.add),
-                      label: const Text('Add Captions'),
-                      style: TextButton.styleFrom(foregroundColor: Colors.pink,),
-                    ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    caption2Controller.text,
+                                  ),
+                                  const SizedBox(
+                                    height: 5,
+                                  ),
+                                  Text(
+                                    caption3Controller.text,
+                                  )
+                                ],
+                              ),
                   ),
                   const Spacer(),
                   IconButton(
@@ -677,17 +897,16 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
                 children: [
                   Expanded(
                     child: TextButton.icon(
-                      onPressed:  () => pickVideo(index) ,
+                      onPressed: () => pickVideo(index),
                       icon: const Icon(Icons.upload_file, color: Colors.pink),
                       label: const Text(
                         "Upload Video",
                         style: TextStyle(
-                          color: Colors.pink ,
+                          color: Colors.pink,
                         ),
                       ),
                     ),
                   ),
-
                   Expanded(
                     flex: 2,
                     child: CommonWidgets.recordVideoButton(
@@ -741,14 +960,15 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.pink[50],
-      appBar: AppBar(
+      appBar: widget.showAppBar ? AppBar(
         iconTheme: const IconThemeData(
           color: Colors.white, // Set the back arrow icon color to white
         ),
         backgroundColor: Colors.pink,
-        title: const Text("Create Your Video Resume", style: TextStyle(color: Colors.white)),
+        title: const Text("Create Your Video Resume",
+            style: TextStyle(color: Colors.white)),
         centerTitle: true,
-      ),
+      ) : null,
       body: Column(
         children: [
           Expanded(
@@ -757,7 +977,7 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
               onReorder: reorderSections,
               children: List.generate(
                 sections.length,
-                    (index) => Container(
+                (index) => Container(
                   key: ValueKey(sections[index].label),
                   child: buildVideoSection(index),
                 ),
@@ -772,8 +992,10 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
                 ElevatedButton(
                   onPressed: allVideosUploaded ? previewReels : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: allVideosUploaded ? Colors.pink : Colors.grey,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    backgroundColor:
+                        allVideosUploaded ? Colors.pink : Colors.grey,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 15),
                   ),
                   child: const Text(
                     "Preview Your Reel",
@@ -781,7 +1003,7 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   ),
                 ),
                 const SizedBox(width: 20),
-                TextButton(
+                widget.showSkip ? TextButton(
                   onPressed: skipToNext,
                   child: const Text(
                     "Skip",
@@ -791,7 +1013,7 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
+                ) : const SizedBox(),
               ],
             ),
           ),
@@ -800,7 +1022,3 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
     );
   }
 }
-
-
-
-

@@ -1,9 +1,51 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class AuthService {
   static const String ACCESS_TOKEN_KEY = 'access_token';
   static const String REFRESH_TOKEN_KEY = 'refresh_token';
   static const String PHONE_NUMBER_KEY = 'phone_number';
+
+  static Future<String?> refreshToken() async {
+    String? accessToken = await getAuthToken();
+
+    if (accessToken == null) {
+      return null;
+    }
+
+    try {
+      // Verify token validity with a lightweight API call
+      final response = await http.get(
+        Uri.parse(
+            'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/verify-token/'),
+        headers: {'Authorization': 'Bearer $accessToken'},
+      );
+
+      if (response.statusCode == 401) {
+        // Token expired, try refresh
+        final refreshToken = await getRefreshToken();
+        if (refreshToken == null) return null;
+
+        final refreshResponse = await http.post(
+          Uri.parse(
+              'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/token/refresh/'),
+          body: {'refresh': refreshToken},
+        );
+
+        if (refreshResponse.statusCode == 200) {
+          final data = json.decode(refreshResponse.body);
+          await saveAuthToken(data['access']);
+          return data['access'];
+        }
+        return null;
+      }
+      return accessToken;
+    } catch (e) {
+      return null;
+    }
+  }
 
   static Future<void> saveAuthToken(String token) async {
     final prefs = await SharedPreferences.getInstance();

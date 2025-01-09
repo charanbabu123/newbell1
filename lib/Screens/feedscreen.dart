@@ -69,6 +69,9 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver {
         Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/feed/'),
         headers: {'Authorization': 'Bearer $validToken'},
       );
+      print('Status Code: ${response.statusCode}');
+      print('Response Headers: ${response.headers}');
+      print('Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);

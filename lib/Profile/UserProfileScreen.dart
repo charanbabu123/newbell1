@@ -55,7 +55,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   void initState() {
     super.initState();
+    //Refresh token
+    AuthService.refreshToken();
     fetchUserProfile();
+
   }
 
   Future<void> fetchUserProfile() async {
@@ -380,7 +383,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       children: [
                         SwipeableVideoView(videos: videos),
                         //VideoGridSection(videos: videos),
-                        const ReelUploaderScreen(),
+                        const ReelUploaderScreen(
+                          showAppBar: false,
+                          showSkip: false,
+                        ),
                       ],
                     ),
                   ),
@@ -477,6 +483,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
+
     _usernameController = TextEditingController(text: widget.username);
     _bioController = TextEditingController(text: widget.bio);
   }

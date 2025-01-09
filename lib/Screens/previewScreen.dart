@@ -145,7 +145,37 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
   @override
   void initState() {
     super.initState();
+    _getCaptions();
     _initializeController(0);
+  }
+
+  String? currentCaption = '';
+  List<String> captions = [];
+
+  Future<void> _getCaptions() {
+    //Get response from api and then convert into a list of string
+    for(int i = 0; i< apiResponse.length; i++) {
+      captions.add(apiResponse[i]);
+    }
+  }
+
+  void _updateCaption() {
+    final duration = _controller.value.duration;
+    final position = _controller.value.position;
+
+    if (duration != null) {
+      final segmentDuration = duration.inMilliseconds ~/ 3;
+
+      setState(() {
+        if (position.inMilliseconds < segmentDuration) {
+          currentCaption = captions[0];
+        } else if (position.inMilliseconds < 2 * segmentDuration) {
+          currentCaption = captions[1];
+        } else {
+          currentCaption = captions[2];
+        }
+      });
+    }
   }
 
   Future<void> _initializeController(int index) async {
