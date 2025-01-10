@@ -37,12 +37,12 @@ class VideoSection {
 }
 
 class ReelUploaderScreen extends StatefulWidget {
-  const ReelUploaderScreen(
-      {super.key,
-      this.videoPath,
-      this.showAppBar = true,
-      this.showSkip = true,
-      });
+  const ReelUploaderScreen({
+    super.key,
+    this.videoPath,
+    this.showAppBar = true,
+    this.showSkip = true,
+  });
   final String? videoPath;
   final bool showAppBar, showSkip;
 
@@ -960,15 +960,17 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.pink[50],
-      appBar: widget.showAppBar ? AppBar(
-        iconTheme: const IconThemeData(
-          color: Colors.white, // Set the back arrow icon color to white
-        ),
-        backgroundColor: Colors.pink,
-        title: const Text("Create Your Video Resume",
-            style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-      ) : null,
+      appBar: widget.showAppBar
+          ? AppBar(
+              iconTheme: const IconThemeData(
+                color: Colors.white, // Set the back arrow icon color to white
+              ),
+              backgroundColor: Colors.pink,
+              title: const Text("Create Your Video Resume",
+                  style: TextStyle(color: Colors.white)),
+              centerTitle: true,
+            )
+          : null,
       body: Column(
         children: [
           Expanded(
@@ -1003,17 +1005,19 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   ),
                 ),
                 const SizedBox(width: 20),
-                widget.showSkip ? TextButton(
-                  onPressed: skipToNext,
-                  child: const Text(
-                    "Skip",
-                    style: TextStyle(
-                      color: Colors.pink,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ) : const SizedBox(),
+                widget.showSkip
+                    ? TextButton(
+                        onPressed: skipToNext,
+                        child: const Text(
+                          "Skip",
+                          style: TextStyle(
+                            color: Colors.pink,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                    : const SizedBox(),
               ],
             ),
           ),
