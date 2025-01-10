@@ -243,6 +243,14 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
   final PageController _videoController = PageController();
   final Map<int, VideoPlayerController> _controllers = {};
   int _currentVideoIndex = 0;
+  String? _currentCaption;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeControllers();
+  }
+
 
   void _registerController(int index, VideoPlayerController controller) {
     _controllers[index] = controller;
@@ -255,8 +263,93 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
     for (var controller in _controllers.values) {
       controller.dispose();
     }
+    _videoController.dispose();
     _controllers.clear();
     super.dispose();
+  }
+  void _initializeControllers() {
+    for (int i = 0; i < widget.feed.videos.length; i++) {
+      final video = widget.feed.videos[i];
+      final controller = VideoPlayerController.network(video.videoUrl);
+      _controllers[i] = controller;
+
+      controller.initialize().then((_) {
+        if (i == 0) {
+          // Auto-play the first video
+          controller.play();
+        }
+        setState(() {}); // Update the UI after initialization
+      });
+
+      // Listen for video end to transition to the next video
+      controller.addListener(() {
+        if (i == _currentVideoIndex) {
+          _updateCaption(controller, video);
+        }
+
+        // Transition to next video when the current video ends
+        if (controller.value.isInitialized &&
+            controller.value.position == controller.value.duration) {
+          if (i == _currentVideoIndex && i < widget.feed.videos.length - 1) {
+            _videoController.nextPage(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          }
+        }
+      });
+    }
+  }
+
+  void _disposeControllers() {
+    for (final controller in _controllers.values) {
+      controller.dispose();
+    }
+    _controllers.clear();
+  }
+  void _onPageChanged(int index) {
+    setState(() {
+      _currentVideoIndex = index;
+    });
+
+    // Pause all videos except the current one
+    for (int i = 0; i < _controllers.length; i++) {
+      final controller = _controllers[i];
+      if (i == index) {
+        controller?.play();
+      } else {
+        controller?.pause();
+      }
+    }
+  }
+
+  void _playVideo(VideoPlayerController? controller) {
+    if (controller != null && controller.value.isInitialized) {
+      controller.play();
+    }
+  }
+
+  void _updateCaption(VideoPlayerController controller, Video video) {
+    if (!controller.value.isInitialized || controller.value.duration == null) {
+      return;
+    }
+
+    final position = controller.value.position.inSeconds;
+    final totalDuration = controller.value.duration.inSeconds;
+
+    if (totalDuration > 0) {
+      final segment = totalDuration ~/ 3;
+
+      setState(() {
+        if (position < segment) {
+          _currentCaption = video.caption1;
+        } else if (position < 2 * segment) {
+          _currentCaption = video.caption2;
+        } else {
+          _currentCaption = video.caption3;
+        }
+      });
+    }
   }
 
   @override
@@ -268,11 +361,35 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         PageView.builder(
           controller: _videoController,
           itemCount: widget.feed.videos.length,
-          onPageChanged: (index) => setState(() => _currentVideoIndex = index),
+          onPageChanged: _onPageChanged,
           itemBuilder: (context, index) {
-            return VideoPlayerWidget(video: widget.feed.videos[index]);
+            final controller = _controllers[index];
+            if (controller == null || !controller.value.isInitialized) {
+              return const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              );
+            }
+
+            return GestureDetector(
+              onTap: () {
+                if (controller.value.isPlaying) {
+                  controller.pause();
+                } else {
+                  controller.play();
+                }
+              },
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: controller.value.size.width,
+                  height: controller.value.size.height,
+                  child: VideoPlayer(controller),
+                ),
+              ),
+            );
           },
         ),
+
 
         // User info overlay
         Positioned(
@@ -309,56 +426,43 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                   ),
                 ],
               ),
-              if (widget.feed.videos[_currentVideoIndex].caption1 != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: Text(
-                    widget.feed.videos[_currentVideoIndex].caption1!,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+
             ],
           ),
         ),
 
+
         // Video progress indicator
         Positioned(
-          bottom: 1,
-          left: 6,
-          right: 6,
+          bottom: 10,
+          left: 16,
+          right: 16,
           child: Row(
             children: List.generate(widget.feed.videos.length, (index) {
               final controller = _controllers[index];
               return Expanded(
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  child: StreamBuilder<Duration?>(
-                    stream: controller?.position.asStream(),
-                    builder: (context, AsyncSnapshot<Duration?> snapshot) {
-                      double progress = 0.0;
-                      if (controller != null &&
-                          controller.value.isInitialized &&
-                          controller.value.duration.inMilliseconds > 0) {
-                        progress = (snapshot.data?.inMilliseconds ?? 0) /
-                            controller.value.duration.inMilliseconds;
-                      }
+                child: Stack(
+                  children: [
+                    Container(
+                      height: 4,
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.5),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    if (controller != null)
+                      ValueListenableBuilder<VideoPlayerValue>(
+                        valueListenable: controller,
+                        builder: (context, value, child) {
+                          double progress = 0.0;
+                          if (value.isInitialized &&
+                              value.duration.inMilliseconds > 0) {
+                            progress = value.position.inMilliseconds /
+                                value.duration.inMilliseconds;
+                          }
 
-                      return Stack(
-                        children: [
-                          // Background (grey) bar
-                          Container(
-                            height: 4,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.8),
-                              borderRadius: BorderRadius.circular(2),
-                            ),
-                          ),
-                          // Progress (white) bar
-                          FractionallySizedBox(
+                          return FractionallySizedBox(
                             alignment: Alignment.centerLeft,
                             widthFactor: progress.clamp(0.0, 1.0),
                             child: Container(
@@ -368,11 +472,10 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                                 borderRadius: BorderRadius.circular(2),
                               ),
                             ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
+                          );
+                        },
+                      ),
+                  ],
                 ),
               );
             }),
@@ -411,15 +514,18 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
               color: Colors.pink.withOpacity(0.7),
               borderRadius: BorderRadius.circular(4),
             ),
+            alignment: Alignment.center, // Center aligns the content inside the Container
             child: Text(
               widget.feed.videos[_currentVideoIndex].tag,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
               ),
+              textAlign: TextAlign.center, // Ensures multi-line text is center-aligned
             ),
           ),
         ),
+
       ],
     );
   }
@@ -437,6 +543,7 @@ class VideoPlayerWidget extends StatefulWidget {
 class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
   bool _isInitialized = false;
+  String? _currentCaption;
 
   @override
   void initState() {
@@ -449,9 +556,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     try {
       await _controller.initialize();
       if (mounted) {
-        setState(() => _isInitialized = true);
+        setState((){  _isInitialized = true;
+            _currentCaption = widget.video.caption1;});
+        _controller.addListener(_updateCaption);
         _controller.play();
         _controller.addListener(_onVideoEnd);
+
 
         // Register controller with parent
         final parentState =
@@ -464,6 +574,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       print('Error initializing video: $e');
     }
   }
+
+
 
   void _onVideoEnd() {
     if (_controller.value.position == _controller.value.duration) {
@@ -479,9 +591,35 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     }
   }
 
+
+
+  void _updateCaption() {
+    if (!_controller.value.isInitialized || _controller.value.duration == null) {
+      return;
+    }
+
+    final position = _controller.value.position.inSeconds;
+    final totalDuration = _controller.value.duration.inSeconds;
+
+    if (totalDuration > 0) {
+      final segment = totalDuration ~/ 3;
+
+      setState(() {
+        if (position < segment) {
+          _currentCaption = widget.video.caption1;
+        } else if (position < 2 * segment) {
+          _currentCaption = widget.video.caption2;
+        } else {
+          _currentCaption = widget.video.caption3;
+        }
+      });
+    }
+  }
+
   @override
   void dispose() {
     _controller.removeListener(_onVideoEnd);
+    _controller.removeListener(_updateCaption);
     _controller.pause();
     _controller.dispose();
     super.dispose();
@@ -506,63 +644,43 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              _controller.value.isPlaying
-                  ? _controller.pause()
-                  : _controller.play();
-            });
-          },
-          child: FittedBox(
-            fit: BoxFit.contain,
-            child: SizedBox(
-              width: _controller.value.size?.width ?? 0,
-              height: _controller.value.size?.height ?? 0,
-              child: VideoPlayer(_controller),
-            ),
-          ),
-        ),
-        if (widget.video.caption1 != null)
-          Positioned(
-            bottom: 50,
-            left: 16,
-            child: Text(
-              widget.video.title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+        Padding(
+          padding: const EdgeInsets.only(top: 50), // Adjust the top padding as needed
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _controller.value.isPlaying
+                    ? _controller.pause()
+                    : _controller.play();
+              });
+            },
+            child: FittedBox(
+              fit: BoxFit.contain,
+              child: SizedBox(
+                width: _controller.value.size?.width ?? 0,
+                height: _controller.value.size?.height ?? 0,
+                child: VideoPlayer(_controller),
               ),
             ),
           ),
-        if (widget.video.caption2 != null)
+        ),
+
+        if (_currentCaption != null)
           Positioned(
-            bottom: 40,
+            bottom: MediaQuery.of(context).size.height / 3, // 1/3 from the bottom
             left: 16,
+            right: 16,
             child: Text(
-              widget.video.caption2!,
+              _currentCaption!,
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+                fontSize: 46,
+                fontWeight: FontWeight.bold, // Ensures the text is bold
               ),
             ),
           ),
 
-        if (widget.video.caption3 != null)
-          Positioned(
-            bottom: 16,
-            left: 16,
-            child: Text(
-              widget.video.caption3!,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
 
         // Progress bar
 
