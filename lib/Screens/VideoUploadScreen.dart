@@ -257,6 +257,8 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     VideoSection(label: "Experience"),
     VideoSection(label: "Hobbies"),
   ];
+   late int index;
+
 
   @override
   void initState() {
@@ -511,7 +513,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                         print(widget.videoPath);
                         int count = 0;
                         Navigator.of(context).popUntil((_) => count++ >= 2);
-                        handleVideo(0);
+                        handleVideo(index);
                       },
                       child: const Text("Upload"),
                     ),

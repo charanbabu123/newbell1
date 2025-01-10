@@ -192,6 +192,7 @@ class User {
 
 class Video {
   final int id;
+  final double duration;
   final String tag;
   final String videoUrl;
   final DateTime uploadedAt;
@@ -209,11 +210,13 @@ class Video {
     this.caption1,
     this.caption2,
     this.caption3,
+    required this.duration,
   });
 
   factory Video.fromJson(Map<String, dynamic> json) {
     return Video(
       id: json['id'] ?? 0,
+      duration: (json['duration'] ?? 0.0) ,
       tag: json['tag'] ?? '',
       videoUrl: json['video_url'] ?? '',
       uploadedAt: DateTime.parse(
@@ -228,6 +231,7 @@ class Video {
 
 class FullScreenFeedItem extends StatefulWidget {
   final UserFeed feed;
+
 
   const FullScreenFeedItem({super.key, required this.feed});
 
@@ -532,12 +536,26 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               ),
             ),
           ),
-        if (widget.video.caption1 != null)
+        if (widget.video.caption2 != null)
+          Positioned(
+            bottom: 40,
+            left: 16,
+            child: Text(
+              widget.video.caption2!,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+
+        if (widget.video.caption3 != null)
           Positioned(
             bottom: 16,
             left: 16,
             child: Text(
-              widget.video.caption1!,
+              widget.video.caption3!,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -548,19 +566,19 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
         // Progress bar
 
-        // Positioned(
-        //   bottom: 0,
-        //   left: 0,
-        //   right: 0,
-        //   child: VideoProgressIndicator(
-        //     _controller,
-        //     allowScrubbing: true,
-        //     colors: VideoProgressColors(
-        //       playedColor: Colors.white,
-        //       backgroundColor: Colors.grey,
-        //     ),
-        //   ),
-        // ),
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: VideoProgressIndicator(
+            _controller,
+            allowScrubbing: true,
+            colors: VideoProgressColors(
+              playedColor: Colors.white,
+              backgroundColor: Colors.grey,
+            ),
+          ),
+        ),
       ],
     );
   }
