@@ -598,7 +598,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
         if (_currentCaption != null)
           Positioned(
-            bottom: MediaQuery.of(context).size.height / 3, // 1/3 from the bottom
+            bottom: 180,
             left: 16,
             right: 16,
             child: Text(

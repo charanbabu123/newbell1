@@ -1,329 +1,203 @@
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
-import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:http/http.dart' as http;
 import '../services/auth_service.dart';
-import 'ReeluploaderScreen.dart';
-
 
 class PreviewReelsScreen extends StatefulWidget {
-  final List<String> videoPaths;
-  final List<String> sectionLabels;
-  final List<VideoSection> sections; // Add this line to accept sections
-
-  const PreviewReelsScreen({
-    super.key,
-    required this.videoPaths,
-    required this.sectionLabels,
-    required this.sections, // Add this line to accept sections
-    required List videoTitles,
-  });
+  const PreviewReelsScreen({Key? key}) : super(key: key);
 
   @override
   _PreviewReelsScreenState createState() => _PreviewReelsScreenState();
 }
 
 class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
+  bool isLoading = true;
+  Map<String, dynamic>? profileData;
+  List<dynamic> videos = [];
+  int currentVideoIndex = 0;
+  List<double> progressValues = [];
+  bool isPublishing = false; // State to manage loading on the button
 
 
-  Future<void> publishAndReorderReels() async {
-    for (var controller in _controllers.values) {
-      if (controller.value.isPlaying) {
-        await controller.pause();
-      }
-    }
+  @override
+  void initState() {
+    super.initState();
+    _fetchPreviewVideos();
+  }
+
+  Future<void> _publishReel() async {
+    setState(() {
+      isPublishing = true;
+    });
+
     final String? token = await AuthService.getAuthToken();
     if (token == null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Authentication token not found. Please log in again.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Authentication token not found.')),
+      );
+      setState(() {
+        isPublishing = false;
+      });
       return;
     }
 
     try {
-      // First, publish the reel
-      final publishResponse = await http.post(
+      final response = await http.post(
         Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/publish-reel/'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
-      );
-
-      if (publishResponse.statusCode != 200) {
-        throw Exception('Failed to publish reel: ${publishResponse.body}');
-      }
-
-      // Then, reorder the videos
-      List<Map<String, dynamic>> reelsData = [];
-      for (int i = 0; i < widget.videoPaths.length; i++) {
-        // Assuming we're storing video IDs in the sections
-        final videoSection = widget.sections[i];
-        if (videoSection.videoId != null) {
-          reelsData.add({
-            'id': videoSection.videoId,
-            'position': i,
-          });
-        }
-      }
-
-      final reorderResponse = await http.post(
-        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/videos/reorder/'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
         body: jsonEncode({
-          'reels': reelsData,
+          'video_id': videos[currentVideoIndex]['id'], // Assuming each video has an 'id'
         }),
       );
-      print('Status Code: ${reorderResponse.statusCode}');
-      print('Response Headers: ${reorderResponse.headers}');
-      print('Response Body: ${reorderResponse.body}');
-      if (reorderResponse.statusCode != 200) {
-        throw Exception('Failed to reorder videos: ${reorderResponse.body}');
-      }
-      for (var controller in _controllers.values) {
-        await controller.dispose();
-      }
-      _controllers.clear();
-      // If both operations are successful, navigate to feed
-      if (mounted) {
-        Navigator.of(context, rootNavigator: true).pushNamed("/feed");
-      }
-    } catch (e) {
-      for (var controller in _controllers.values) {
-        await controller.dispose();
-      }
-      _controllers.clear();
-      if (mounted) {
+
+      if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
+          const SnackBar(content: Text('Reel published successfully!'),
+            backgroundColor: Colors.pink,
           ),
         );
+        Navigator.pushReplacementNamed(context, '/feed'); // Adjust the route name
+      } else {
+        throw Exception('Failed to publish reel. ${response.body}');
       }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    } finally {
+      setState(() {
+        isPublishing = false;
+      });
     }
   }
 
-  void _onVideoEnd() {
-    if (currentIndex < widget.videoPaths.length - 1) {
 
+  Future<void> _fetchPreviewVideos() async {
+    final String? token = await AuthService.getAuthToken();
+    if (token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Authentication token not found.')),
+      );
+      return;
+    }
 
-      // Trigger carousel to move to next page
-      _carouselController.nextPage(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
+    try {
+      final response = await http.get(
+        Uri.parse(
+            'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/preview-videos/'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          profileData = data['profile'];
+          videos = data['videos'];
+          progressValues = List.filled(videos.length, 0.0);
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load preview videos.');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
       );
     }
   }
 
-
-
-  int currentIndex = 0;
-  String username = "charan";
-  String location = "bengaluru 2 YOE";
-  final CarouselSliderController _carouselController = CarouselSliderController();
-  final int maxCachedControllers = 3;
-  final Map<int, VideoPlayerController> _controllers = {};
-  int _currentPlaying = -1;
-  bool _isInitializing = false;
-
-
-
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _getCaptions();
-  //   _initializeController(0);
-  // }
-  //
-  // String? currentCaption = '';
-  // List<String> captions = [];
-  //
-  // Future<void> _getCaptions() {
-  //   //Get response from api and then convert into a list of string
-  //   for(int i = 0; i< apiResponse.length; i++) {
-  //     captions.add(apiResponse[i]);
-  //   }
-  // }
-  //
-  // void _updateCaption() {
-  //   final duration = _controller.value.duration;
-  //   final position = _controller.value.position;
-  //
-  //   if (duration != null) {
-  //     final segmentDuration = duration.inMilliseconds ~/ 3;
-  //
-  //     setState(() {
-  //       if (position.inMilliseconds < segmentDuration) {
-  //         currentCaption = captions[0];
-  //       } else if (position.inMilliseconds < 2 * segmentDuration) {
-  //         currentCaption = captions[1];
-  //       } else {
-  //         currentCaption = captions[2];
-  //       }
-  //     });
-  //   }
-  // }
-
-  Future<void> _initializeController(int index) async {
-    if (index < 0 ||
-        index >= widget.videoPaths.length ||
-        _controllers.containsKey(index) ||
-        _isInitializing) return;
-
-    _isInitializing = true;
-
-    try {
-      final controller = VideoPlayerController.file(File(widget.videoPaths[index]));
-      await controller.initialize();
-
-      controller.addListener(() {
-        if (controller.value.position >= controller.value.duration &&
-            index == currentIndex) {
-          _carouselController.nextPage();
-        }
-      });
-
-      _controllers[index] = controller;
-      controller.setLooping(false);
-
-      if (mounted && index == currentIndex) {
-        await controller.play();
-        setState(() => _currentPlaying = index);
-      }
-    } catch (e) {
-      print('Error initializing video $index: $e');
-    } finally {
-      _isInitializing = false;
-    }
-  }
-
-
-  void _cleanupControllers() {
-    if (_controllers.length <= maxCachedControllers) return;
-
-    final keepIndices = {
-      if (currentIndex - 1 >= 0) currentIndex - 1,
-      currentIndex,
-      if (currentIndex + 1 < widget.videoPaths.length) currentIndex + 1,
-    };
-
-    final disposableControllers =
-    Map<int, VideoPlayerController>.from(_controllers)
-      ..removeWhere((index, _) => keepIndices.contains(index));
-
-    for (var entry in disposableControllers.entries) {
-      entry.value.dispose();
-      _controllers.remove(entry.key);
-    }
-  }
-
-  Future<void> _onPageChanged(int index, CarouselPageChangedReason reason) async {
-    if (index == currentIndex) return;
-
-    // Pause the currently playing video
-    if (_currentPlaying >= 0 && _controllers.containsKey(_currentPlaying)) {
-      await _controllers[_currentPlaying]?.pause();
-    }
-
+  void _playNextVideo() {
     setState(() {
-      currentIndex = index;
+      currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+      progressValues[currentVideoIndex] = 0.0;
     });
-
-    // Initialize controllers for previous, current, and next videos
-// Pre-initialize next video
-    await Future.wait([
-      _initializeController(index),
-      if (index + 1 < widget.videoPaths.length) _initializeController(index + 1),
-    ]);
-
-    // Ensure current video plays
-    if (_controllers.containsKey(index)) {
-      final controller = _controllers[index]!;
-      await controller.seekTo(Duration.zero);
-      await controller.play();
-      setState(() {
-        _currentPlaying = index;
-      });
-    }
-
-    _cleanupControllers();
   }
 
-
-  @override
-  void dispose() {
-    for (var controller in _controllers.values) {
-      controller.dispose();
-    }
-    _controllers.clear();
-    super.dispose();
+  void _updateProgress(int index, double progress) {
+    setState(() {
+      progressValues[index] = progress;
+    });
   }
 
-  Widget _buildVideoPlayer(int index) {
-    final controller = _controllers[index];
-
-    return controller != null && controller.value.isInitialized
-        ? GestureDetector(
-      onTap: () {
-        setState(() {
-          if (controller.value.isPlaying) {
-            controller.pause();
-          } else {
-            // Resume playback when tapped
-            controller.play();
-          }
-        });
-      },
-      child: Container(
-        color: Colors.black,
-        height: MediaQuery.of(context).size.height,
-        width: MediaQuery.of(context).size.width,
-        child: FittedBox(
-          fit: BoxFit.contain,
-          child: SizedBox(
-            width: controller.value.size.width,
-            height: controller.value.size.height,
-            child: VideoPlayer(controller),
-          ),
-        ),
-      ),
-    )
-        : const Center(
-      child: CircularProgressIndicator(
-        valueColor: AlwaysStoppedAnimation<Color>(Colors.pink),
-      ),
-    );
-  }
-
-
-
-  Widget _buildNavItem(IconData icon, String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+  Widget _buildProfileInfo() {
+    return Positioned(
+      bottom: MediaQuery.of(context).padding.top + 40,
+      left: 16,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(height: 4),
+          Row(
+            children: [
+              if (profileData?['profile_picture'] != null)
+                CircleAvatar(
+                  radius: 20,
+                  backgroundImage: NetworkImage(profileData!['profile_picture']),
+                ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    profileData?['name'] ?? '',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 4.0,
+                          color: Colors.black,
+                          offset: Offset(1.0, 1.0),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        profileData?['city'] ?? '',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 4.0,
+                              color: Colors.black,
+                              offset: Offset(1.0, 1.0),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
           Text(
-            label,
+            profileData?['bio'] ?? '',
             style: const TextStyle(
               color: Colors.white,
-              fontSize: 12,
+              fontSize: 14,
+              shadows: [
+                Shadow(
+                  blurRadius: 4.0,
+                  color: Colors.black,
+                  offset: Offset(1.0, 1.0),
+                ),
+              ],
             ),
           ),
         ],
@@ -333,104 +207,103 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (videos.isEmpty) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'No videos available.',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        backgroundColor: Colors.black,
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
           CarouselSlider.builder(
-            carouselController: _carouselController,
-            itemCount: widget.videoPaths.length,
+            itemCount: videos.length,
             itemBuilder: (context, index, _) {
+              final video = videos[index];
               return Stack(
                 fit: StackFit.expand,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 40.0, bottom: 5.0), // Increased bottom padding
-                    child: _buildVideoPlayer(index),
+                  VideoPlayerWidget(
+                    videoUrl: video['video_url'],
+                    onVideoEnd: _playNextVideo,
+                    isPlaying: currentVideoIndex == index,
+                    onProgressUpdate: (progress) => _updateProgress(index, progress),
+                    autoPlay: true,
+                    caption1: video['caption_1'],
+                    caption2: video['caption_2'],
+                    caption3: video['caption_3'],
+                    duration: video['duration'] ?? 30.0,
                   ),
+                  // Video tag
                   Positioned(
-                    bottom: 60,
-                    left: 18,
+                    bottom: MediaQuery.of(context).padding.top + 20, // Adjust as needed
+                    left: 0,
+                    right: 0,
                     child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center, // Center the container horizontally
                       children: [
-                        const CircleAvatar(
-                          radius: 20,
-                          backgroundImage: AssetImage('assets/img10.png'),
-                        ),
-                        const SizedBox(width: 8),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              username,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.pink.withOpacity(0.6), // Background color tightly wrapping the text
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            video['tag'] ?? '',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
                             ),
-                            Row(
-                              children: [
-
-                                const SizedBox(width: 4),
-
-                                Text(
-                                  location,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
                   ),
+
+
+                  // Progress bars
                   Positioned(
                     bottom: 20,
-                    right: 170,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.8),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        widget.sectionLabels[index],
-                        style: const TextStyle(
-                          color: Colors.pink,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                    left: 10,
+                    right: 10,
+                    child: Row(
+                      children: List.generate(videos.length, (i) {
+                        return Expanded(
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(horizontal: 2),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(2),
+                              child: LinearProgressIndicator(
+                                value: i < currentVideoIndex
+                                    ? 1.0
+                                    : (i == currentVideoIndex
+                                    ? progressValues[i]
+                                    : 0.0),
+                                backgroundColor: Colors.grey.withOpacity(0.5),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                    Colors.white),
+                                minHeight: 3,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
                     ),
                   ),
-
-
-                  Positioned(
-                    bottom: 55, // Fixed distance from the bottom edge of the screen
-                    right: 25, // Fixed distance from the right edge of the screen
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pink.withOpacity(0.9),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8), // Adjust padding here
-                      ),
-                      onPressed: publishAndReorderReels,
-                      child: const Text(
-                        "Publish Your Reel",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-
                 ],
               );
             },
@@ -439,10 +312,14 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
               viewportFraction: 1.0,
               enlargeCenterPage: false,
               enableInfiniteScroll: false,
-              onPageChanged: _onPageChanged,
-              scrollPhysics: const BouncingScrollPhysics(),
+              onPageChanged: (index, _) {
+                setState(() {
+                  currentVideoIndex = index;
+                });
+              },
             ),
           ),
+          _buildProfileInfo(),
           Positioned(
             top: MediaQuery.of(context).padding.top + 12,
             left: 6,
@@ -451,62 +328,210 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
               onPressed: () => Navigator.pop(context),
             ),
           ),
-
-
-          Positioned(
-            bottom: 1, // Position above the navigation bar
-            left: 6,
-            right: 6,
-            child: Row(
-              children: List.generate(widget.videoPaths.length * 2 - 1, (index) {
-                if (index % 2 == 1) {
-                  // Add a black thin line between progress bars
-                  return SizedBox(
-                    width: 1, // Adjust the width of the black line as needed
-                    child: Container(
-                      color: Colors.black, // Color of the line
-                    ),
-                  );
-                }
-
-                final progressIndex = index ~/ 2;
-                return Expanded(
-                  child: AnimatedBuilder(
-                    animation: _controllers[progressIndex] ?? ValueNotifier(0.0),
-                    builder: (context, child) {
-                      final controller = _controllers[progressIndex];
-                      final progress = controller != null && controller.value.isInitialized
-                          ? controller.value.position.inMilliseconds / controller.value.duration.inMilliseconds
-                          : 0.0;
-
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 0),
-                        child: Container(
-                          height: 4,
-                          decoration: BoxDecoration(
-                            color: progress >= 1.0
-                                ? Colors.white // Completed video
-                                : Colors.grey.withOpacity(1), // Not started
-                            borderRadius: BorderRadius.circular(1),
-                          ),
-                          child: FractionallySizedBox(
-                            alignment: Alignment.centerLeft,
-                            widthFactor: progress.clamp(0.0, 1.0), // Progress percentage
-                            child: Container(
-                              color: Colors.white, // Active progress bar
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              }),
-            ),
-          ),
         ],
       ),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 60.0), // Adjust the padding from the bottom
+        child: FloatingActionButton.extended(
+          onPressed: isPublishing ? null : _publishReel,
+          label: isPublishing
+              ? const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 2,
+            ),
+          )
+              : const Text(
+            'Publish Reel',
+            style: TextStyle(color: Colors.white), // Ensures text color is white
+          ),
+          icon: isPublishing ? null : const Icon(Icons.cloud_upload, color: Colors.white), // Ensures icon color is white
+          backgroundColor: isPublishing ? Colors.grey : Colors.pink,
+        ),
+      ),
+
+
     );
   }
 }
 
+class VideoPlayerWidget extends StatefulWidget {
+  final String videoUrl;
+  final VoidCallback? onVideoEnd;
+  final bool isPlaying;
+  final Function(double)? onProgressUpdate;
+  final bool autoPlay;
+  final String? caption1;
+  final String? caption2;
+  final String? caption3;
+  final double duration;
+
+  const VideoPlayerWidget({
+    Key? key,
+    required this.videoUrl,
+    this.onVideoEnd,
+    this.isPlaying = false,
+    this.onProgressUpdate,
+    this.autoPlay = false,
+    this.caption1,
+    this.caption2,
+    this.caption3,
+    this.duration = 30.0,
+  }) : super(key: key);
+
+  @override
+  _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
+}
+
+class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
+  late VideoPlayerController _controller;
+  bool _isPlaying = false;
+  String? currentCaption;
+  late double segmentDuration;
+
+  @override
+  void initState() {
+    super.initState();
+    segmentDuration = widget.duration / 3;
+    _initializeController();
+  }
+
+  Future<void> _initializeController() async {
+    _controller = VideoPlayerController.network(widget.videoUrl);
+    await _controller.initialize();
+    if (widget.isPlaying && widget.autoPlay) {
+      _controller.play();
+      _isPlaying = true;
+    }
+    _controller.addListener(_videoListener);
+    setState(() {});
+  }
+
+  void _videoListener() {
+    if (_controller.value.isPlaying) {
+      final duration = _controller.value.duration.inMilliseconds;
+      final position = _controller.value.position.inMilliseconds;
+
+      if (duration > 0) {
+        final progress = position / duration;
+        widget.onProgressUpdate?.call(progress);
+
+        // Update caption based on video position
+        final currentTime = _controller.value.position.inSeconds;
+        setState(() {
+          if (currentTime < segmentDuration) {
+            currentCaption = widget.caption1;
+          } else if (currentTime < segmentDuration * 2) {
+            currentCaption = widget.caption2;
+          } else {
+            currentCaption = widget.caption3;
+          }
+        });
+      }
+
+      if (_controller.value.position >= _controller.value.duration) {
+        widget.onVideoEnd?.call();
+      }
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant VideoPlayerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isPlaying && !_controller.value.isPlaying) {
+      _controller.play();
+      _isPlaying = true;
+    } else if (!widget.isPlaying && _controller.value.isPlaying) {
+      _controller.pause();
+      _isPlaying = false;
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_videoListener);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _togglePlayPause() {
+    setState(() {
+      _isPlaying = !_isPlaying;
+      if (_isPlaying) {
+        _controller.play();
+      } else {
+        _controller.pause();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _controller.value.isInitialized
+        ? Stack(
+      fit: StackFit.expand,
+      children: [
+        FittedBox(
+          fit: BoxFit.cover, // Ensures videos scale properly
+          child: SizedBox(
+            width: _controller.value.size.width,
+            height: _controller.value.size.height,
+            child: VideoPlayer(_controller),
+          ),
+        ),
+        if (currentCaption != null)
+          Positioned(
+            bottom: 180, // Adjust this value for vertical positioning
+            left: 0, // Required to ensure the child can center horizontally
+            right: 0, // Required to ensure the child can center horizontally
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2), // Padding for the background
+                decoration: BoxDecoration(
+                  color: Colors.pink.withOpacity(0.6), // Background color tightly wrapping the text
+                  borderRadius: BorderRadius.circular(8), // Rounded corners
+                ),
+                child: Text(
+                  currentCaption!,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 4.0,
+                        color: Colors.black,
+                        offset: Offset(1.0, 1.0),
+                      ),
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ),
+          ),
+
+        GestureDetector(
+          onTap: _togglePlayPause,
+          child: AnimatedOpacity(
+            opacity: !_isPlaying ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 300),
+            child: Container(
+              color: Colors.black.withOpacity(0.3),
+              child: Center(
+                child: Icon(
+                  _isPlaying ? Icons.pause : Icons.play_arrow,
+                  color: Colors.white,
+                  size: 60.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    )
+        : const Center(child: CircularProgressIndicator());
+  }
+}

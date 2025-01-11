@@ -257,7 +257,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     VideoSection(label: "Experience"),
     VideoSection(label: "Hobbies"),
   ];
-   late int index;
+late int index;
 
 
   @override
