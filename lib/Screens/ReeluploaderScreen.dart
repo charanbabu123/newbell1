@@ -141,7 +141,7 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Reels reordered successfully.'),
-            backgroundColor: Colors.green,
+            backgroundColor: Colors.pink,
           ),
         );
         // Navigate to the preview screen after reordering
@@ -555,258 +555,36 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
               Row(
                 children: [
                   Expanded(
-                    child:section.captions != null ?
-                    Column(
+                    child: section.captions != null
+                        ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Caption 1: ${section.captions![0]}",
-                          style: TextStyle(color: Colors.pink),
-                        ),
-                        Text(
-                          "Caption 2: ${section.captions![1]}",
-                          style: TextStyle(color: Colors.pink),
-                        ),
-                        Text(
-                          "Caption 3: ${section.captions![2]}",
-                          style: TextStyle(color: Colors.pink),
-                        ),
+                        for (int i = 0; i < section.captions!.length; i++)
+                          Text(
+                            "Caption ${i + 1}: ${section.captions![i]}",
+                            style: const TextStyle(color: Colors.pink),
+                          ),
                         TextButton.icon(
                           onPressed: () {
-                            setState(() {
-                              section.clearCaptions();
-                            });
-                            // Show dialog to add new captions
-                            showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                final TextEditingController caption1Controller = TextEditingController();
-                                final TextEditingController caption2Controller = TextEditingController();
-                                final TextEditingController caption3Controller = TextEditingController();
-
-                                return AlertDialog(
-                                  title: const Text('Add Captions'),
-                                  content: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      TextField(
-                                        controller: caption1Controller,
-                                        decoration: InputDecoration(
-                                          labelText: 'Caption 1 *',
-                                          labelStyle: TextStyle(color: Colors.pink),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink),
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink),
-                                          ),
-                                        ),
-                                      ),
-                                      TextField(
-                                        controller: caption2Controller,
-                                        decoration: InputDecoration(
-                                          labelText: 'Caption 2 *',
-                                          labelStyle: TextStyle(color: Colors.pink),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink),
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink),
-                                          ),
-                                        ),
-                                      ),
-                                      TextField(
-                                        controller: caption3Controller,
-                                        decoration: InputDecoration(
-                                          labelText: 'Caption 3 *',
-                                          labelStyle: TextStyle(color: Colors.pink),
-                                          enabledBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink),
-                                          ),
-                                          focusedBorder: UnderlineInputBorder(
-                                            borderSide: BorderSide(color: Colors.pink),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () async {
-                                        if (caption1Controller.text.split(' ').length > 10 ||
-                                            caption2Controller.text.split(' ').length > 10 ||
-                                            caption3Controller.text.split(' ').length > 10 ||
-                                            caption1Controller.text.isEmpty ||
-                                            caption2Controller.text.isEmpty ||
-                                            caption3Controller.text.isEmpty) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(
-                                              content: Text('Each caption must be less than 10 words and all fields are mandatory'),
-                                              backgroundColor: Colors.red,
-                                            ),
-                                          );
-                                        } else {
-                                          try {
-                                            List<String> newCaptions = [
-                                              caption1Controller.text,
-                                              caption2Controller.text,
-                                              caption3Controller.text
-                                            ];
-
-                                            // Check if we have a videoId
-                                            if (section.videoId == null) {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text('No video ID found for this section'),
-                                                  backgroundColor: Colors.red,
-                                                ),
-                                              );
-                                              return;
-                                            }
-
-                                            // Call the existing uploadCaptions function
-                                            final result = await uploadCaptions(newCaptions, section.videoId.toString());
-
-                                            if (result != null && !result.containsKey('error')) {
-                                              // Update local state only after successful API call
-                                              setState(() {
-                                                section.updateCaptions(newCaptions);
-                                              });
-                                              Navigator.of(context).pop();
-
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                const SnackBar(
-                                                  content: Text('Captions updated successfully'),
-                                                  backgroundColor: Colors.pink,
-                                                ),
-                                              );
-                                            } else {
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(
-                                                  content: Text('Failed to update captions: ${result?['error'] ?? 'Unknown error'}'),
-                                                  backgroundColor: Colors.red,
-                                                ),
-                                              );
-                                            }
-                                          } catch (e) {
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(
-                                                content: Text('Error updating captions: $e'),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                            );
-                                          }
-                                        }
-                                      },
-                                      child: Text('Submit'),
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Colors.pink,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
+                            _showCaptionDialog(section, index, isEdit: true);
                           },
-                          icon: Icon(Icons.edit, color: Colors.pink),
-                          label: Text('Edit Captions', style: TextStyle(color: Colors.pink)),
+                          icon: const Icon(Icons.edit, color: Colors.pink),
+                          label: const Text(
+                            'Edit Captions',
+                            style: TextStyle(color: Colors.pink),
+                          ),
                         ),
                       ],
                     )
                         : TextButton.icon(
                       onPressed: () {
-                        // Show dialog to add captions
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            final TextEditingController caption1Controller = TextEditingController();
-                            final TextEditingController caption2Controller = TextEditingController();
-                            final TextEditingController caption3Controller = TextEditingController();
-
-                            return AlertDialog(
-                              title: const Text('Add Captions'),
-                              content: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  TextField(
-                                    controller: caption1Controller,
-                                    decoration: InputDecoration(
-                                      labelText: 'Caption 1 *',
-                                      labelStyle: TextStyle(color: Colors.pink),
-                                      enabledBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.pink),
-                                      ),
-                                      focusedBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.pink),
-                                      ),
-                                    ),
-                                  ),
-                                  TextField(
-                                    controller: caption2Controller,
-                                    decoration: InputDecoration(
-                                      labelText: 'Caption 2 *',
-                                      labelStyle: TextStyle(color: Colors.pink),
-                                      enabledBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.pink),
-                                      ),
-                                      focusedBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.pink),
-                                      ),
-                                    ),
-                                  ),
-                                  TextField(
-                                    controller: caption3Controller,
-                                    decoration: InputDecoration(
-                                      labelText: 'Caption 3 *',
-                                      labelStyle: TextStyle(color: Colors.pink),
-                                      enabledBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.pink),
-                                      ),
-                                      focusedBorder: UnderlineInputBorder(
-                                        borderSide: BorderSide(color: Colors.pink),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    if (caption1Controller.text.split(' ').length > 10 ||
-                                        caption2Controller.text.split(' ').length > 10 ||
-                                        caption3Controller.text.split(' ').length > 10 ||
-                                        caption1Controller.text.isEmpty ||
-                                        caption2Controller.text.isEmpty ||
-                                        caption3Controller.text.isEmpty) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                          content: Text('Each caption must be less than 10 words and all fields are mandatory'),
-                                          backgroundColor: Colors.red,
-                                        ),
-                                      );
-                                    } else {
-                                      setState(() {
-                                        section.updateCaptions([
-                                          caption1Controller.text,
-                                          caption2Controller.text,
-                                          caption3Controller.text
-                                        ]);
-                                      });
-                                      Navigator.of(context).pop();
-                                    }
-                                  },
-                                  child: Text('Submit'),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: Colors.pink,
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
-                        );
+                        _showCaptionDialog(section, index, isEdit: false);
                       },
                       icon: const Icon(Icons.add, color: Colors.pink),
-                      label: const Text('Add Captions', style: TextStyle(color: Colors.pink)),
+                      label: const Text(
+                        'Add Captions',
+                        style: TextStyle(color: Colors.pink),
+                      ),
                     ),
                   ),
                   const Spacer(),
@@ -862,6 +640,126 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
     );
 
   }
+  void _showCaptionDialog(VideoSection section, int index, {required bool isEdit}) {
+    final TextEditingController caption1Controller = TextEditingController();
+    final TextEditingController caption2Controller = TextEditingController();
+    final TextEditingController caption3Controller = TextEditingController();
+
+    if (isEdit && section.captions != null) {
+      caption1Controller.text = section.captions![0];
+      caption2Controller.text = section.captions![1];
+      caption3Controller.text = section.captions![2];
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(isEdit ? 'Edit Captions' : 'Add Captions'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: caption1Controller,
+                decoration: const InputDecoration(
+                  labelText: 'Caption 1 *',
+                  labelStyle: TextStyle(color: Colors.pink),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.pink),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.pink),
+                  ),
+                ),
+              ),
+              TextField(
+                controller: caption2Controller,
+                decoration: const InputDecoration(
+                  labelText: 'Caption 2 *',
+                  labelStyle: TextStyle(color: Colors.pink),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.pink),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.pink),
+                  ),
+                ),
+              ),
+              TextField(
+                controller: caption3Controller,
+                decoration: const InputDecoration(
+                  labelText: 'Caption 3 *',
+                  labelStyle: TextStyle(color: Colors.pink),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.pink),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Colors.pink),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                if (caption1Controller.text.isEmpty ||
+                    caption2Controller.text.isEmpty ||
+                    caption3Controller.text.isEmpty ||
+                    caption1Controller.text.split(' ').length > 10 ||
+                    caption2Controller.text.split(' ').length > 10 ||
+                    caption3Controller.text.split(' ').length > 10) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'Each caption must be less than 10 words and all fields are mandatory'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+
+                List<String> newCaptions = [
+                  caption1Controller.text,
+                  caption2Controller.text,
+                  caption3Controller.text,
+                ];
+
+                try {
+                  // Call API to upload captions only on first submission
+                  if (!isEdit) {
+                    await uploadCaptions(newCaptions, section.videoId.toString());
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Captions added successfully'),
+                        backgroundColor: Colors.pink,
+                      ),
+                    );
+                  }
+
+                  // Update local state
+                  setState(() {
+                    section.updateCaptions(newCaptions);
+                  });
+
+                  Navigator.of(context).pop();
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error updating captions: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   // void previewReels() {
   //   List<String> videoPaths = sections

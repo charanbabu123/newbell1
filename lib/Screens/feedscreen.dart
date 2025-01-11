@@ -44,9 +44,9 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver {
   void _pauseAllVideos() {
     // Get all video player widgets in the widget tree
     final List<_VideoPlayerWidgetState> videoStates =
-        context.findAncestorStateOfType<_VideoPlayerWidgetState>() != null
-            ? [context.findAncestorStateOfType<_VideoPlayerWidgetState>()!]
-            : [];
+    context.findAncestorStateOfType<_VideoPlayerWidgetState>() != null
+        ? [context.findAncestorStateOfType<_VideoPlayerWidgetState>()!]
+        : [];
 
     for (var videoState in videoStates) {
       if (videoState._controller.value.isPlaying) {
@@ -124,7 +124,7 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver {
               ),
             ),
             padding:
-                const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 16),
+            const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 16),
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -323,7 +323,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                   CircleAvatar(
                     radius: 20,
                     backgroundImage:
-                        NetworkImage(widget.feed.user.profilePictureUrl),
+                    NetworkImage(widget.feed.user.profilePictureUrl),
                   ),
                   const SizedBox(width: 12),
                   Column(
@@ -402,7 +402,6 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         //   ),
         // ),
 
-
         // Static buttons like share, comment
         Positioned(
           right: 16,
@@ -413,10 +412,12 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                 icon: const Icon(Icons.favorite, color: Colors.white),
                 onPressed: () {},
               ),
+              const SizedBox(height: 5), // Add space here
               IconButton(
                 icon: const Icon(Icons.comment, color: Colors.white),
                 onPressed: () {},
               ),
+              const SizedBox(height: 5), // Add space here
               IconButton(
                 icon: const Icon(Icons.share, color: Colors.white),
                 onPressed: () {},
@@ -425,27 +426,28 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
           ),
         ),
 
+
         // Video tag overlay
         Positioned(
-          left: 143,
-          bottom: 30,
+          left: 143, // Keep this to position the container from the left edge
+          bottom: 30, // Position the container from the bottom
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             decoration: BoxDecoration(
               color: Colors.pink.withOpacity(0.7),
               borderRadius: BorderRadius.circular(4),
             ),
-            alignment: Alignment.center, // Center aligns the content inside the Container
             child: Text(
               widget.feed.videos[_currentVideoIndex].tag,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 14,
               ),
-              textAlign: TextAlign.center, // Ensures multi-line text is center-aligned
+              textAlign: TextAlign.center, // Center-aligns the text itself
             ),
           ),
         ),
+
 
       ],
     );
@@ -478,7 +480,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       await _controller.initialize();
       if (mounted) {
         setState((){  _isInitialized = true;
-            _currentCaption = widget.video.caption1;});
+        _currentCaption = widget.video.caption1;});
         _controller.addListener(_updateCaption);
         _controller.play();
         _controller.addListener(() {
@@ -491,7 +493,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
         // Register controller with parent
         final parentState =
-            context.findAncestorStateOfType<_FullScreenFeedItemState>();
+        context.findAncestorStateOfType<_FullScreenFeedItemState>();
         if (parentState != null) {
           parentState._registerController(widget.video.id, _controller);
         }
@@ -599,18 +601,29 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         if (_currentCaption != null)
           Positioned(
             bottom: 180,
-            left: 16,
-            right: 16,
-            child: Text(
-              _currentCaption!,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 46,
-                fontWeight: FontWeight.bold, // Ensures the text is bold
+            left: 0, // Align the container to the left edge of the parent
+            right: 0, // Align the container to the right edge of the parent
+            child: Center( // Center the container within the available space
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5), // Adjust padding for the background
+                decoration: BoxDecoration(
+                  color: Colors.pink.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Text(
+                  _currentCaption!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 36,
+                    fontWeight: FontWeight.bold, // Ensures the text is bold
+                  ),
+                ),
               ),
             ),
           ),
+
+
 
 
         // Progress bar

@@ -7,6 +7,7 @@ import 'package:camera/camera.dart';
 import 'Screens/BasicDetailsScreen.dart';
 
 import 'Screens/ReeluploaderScreen.dart';
+import 'Screens/name.dart';
 import 'login/OtpScreen.dart';
 import 'Screens/VideoUploadScreen.dart';
 import 'splash/ProductTourScreen.dart';
@@ -42,7 +43,7 @@ class MyApp extends StatelessWidget {
           return OtpScreen(phoneNumber: args['phoneNumber']);
         },
 
-        '/details': (context) => const BasicDetailsScreen(),
+        '/details': (context) => const NameScreen(),
         '/reel': (context) => const ReelUploaderScreen(),
         '/feed': (context) => const FeedScreen(),
         '/profile': (context) => const UserProfileScreen(),

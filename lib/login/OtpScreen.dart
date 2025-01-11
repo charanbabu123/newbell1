@@ -8,8 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Screens/BasicDetailsScreen.dart';
 import '../Screens/feedscreen.dart';
+import '../Screens/name.dart';
 import '../services/auth_service.dart';
-import '../splash/ProductTourScreen.dart';
+
 
 class OtpScreen extends StatefulWidget {
   final String phoneNumber;
@@ -211,7 +212,7 @@ class _OtpScreenState extends State<OtpScreen>  {
               context,
               MaterialPageRoute(
                 builder: (context) =>
-                isNewUser! ? const FeedScreen() : const BasicDetailsScreen(),
+                isNewUser! ? const FeedScreen() : const NameScreen(),
               ),
                   (route) => false,
             );

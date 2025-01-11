@@ -216,9 +216,9 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.pink[50],
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.pink,
         elevation: 0,
         iconTheme: const IconThemeData(
           color: Colors.white, // Set the back arrow icon color to white
@@ -226,7 +226,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         title: Text(
           username,
           style: const TextStyle(
-            color: Colors.white,
+            color: Colors.pink,
             fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
@@ -247,7 +247,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             SizedBox(height: 16),
             Text(
               "Logging off...",
-              style: TextStyle(color: Colors.white, fontSize: 18),
+              style: TextStyle(color: Colors.pink, fontSize: 18),
             ),
           ],
         ),
@@ -282,7 +282,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           child: const CircleAvatar(
                             radius: 12,
                             backgroundColor: Colors.blue,
-                            child: Icon(Icons.add, size: 16, color: Colors.white),
+                            child: Icon(Icons.add, size: 16, color: Colors.pink),
                           ),
                         ),
                       ),
@@ -311,7 +311,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 Text(
                   "Name : $username",
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Colors.pink,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -319,7 +319,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 Text(
                   "City : $city",
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Colors.pink,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -327,7 +327,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 Text(
                   "Year of Exp: ${yoe.toString()}",
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Colors.pink,
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -352,7 +352,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                       child: Text(
                         "Edit Profile",
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Colors.pink,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -371,11 +371,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               child: Column(
                 children: [
                   const TabBar(
-                    indicatorColor: Colors.white,
+                    indicatorColor: Colors.pink,
                     tabs: [
 
-                      Tab(icon: Icon(Icons.video_library, color: Colors.white)),
-                      Tab(icon: Icon(Icons.grid_on, color: Colors.white)),
+                      Tab(icon: Icon(Icons.video_library, color: Colors.pink)),
+                      Tab(icon: Icon(Icons.grid_on, color: Colors.pink)),
                     ],
                   ),
                   Expanded(
@@ -405,7 +405,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         Text(
           count.toString(),
           style: const TextStyle(
-            color: Colors.white,
+            color: Colors.pink,
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
@@ -424,9 +424,9 @@ class MenuScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.pink[50],
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.pink[50],
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -441,14 +441,14 @@ class MenuScreen extends StatelessWidget {
           ListTile(
             title: const Text(
               'Settings',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: TextStyle(color: Colors.pink, fontSize: 16),
             ),
             onTap: () {},
           ),
           ListTile(
             title: const Text(
               'Privacy',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+              style: TextStyle(color: Colors.pink, fontSize: 16),
             ),
             onTap: () {},
           ),
@@ -498,13 +498,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.pink[50],
       appBar: AppBar(
-        title: const Text("Edit Profile", style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.black,
+        title: const Text("Edit Profile", style: TextStyle(color: Colors.pink)),
+        backgroundColor: Colors.pink[50],
         elevation: 0,
         iconTheme: const IconThemeData(
-          color: Colors.white, // Set the back arrow icon color to white
+          color: Colors.pink, // Set the back arrow icon color to white
         ),
       ),
       body: Padding(
@@ -519,7 +519,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 8),
             TextField(
               controller: _usernameController,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.pink),
               decoration: InputDecoration(
                 filled: true,
                 fillColor: Colors.grey[800],
@@ -538,7 +538,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 8),
             TextField(
               controller: _bioController,
-              style: const TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.pink),
               maxLines: 3,
               decoration: InputDecoration(
                 filled: true,
@@ -558,8 +558,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   'bio': _bioController.text,
                 });
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-              child: const Text("Save", style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
+              child: const Text("Save", style: TextStyle(color: Colors.pink)),
             ),
           ],
         ),
@@ -673,7 +673,8 @@ class VideoGridSection extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
+                    color: Colors.grey
+                        .withOpacity(0.7),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
