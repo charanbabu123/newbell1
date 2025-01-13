@@ -41,7 +41,7 @@ class _EmailScreenState extends State<EmailScreen> {
         elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(25.0),
+        padding: const EdgeInsets.all(45.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -72,13 +72,15 @@ class _EmailScreenState extends State<EmailScreen> {
                   ),
                 ),
                 validator: (value) {
+                  // If the value is empty, pass the condition
                   if (value == null || value.isEmpty) {
-                    return "Email is required";
+                    return null; // No error if the field is empty
                   } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                    return "Enter a valid email address";
+                    return "Enter a valid email address"; // Error if not a valid email
                   }
-                  return null;
+                  return null; // No error if the email is valid
                 },
+
               ),
               const SizedBox(height: 30),
               GestureDetector(
@@ -105,6 +107,39 @@ class _EmailScreenState extends State<EmailScreen> {
                   ),
                   child: const Text(
                     "Next",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              GestureDetector(
+                onTap: () {
+                  if (_formKey.currentState!.validate()) {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ProfilePictureScreen(
+                        name: widget.name,
+                        city: widget.city,
+                        email: emailController.text,
+                      ),
+                    ));
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Colors.pink, Colors.pinkAccent],
+                    ),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Text(
+                    "Skip",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

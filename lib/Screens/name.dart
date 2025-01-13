@@ -39,7 +39,7 @@ class _NameScreenState extends State<NameScreen> {
         elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(25.0),
+        padding: const EdgeInsets.all(45.0),
         child: Form(
           key: _formKey,
           child: Column(

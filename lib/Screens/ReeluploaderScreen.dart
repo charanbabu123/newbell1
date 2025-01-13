@@ -26,6 +26,7 @@ class VideoSection {
   bool isProcessing = false;
   String processingTime = '';
   int? videoId;
+  String? errorMessage; // New property to store error messages
 
   VideoSection({
     required this.label,
@@ -33,6 +34,7 @@ class VideoSection {
     this.thumbnailController,
     this.captions,
     this.videoId,
+    this.errorMessage,
   });
 
   void updateCaptions(List<String> newCaptions) {
@@ -305,6 +307,7 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
     }
   }
 
+
   Future<void> uploadVideo(File videoFile, int index) async {
     final String? token = await AuthService.getAuthToken();
     if (token == null) {
@@ -553,6 +556,7 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
               ),
               const SizedBox(height: 8),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: section.captions != null
@@ -560,20 +564,18 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         for (int i = 0; i < section.captions!.length; i++)
-                          Text(
-                            "Caption ${i + 1}: ${section.captions![i]}",
-                            style: const TextStyle(color: Colors.pink),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: Text(
+                              "Caption ${i + 1}: ${section.captions![i]}",
+                              style: const TextStyle(color: Colors.pink),
+                              maxLines: 5, // Limit to two lines
+                              overflow: TextOverflow.ellipsis, // Adds ellipsis if text exceeds two lines
+                              softWrap: true, // Ensures text wraps if it exceeds one line
+                            ),
                           ),
-                        TextButton.icon(
-                          onPressed: () {
-                            _showCaptionDialog(section, index, isEdit: true);
-                          },
-                          icon: const Icon(Icons.edit, color: Colors.pink),
-                          label: const Text(
-                            'Edit Captions',
-                            style: TextStyle(color: Colors.pink),
-                          ),
-                        ),
+
+                        const SizedBox(width: 60.0), // Adjust spacing here
                       ],
                     )
                         : TextButton.icon(
@@ -587,13 +589,30 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
                       ),
                     ),
                   ),
-                  const Spacer(),
-                  IconButton(
-                    onPressed: () => deleteVideo(index),
-                    icon: const Icon(Icons.delete, color: Colors.red),
+                  //const Spacer(),
+                  Column(
+                    children: [
+                      // Single Edit Button
+                      TextButton.icon(
+                        onPressed: () {
+                          _showCaptionDialog(section, index, isEdit: true);
+                        },
+                        icon: const Icon(Icons.edit, color: Colors.pink),
+                        label: const Text(
+                          'Edit Captions',
+                          style: TextStyle(color: Colors.pink),
+                        ),
+                      ),
+                      // Delete Button
+                      IconButton(
+                        onPressed: () => deleteVideo(index),
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                      ),
+                    ],
                   ),
                 ],
-              )
+              ),
+
             ] else if (section.isProcessing) ...[
               Text(
                 section.processingTime,
@@ -641,15 +660,21 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
 
   }
   void _showCaptionDialog(VideoSection section, int index, {required bool isEdit}) {
-    final TextEditingController caption1Controller = TextEditingController();
-    final TextEditingController caption2Controller = TextEditingController();
-    final TextEditingController caption3Controller = TextEditingController();
+    final TextEditingController caption1Controller =
+    TextEditingController(text: section.captions?.elementAt(0) ?? '');
+    final TextEditingController caption2Controller =
+    TextEditingController(text: section.captions?.elementAt(1) ?? '');
+    final TextEditingController caption3Controller =
+    TextEditingController(text: section.captions?.elementAt(2) ?? '');
 
     if (isEdit && section.captions != null) {
       caption1Controller.text = section.captions![0];
       caption2Controller.text = section.captions![1];
       caption3Controller.text = section.captions![2];
     }
+    final int videoDuration = section.thumbnailController?.value.duration.inSeconds ?? 60; // Default 60 seconds
+    final List<String> intervals = _getCaptionIntervals(videoDuration, 3);
+
 
     showDialog(
       context: context,
@@ -661,43 +686,48 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
             children: [
               TextField(
                 controller: caption1Controller,
-                decoration: const InputDecoration(
-                  labelText: 'Caption 1 *',
-                  labelStyle: TextStyle(color: Colors.pink),
-                  enabledBorder: UnderlineInputBorder(
+                decoration: InputDecoration(
+                  labelText: intervals.isNotEmpty ? 'Caption 1 (${intervals[0]}) *' : 'Caption 1 *',
+                  errorText: section.errorMessage,
+                  labelStyle: const TextStyle(color: Colors.pink),
+                  enabledBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.pink),
                   ),
-                  focusedBorder: UnderlineInputBorder(
+                  focusedBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.pink),
                   ),
                 ),
-              ),
+                style: const TextStyle(fontSize: 14), // Adjust font size to fit within 3 rows
+        ),
               TextField(
                 controller: caption2Controller,
-                decoration: const InputDecoration(
-                  labelText: 'Caption 2 *',
-                  labelStyle: TextStyle(color: Colors.pink),
-                  enabledBorder: UnderlineInputBorder(
+                decoration: InputDecoration(
+                  labelText: intervals.isNotEmpty ? 'Caption 2 (${intervals[1]}) *' : 'Caption 2 *',
+                  errorText: section.errorMessage,
+                  labelStyle: const TextStyle(color: Colors.pink),
+                  enabledBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.pink),
                   ),
-                  focusedBorder: UnderlineInputBorder(
+                  focusedBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.pink),
                   ),
                 ),
               ),
               TextField(
                 controller: caption3Controller,
-                decoration: const InputDecoration(
-                  labelText: 'Caption 3 *',
-                  labelStyle: TextStyle(color: Colors.pink),
-                  enabledBorder: UnderlineInputBorder(
+                decoration: InputDecoration(
+                  labelText: intervals.isNotEmpty ? 'Caption 3 (${intervals[2]}) *' : 'Caption 3 *',
+                  errorText: section.errorMessage,
+                  labelStyle: const TextStyle(color: Colors.pink),
+                  enabledBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.pink),
                   ),
-                  focusedBorder: UnderlineInputBorder(
+                  focusedBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.pink),
                   ),
                 ),
               ),
+
             ],
           ),
           actions: [
@@ -706,13 +736,14 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
                 if (caption1Controller.text.isEmpty ||
                     caption2Controller.text.isEmpty ||
                     caption3Controller.text.isEmpty ||
-                    caption1Controller.text.split(' ').length > 10 ||
-                    caption2Controller.text.split(' ').length > 10 ||
-                    caption3Controller.text.split(' ').length > 10) {
+                    caption1Controller.text.split(' ').length > 50 ||
+                    caption2Controller.text.split(' ').length > 50 ||
+                    caption3Controller.text.split(' ').length > 50) {
+                  Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
-                          'Each caption must be less than 10 words and all fields are mandatory'),
+                          'Each caption must be less than 50 words and all fields are mandatory'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -727,7 +758,6 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
 
                 try {
                   // Call API to upload captions only on first submission
-                  if (!isEdit) {
                     await uploadCaptions(newCaptions, section.videoId.toString());
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -735,7 +765,7 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
                         backgroundColor: Colors.pink,
                       ),
                     );
-                  }
+
 
                   // Update local state
                   setState(() {
@@ -759,29 +789,19 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
       },
     );
   }
+  List<String> _getCaptionIntervals(int videoDuration, int segmentCount) {
+    int segmentLength = (videoDuration / segmentCount).ceil();
+    List<String> intervals = [];
+    for (int i = 0; i < segmentCount; i++) {
+      int start = i * segmentLength;
+      int end = (i + 1) * segmentLength;
+      if (end > videoDuration) end = videoDuration;
+      intervals.add('$start-${end} seconds');
+    }
+    return intervals;
+  }
 
 
-  // void previewReels() {
-  //   List<String> videoPaths = sections
-  //       .where((section) => section.videoFile != null)
-  //       .map((section) => section.videoFile!.path)
-  //       .toList();
-  //
-  //   Navigator.push(
-  //     context,
-  //     MaterialPageRoute(
-  //       builder: (_) => PreviewReelsScreen(
-  //         videoPaths: videoPaths,
-  //         sectionLabels: sections
-  //             .where((section) => section.videoFile != null)
-  //             .map((section) => section.label)
-  //             .toList(),
-  //         sections: sections, // Add this line to pass the sections argument
-  //         videoTitles: const [],
-  //       ),
-  //     ),
-  //   );
-  // }
 
 
   void skipToNext() {

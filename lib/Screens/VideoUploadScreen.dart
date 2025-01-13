@@ -452,8 +452,6 @@ late int index;
     }
   }
 
-
-
   @override
   void dispose() {
     _videoPlayerController.dispose();
@@ -461,86 +459,164 @@ late int index;
   }
 
   @override
+  @override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
-          Center(
+          // Video Container
+          SizedBox.expand(
             child: _videoPlayerController.value.isInitialized
-                ? AspectRatio(
-              aspectRatio: 16 / 9,
-              child: VideoPlayer(_videoPlayerController),
+                ? FittedBox(
+              fit: BoxFit.cover,
+              child: SizedBox(
+                width: _videoPlayerController.value.size.width,
+                height: _videoPlayerController.value.size.height,
+                child: VideoPlayer(_videoPlayerController),
+              ),
             )
-                : const CircularProgressIndicator(),
-          ),
-          Positioned(
-            bottom: 30,
-            left: 10,
-            right: 10,
-            child: Column(
-              children: [
-                Slider(
-                  value: _sliderValue,
-                  min: 0.0,
-                  max: _videoPlayerController.value.duration.inSeconds
-                      .toDouble(),
-                  onChangeStart: (value) {
-                    // Pause video when dragging starts
-                    _videoPlayerController.pause();
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                      _sliderValue = value;
-                    });
-                    _videoPlayerController
-                        .seekTo(Duration(seconds: value.toInt()));
-                  },
-                  onChangeEnd: (value) {
-                    // Resume video when dragging ends
-                    _videoPlayerController.play();
-                  },
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: widget.onDiscard,
-                      child: const Text("Discard"),
-                    ),
-                    ElevatedButton(
-                      onPressed: ()
-                      {
-                        print(widget.videoPath);
-                        int count = 0;
-                        Navigator.of(context).popUntil((_) => count++ >= 2);
-                        handleVideo(index);
-                      },
-                      child: const Text("Upload"),
-                    ),
-                  ],
-                ),
-              ],
+                : const Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+              ),
             ),
           ),
+
+          // Top status bar background gradient
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: MediaQuery.of(context).padding.top + 50,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.7),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Bottom controls background gradient
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 150,
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.8),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Video progress slider
+          Positioned(
+            bottom: 100,
+            left: 0,
+            right: 0,
+            child: SliderTheme(
+              data: SliderThemeData(
+                trackHeight: 2,
+                thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+                overlayShape: RoundSliderOverlayShape(overlayRadius: 12),
+                activeTrackColor: Colors.white,
+                inactiveTrackColor: Colors.white.withOpacity(0.3),
+                thumbColor: Colors.white,
+              ),
+              child: Slider(
+                value: _sliderValue,
+                min: 0.0,
+                max: _videoPlayerController.value.duration.inSeconds.toDouble(),
+                onChangeStart: (value) {
+                  _videoPlayerController.pause();
+                },
+                onChanged: (value) {
+                  setState(() {
+                    _sliderValue = value;
+                  });
+                  _videoPlayerController.seekTo(Duration(seconds: value.toInt()));
+                },
+                onChangeEnd: (value) {
+                  _videoPlayerController.play();
+                },
+              ),
+            ),
+          ),
+
+          // Bottom controls
           Positioned(
             bottom: 30,
-            left: 170,
-            child: IconButton(
-              icon: Icon(
-                _videoPlayerController.value.isPlaying
-                    ? Icons.pause
-                    : Icons.play_arrow,
-                color: Colors.black,
-              ),
-              onPressed: () {
-                setState(() {
-                  if (_videoPlayerController.value.isPlaying) {
-                    _videoPlayerController.pause();
-                  } else {
-                    _videoPlayerController.play();
-                  }
-                });
-              },
+            left: 20,
+            right: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Discard button
+                TextButton(
+                  onPressed: widget.onDiscard,
+                  child: const Text(
+                    "Discard",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+
+                // Play/Pause button
+                IconButton(
+                  icon: Icon(
+                    _videoPlayerController.value.isPlaying
+                        ? Icons.pause_circle_filled
+                        : Icons.play_circle_filled,
+                    color: Colors.white,
+                    size: 40,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      if (_videoPlayerController.value.isPlaying) {
+                        _videoPlayerController.pause();
+                      } else {
+                        _videoPlayerController.play();
+                      }
+                    });
+                  },
+                ),
+
+                // Upload button
+                TextButton(
+                  onPressed: () {
+                    print(widget.videoPath);
+                    int count = 0;
+                    Navigator.of(context).popUntil((_) => count++ >= 2);
+                    handleVideo(index);
+                  },
+                  child: const Text(
+                    "Upload",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

@@ -50,7 +50,7 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
         elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(25.0),
+        padding: const EdgeInsets.all(45.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -152,6 +152,38 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
                 ),
                 child: const Text(
                   "Next",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => ExperienceScreen(
+                    name: widget.name,
+                    city: widget.city,
+                    email: widget.email,
+                    profileImage: _profileImage,
+                  ),
+                ));
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 15),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Colors.pink, Colors.pinkAccent],
+                  ),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: const Text(
+                  "Skip",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

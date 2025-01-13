@@ -40,7 +40,7 @@ class _CityScreenState extends State<CityScreen> {
         elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(25.0),
+        padding: const EdgeInsets.all(45.0),
         child: Form(
           key: _formKey,
           child: Column(
@@ -69,12 +69,12 @@ class _CityScreenState extends State<CityScreen> {
                     borderSide: const BorderSide(color: Colors.pink, width: 2),
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "City is required";
-                  }
-                  return null;
-                },
+                // validator: (value) {
+                //   if (value == null || value.isEmpty) {
+                //     return "City is required";
+                //   }
+                //   return null;
+                // },
               ),
               const SizedBox(height: 30),
               GestureDetector(
@@ -100,6 +100,38 @@ class _CityScreenState extends State<CityScreen> {
                   ),
                   child: const Text(
                     "Next",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              GestureDetector(
+                onTap: () {
+                  if (_formKey.currentState!.validate()) {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => EmailScreen(
+                        name: widget.name,
+                        city: cityController.text,
+                      ),
+                    ));
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Colors.pink, Colors.pinkAccent],
+                    ),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Text(
+                    "Skip",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

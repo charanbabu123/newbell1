@@ -273,7 +273,28 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
                       ],
                     ),
                   ),
-
+                  Positioned(
+                    right: 16,
+                    bottom: 120,
+                    child: Column(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.favorite, color: Colors.white),
+                          onPressed: () {},
+                        ),
+                        const SizedBox(height: 5), // Add space here
+                        IconButton(
+                          icon: const Icon(Icons.comment, color: Colors.white),
+                          onPressed: () {},
+                        ),
+                        const SizedBox(height: 5), // Add space here
+                        IconButton(
+                          icon: const Icon(Icons.share, color: Colors.white),
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                  ),
 
                   // Progress bars
                   Positioned(
