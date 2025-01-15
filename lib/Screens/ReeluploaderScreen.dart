@@ -51,6 +51,7 @@ class ReelUploaderScreen extends StatefulWidget {
     this.videoPath,
     this.showAppBar = true,
     this.showSkip = true,
+
   });
   final String? videoPath;
   final bool showAppBar, showSkip;

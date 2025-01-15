@@ -127,16 +127,30 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
   Widget _buildProfileInfo() {
     return Positioned(
       bottom: MediaQuery.of(context).padding.top + 40,
-      left: 16,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    left: 16,
+    child: Container(
+     // Debug background
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               if (profileData?['profile_picture'] != null)
                 CircleAvatar(
                   radius: 20,
-                  backgroundImage: NetworkImage(profileData!['profile_picture']),
+                  backgroundColor: Colors.grey, // Grey background color for fallback
+                  backgroundImage: profileData?['profile_picture'] != null &&
+                      profileData!['profile_picture'].isNotEmpty
+                      ? NetworkImage(profileData!['profile_picture'])
+                      : null, // Load image only if profile_picture is non-null and not empty
+                  child: (profileData?['profile_picture'] == null ||
+                      profileData!['profile_picture'].isEmpty)
+                      ? const Icon(
+                    Icons.person, // Default icon for fallback
+                    color: Colors.white,
+                    size: 20,
+                  )
+                      : null, // No fallback icon if profile_picture is provided
                 ),
               const SizedBox(width: 8),
               Column(
@@ -159,11 +173,11 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
                   ),
                   Row(
                     children: [
-                      Icon(
-                        Icons.location_on,
-                        color: Colors.white,
-                        size: 14,
-                      ),
+                      // const Icon(
+                      //   Icons.location_on,
+                      //   color: Colors.white,
+                      //   size: 14,
+                      // ),
                       const SizedBox(width: 4),
                       Text(
                         profileData?['city'] ?? '',
@@ -202,6 +216,7 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -351,8 +366,9 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
           ),
         ],
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 60.0), // Adjust the padding from the bottom
+        padding: const EdgeInsets.only(top: 25.0), // Adjust top padding to account for AppBar
         child: FloatingActionButton.extended(
           onPressed: isPublishing ? null : _publishReel,
           label: isPublishing
@@ -366,9 +382,9 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
           )
               : const Text(
             'Publish Reel',
-            style: TextStyle(color: Colors.white), // Ensures text color is white
+            style: TextStyle(color: Colors.white),
           ),
-          icon: isPublishing ? null : const Icon(Icons.cloud_upload, color: Colors.white), // Ensures icon color is white
+          icon: isPublishing ? null : const Icon(Icons.cloud_upload, color: Colors.white),
           backgroundColor: isPublishing ? Colors.grey : Colors.pink,
         ),
       ),
@@ -518,7 +534,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   currentCaption!,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 36,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     shadows: [
                       Shadow(

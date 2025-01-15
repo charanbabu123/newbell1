@@ -19,6 +19,7 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver {
   final PageController _pageController = PageController();
   int _currentPageIndex = 0;
 
+
   @override
   void initState() {
     super.initState();
@@ -168,6 +169,7 @@ class User {
   final int yoe;
   final String email;
   final String city;
+  final String bio;
 
   User({
     required this.id,
@@ -176,6 +178,7 @@ class User {
     required this.yoe,
     required this.email,
     required this.city,
+    required this.bio,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -186,6 +189,7 @@ class User {
       yoe: json['yoe'] ?? 0,
       email: json['email'] ?? '',
       city: json['city'] ?? '',
+      bio: json['bio']?? '',
     );
   }
 }
@@ -337,8 +341,12 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      // Text(
+                      //   '${widget.feed.user.city} • ${widget.feed.user.yoe} YOE',
+                      //   style: TextStyle(color: Colors.grey[300], fontSize: 14),
+                      // ),
                       Text(
-                        '${widget.feed.user.city} • ${widget.feed.user.yoe} YOE',
+                        widget.feed.user.bio,  // Add this Text widget
                         style: TextStyle(color: Colors.grey[300], fontSize: 14),
                       ),
                     ],
@@ -615,7 +623,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 36,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold, // Ensures the text is bold
                   ),
                 ),
@@ -635,7 +643,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           child: VideoProgressIndicator(
             _controller,
             allowScrubbing: true,
-            colors: VideoProgressColors(
+            colors: const VideoProgressColors(
               playedColor: Colors.white,
               backgroundColor: Colors.grey,
             ),

@@ -37,7 +37,7 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> {
   File? _profileImage;
   String username = "Loading...";
-  String bio = "Coding enthusiast | Flutter developer | Coffee lover";
+  String bio = "";
   String email = "Loading...";
   String city = "Loading...";
   num yoe = 0;
@@ -469,7 +469,10 @@ class EditProfileScreen extends StatefulWidget {
   final String username;
   final String bio;
 
-  const EditProfileScreen({Key? key, required this.username, required this.bio})
+
+
+
+  const EditProfileScreen({Key? key, required this.username, required this.bio })
       : super(key: key);
 
   @override
@@ -479,6 +482,7 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _usernameController;
   late TextEditingController _bioController;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -493,6 +497,50 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _usernameController.dispose();
     _bioController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSave() async {
+    setState(() => _isLoading = true);
+
+    try {
+      final token = await AuthService.getAuthToken();
+      if (token == null) throw Exception('No auth token found');
+
+      final response = await http.post(
+        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/register/'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'bio': _bioController.text,
+        }),
+      );
+      print('Status Code: ${response.statusCode}');
+      print('Response Headers: ${response.headers}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (mounted) {
+          Navigator.of(context).pop({
+            'username': _usernameController.text,
+            'bio': _bioController.text,
+          });
+        }
+      } else {
+        throw Exception('Failed to update profile: ${response.statusCode}');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error updating profile: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -551,15 +599,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop({
-                  'username': _usernameController.text,
-                  'bio': _bioController.text,
-                });
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.white),
-              child: const Text("Save", style: TextStyle(color: Colors.pink)),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _handleSave,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2,
+                    ),
+                  )
+                      : const Text(
+                    "Save",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
             ),
           ],
         ),

@@ -45,8 +45,13 @@ class _FullScreenCameraState extends State<FullScreenCamera> {
   @override
   void initState() {
     super.initState();
-    _initializeCamera(widget.cameras.first);
+    final frontCamera = widget.cameras.firstWhere(
+          (camera) => camera.lensDirection == CameraLensDirection.front,
+      orElse: () => widget.cameras.first, // Fallback to default if no front camera
+    );
+    _initializeCamera(frontCamera);
   }
+
 
 
 
@@ -257,7 +262,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     VideoSection(label: "Experience"),
     VideoSection(label: "Hobbies"),
   ];
-late int index;
+  late int index;
 
 
   @override
