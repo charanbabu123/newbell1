@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:http/http.dart' as http;
+import '../common/reel_player.dart';
 import '../services/auth_service.dart';
 
 class PreviewReelsScreen extends StatefulWidget {
@@ -75,7 +76,6 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
       });
     }
   }
-
 
   Future<void> _fetchPreviewVideos() async {
     final String? token = await AuthService.getAuthToken();
@@ -200,18 +200,21 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
-            profileData?['bio'] ?? '',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              shadows: [
-                Shadow(
-                  blurRadius: 4.0,
-                  color: Colors.black,
-                  offset: Offset(1.0, 1.0),
-                ),
-              ],
+          Transform.translate(
+            offset: const Offset(48, -25), // 20 pixels right, 10 pixels down
+            child: Text(
+              profileData?['bio'] ?? '',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                shadows: [
+                  Shadow(
+                    blurRadius: 4.0,
+                    color: Colors.black,
+                    offset: Offset(1.0, 1.0),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -385,7 +388,7 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
             style: TextStyle(color: Colors.white),
           ),
           icon: isPublishing ? null : const Icon(Icons.cloud_upload, color: Colors.white),
-          backgroundColor: isPublishing ? Colors.grey : Colors.pink,
+          backgroundColor: isPublishing ? Colors.pink : Colors.pink,
         ),
       ),
 
@@ -406,7 +409,7 @@ class VideoPlayerWidget extends StatefulWidget {
   final double duration;
 
   const VideoPlayerWidget({
-    Key? key,
+    super.key,
     required this.videoUrl,
     this.onVideoEnd,
     this.isPlaying = false,
@@ -416,7 +419,7 @@ class VideoPlayerWidget extends StatefulWidget {
     this.caption2,
     this.caption3,
     this.duration = 30.0,
-  }) : super(key: key);
+  });
 
   @override
   _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();

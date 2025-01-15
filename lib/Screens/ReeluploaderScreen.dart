@@ -51,16 +51,18 @@ class ReelUploaderScreen extends StatefulWidget {
     this.videoPath,
     this.showAppBar = true,
     this.showSkip = true,
+    this.sectionIndex = 0,
 
   });
   final String? videoPath;
   final bool showAppBar, showSkip;
+  final int sectionIndex;
 
   @override
-  _ReelUploaderScreenState createState() => _ReelUploaderScreenState();
+  ReelUploaderScreenState createState() => ReelUploaderScreenState();
 }
 
-class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
+class ReelUploaderScreenState extends State<ReelUploaderScreen> {
   final TextEditingController caption1Controller = TextEditingController();
   final TextEditingController caption2Controller = TextEditingController();
   final TextEditingController caption3Controller = TextEditingController();
@@ -86,7 +88,115 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
     AuthService.refreshToken();
   }
 
+  Future<void> handleVideo(int index) async {
+    if (sections[index].thumbnailController != null && sections[index].thumbnailController!.value.isPlaying) {
+      return;
+    }
 
+    try {
+      File videoFile = sections[index].videoFile!;
+      final VideoPlayerController tempController = VideoPlayerController.file(videoFile);
+      await tempController.initialize();
+      final int videoDuration = tempController.value.duration.inSeconds;
+      tempController.dispose();
+
+      if (videoDuration < 10) {
+        // Show a SnackBar message if the video duration is less than 10 seconds
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please upload a video which is greater than 10 seconds'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      setState(() {
+        sections[index].isLoading = true;
+        sections[index].uploadProgress = 0.0;
+      });
+
+      int fileSizeMB = (videoFile.lengthSync() / (1024 * 1024)).ceil();
+      int estimatedDuration = fileSizeMB.clamp(3, 15);
+
+      for (int i = 1; i <= 100; i++) {
+        await Future.delayed(Duration(milliseconds: (estimatedDuration * 10)));
+        if (mounted) {
+          setState(() {
+            sections[index].uploadProgress = i / 100;
+          });
+        }
+      }
+
+      if (sections[index].uploadProgress == 1.0) {
+        setState(() {
+          sections[index].isProcessing = true;
+          sections[index].isLoading = false;
+          sections[index].processingTime = "Processing Video... ";
+        });
+      }
+
+      if (videoFile.lengthSync() < 5 * 1024 * 1024) {
+        VideoPlayerController controller = VideoPlayerController.file(videoFile);
+        await controller.initialize();
+
+        await Future.delayed(Duration(seconds: estimatedDuration));
+
+        if (mounted) {
+          setState(() {
+            sections[index].thumbnailController?.dispose();
+            sections[index].videoFile = videoFile;
+            sections[index].thumbnailController = controller;
+            sections[index].isProcessing = false;
+            sections[index].processingTime = '';
+            sections[index].uploadProgress = 0.0;
+          });
+        }
+      }
+
+      final MediaInfo? compressedVideo = await VideoCompress.compressVideo(
+        videoFile.path,
+        quality: VideoQuality.LowQuality,
+        deleteOrigin: false,
+      );
+
+      if (compressedVideo == null || compressedVideo.file == null) {
+        throw Exception("Video compression failed");
+      }
+
+      File compressedFile = File(compressedVideo.file!.path);
+
+      VideoPlayerController controller = VideoPlayerController.file(compressedFile);
+      await controller.initialize();
+
+      await Future.delayed(Duration(seconds: estimatedDuration));
+
+      if (mounted) {
+        setState(() {
+          sections[index].thumbnailController?.dispose();
+          sections[index].videoFile = compressedFile;
+          sections[index].thumbnailController = controller;
+          sections[index].isProcessing = false;
+          sections[index].processingTime = '';
+          sections[index].uploadProgress = 0.0;
+        });
+      }
+
+      // Make the API call to upload the video
+      await uploadVideo(compressedFile, index);
+    } catch (e) {
+      print("Error handling video: $e");
+
+      if (mounted) {
+        setState(() {
+          sections[index].isLoading = false;
+          sections[index].uploadProgress = 0.0;
+          sections[index].isProcessing = false;
+          sections[index].processingTime = '';
+        });
+      }
+    }
+  }
 
   Future<void> _openCamera() async {
     final cameras = await availableCameras();
@@ -99,7 +209,7 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
             setState(() {
               _selectedVideos.add(video);
             });
-          },
+          },sectionIndex: widget.sectionIndex,
         ),
       ),
     );
@@ -593,17 +703,18 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   //const Spacer(),
                   Column(
                     children: [
-                      // Single Edit Button
-                      TextButton.icon(
-                        onPressed: () {
-                          _showCaptionDialog(section, index, isEdit: true);
-                        },
-                        icon: const Icon(Icons.edit, color: Colors.pink),
-                        label: const Text(
-                          'Edit Captions',
-                          style: TextStyle(color: Colors.pink),
+                      // Only show Edit Button if captions exist
+                      if (section.captions != null)
+                        TextButton.icon(
+                          onPressed: () {
+                            _showCaptionDialog(section, index, isEdit: true);
+                          },
+                          icon: const Icon(Icons.edit, color: Colors.pink),
+                          label: const Text(
+                            'Edit Captions',
+                            style: TextStyle(color: Colors.pink),
+                          ),
                         ),
-                      ),
                       // Delete Button
                       IconButton(
                         onPressed: () => deleteVideo(index),
@@ -737,14 +848,14 @@ class _ReelUploaderScreenState extends State<ReelUploaderScreen> {
                 if (caption1Controller.text.isEmpty ||
                     caption2Controller.text.isEmpty ||
                     caption3Controller.text.isEmpty ||
-                    caption1Controller.text.split(' ').length > 50 ||
-                    caption2Controller.text.split(' ').length > 50 ||
-                    caption3Controller.text.split(' ').length > 50) {
+                    caption1Controller.text.split(' ').length > 100 ||
+                    caption2Controller.text.split(' ').length > 100 ||
+                    caption3Controller.text.split(' ').length > 100) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
-                          'Each caption must be less than 50 words and all fields are mandatory'),
+                          'Each caption must be less than 100 words and all fields are mandatory'),
                       backgroundColor: Colors.red,
                     ),
                   );

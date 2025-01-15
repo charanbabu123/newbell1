@@ -12,26 +12,41 @@ class FeedScreen extends StatefulWidget {
   State<FeedScreen> createState() => _FeedScreenState();
 }
 
-class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver {
+class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,SingleTickerProviderStateMixin {
   List<UserFeed> feeds = [];
   bool isLoading = false;
   String? nextPageUrl;
   final PageController _pageController = PageController();
   int _currentPageIndex = 0;
-
+  late TabController _tabController;
+  final Map<int, VideoPlayerController> _controllers = {};
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _loadFeeds();
   }
+
+
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
+    _tabController.dispose();
+    _disposeAllVideos();
     super.dispose();
   }
+  void _disposeAllVideos() {
+    for (var controller in _controllers.values) {
+      if (controller.value.isInitialized) {
+        controller.dispose();
+      }
+    }
+    _controllers.clear();
+  }
+
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -55,6 +70,7 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver {
       }
     }
   }
+
 
   Future<void> _loadFeeds() async {
     if (isLoading) return;
@@ -125,21 +141,38 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver {
               ),
             ),
             padding:
-            const EdgeInsets.only(top: 50, left: 16, right: 16, bottom: 16),
+            const EdgeInsets.only(top: 63, left: 20, right: 16, bottom: 16),
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "Explore",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
+                const Spacer(), // Pushes content to the center
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Explore",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+
+                    const SizedBox(width: 10), // Space between the two texts
+                    Text(
+                      "Following",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
                 ),
+                const Spacer(), // Pushes content to the center
                 Icon(Icons.search, color: Colors.white, size: 28),
               ],
-            ),
+            )
           ),
         ],
       ),
@@ -165,11 +198,11 @@ class UserFeed {
 class User {
   final int id;
   final String name;
+  final String? bio; // Make bio nullable
   final String profilePictureUrl;
   final int yoe;
   final String email;
   final String city;
-  final String bio;
 
   User({
     required this.id,
@@ -178,7 +211,7 @@ class User {
     required this.yoe,
     required this.email,
     required this.city,
-    required this.bio,
+    this.bio,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -189,7 +222,7 @@ class User {
       yoe: json['yoe'] ?? 0,
       email: json['email'] ?? '',
       city: json['city'] ?? '',
-      bio: json['bio']?? '',
+      bio: json['bio'] ,
     );
   }
 }
@@ -199,7 +232,7 @@ class Video {
   final double duration;
   final String tag;
   final String videoUrl;
-  final DateTime uploadedAt;
+
   final String title;
   final String? caption1;
   final String? caption2;
@@ -209,7 +242,7 @@ class Video {
     required this.id,
     required this.tag,
     required this.videoUrl,
-    required this.uploadedAt,
+
     required this.title,
     this.caption1,
     this.caption2,
@@ -223,8 +256,6 @@ class Video {
       duration: (json['duration'] ?? 0.0) ,
       tag: json['tag'] ?? '',
       videoUrl: json['video_url'] ?? '',
-      uploadedAt: DateTime.parse(
-          json['uploaded_at'] ?? DateTime.now().toIso8601String()),
       title: json['title'] ?? '',
       caption1: json['caption_1'],
       caption2: json['caption_2'],
@@ -309,7 +340,11 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
           },
 
           itemBuilder: (context, index) {
-            return VideoPlayerWidget(video: widget.feed.videos[index]);
+            return VideoPlayerWidget(
+              video: widget.feed.videos[index],
+              allVideos: widget.feed.videos,  // Add this
+              currentIndex: index,            // Add this
+            );
           },
         ),
 
@@ -341,14 +376,18 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      Text(
+                        widget.feed.user.bio ?? '',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       // Text(
                       //   '${widget.feed.user.city} • ${widget.feed.user.yoe} YOE',
                       //   style: TextStyle(color: Colors.grey[300], fontSize: 14),
                       // ),
-                      Text(
-                        widget.feed.user.bio,  // Add this Text widget
-                        style: TextStyle(color: Colors.grey[300], fontSize: 14),
-                      ),
                     ],
                   ),
                 ],
@@ -358,57 +397,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
           ),
         ),
 
-        // Video progress indicator
-        // Positioned(
-        //   bottom: 10,
-        //   left: 16,
-        //   right: 16,
-        //   child: Row(
-        //     children: List.generate(widget.feed.videos.length, (index) {
-        //       final controller = _controllers[index];
-        //       return Expanded(
-        //         child: Stack(
-        //           children: [
-        //             // Background (grey) bar
-        //             Container(
-        //               height: 4,
-        //               margin: const EdgeInsets.symmetric(horizontal: 2),
-        //               decoration: BoxDecoration(
-        //                 color: Colors.grey.withOpacity(0.5),
-        //                 borderRadius: BorderRadius.circular(2),
-        //               ),
-        //             ),
-        //             // Progress (white) bar
-        //             if (controller != null)
-        //               ValueListenableBuilder<VideoPlayerValue>(
-        //                 valueListenable: controller,
-        //                 builder: (context, value, child) {
-        //                   double progress = 0.0;
-        //                   if (value.isInitialized &&
-        //                       value.duration.inMilliseconds > 0) {
-        //                     progress = value.position.inMilliseconds /
-        //                         value.duration.inMilliseconds;
-        //                   }
-        //
-        //                   return FractionallySizedBox(
-        //                     alignment: Alignment.centerLeft,
-        //                     widthFactor: progress.clamp(0.0, 1.0),
-        //                     child: Container(
-        //                       height: 4,
-        //                       decoration: BoxDecoration(
-        //                         color: Colors.white,
-        //                         borderRadius: BorderRadius.circular(2),
-        //                       ),
-        //                     ),
-        //                   );
-        //                 },
-        //               ),
-        //           ],
-        //         ),
-        //       );
-        //     }),
-        //   ),
-        // ),
+
 
         // Static buttons like share, comment
         Positioned(
@@ -464,8 +453,11 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
 
 class VideoPlayerWidget extends StatefulWidget {
   final Video video;
+  final List<Video> allVideos;  // Add this
+  final int currentIndex;
 
-  const VideoPlayerWidget({super.key, required this.video});
+  const VideoPlayerWidget({super.key, required this.video,required this.allVideos,   // Add this
+    required this.currentIndex,});
 
   @override
   State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
@@ -475,11 +467,16 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
   bool _isInitialized = false;
   String? _currentCaption;
+  int _currentVideoIndex = 0;
+
 
   @override
   void initState() {
     super.initState();
     _initializeVideo();
+    _controller.addListener(() {
+      setState(() {});  // This will rebuild the widget when video position changes
+    });
   }
 
   Future<void> _initializeVideo() async {
@@ -637,16 +634,13 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         // Progress bar
 
         Positioned(
-          bottom: 0,
+          bottom: 20, // Adjust this value to match your design
           left: 0,
           right: 0,
-          child: VideoProgressIndicator(
-            _controller,
-            allowScrubbing: true,
-            colors: const VideoProgressColors(
-              playedColor: Colors.white,
-              backgroundColor: Colors.grey,
-            ),
+          child: InstagramStoryProgressBar(
+            videos: widget.allVideos,
+            currentController: _controller,
+            currentIndex: _currentVideoIndex,
           ),
         ),
       ],
@@ -690,5 +684,85 @@ Future<String?> _getValidToken() async {
     return accessToken;
   } catch (e) {
     return null;
+  }
+}
+
+class InstagramStoryProgressBar extends StatelessWidget {
+  final List<Video> videos;
+  final VideoPlayerController currentController;
+  final int currentIndex;
+
+  const InstagramStoryProgressBar({
+    Key? key,
+    required this.videos,
+    required this.currentController,
+    required this.currentIndex,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Row(
+        children: List.generate(
+          videos.length,
+              (index) => Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2.0),
+              child: index == currentIndex
+                  ? _ProgressBar(controller: currentController)
+                  : Container(
+                height: 2,
+                decoration: BoxDecoration(
+                  color: index < currentIndex
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProgressBar extends StatelessWidget {
+  final VideoPlayerController controller;
+
+  const _ProgressBar({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller,
+      builder: (context, VideoPlayerValue value, child) {
+        final duration = value.duration.inMilliseconds;
+        final position = value.position.inMilliseconds;
+        double progress = duration == 0 ? 0 : position / duration;
+
+        return Container(
+          height: 2,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(2),
+          ),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: progress,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

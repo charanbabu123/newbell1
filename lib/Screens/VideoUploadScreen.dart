@@ -19,10 +19,12 @@ import 'ReeluploaderScreen.dart';
 class FullScreenCamera extends StatefulWidget {
   final List<CameraDescription> cameras;
   final Function(File video) onVideoRecorded;
+  final int sectionIndex;
 
   const FullScreenCamera({
     required this.cameras,
     required this.onVideoRecorded,
+    required this.sectionIndex,
     super.key,
   });
 
@@ -121,6 +123,8 @@ class _FullScreenCameraState extends State<FullScreenCamera> {
             Navigator.pop(context);
             Navigator.pop(context);
           },
+          sectionIndex: widget.sectionIndex,
+
         ),
       ),
     );
@@ -239,6 +243,7 @@ class VideoPreviewScreen extends StatefulWidget {
   final String videoPath;
   final VoidCallback onDiscard;
   final VoidCallback onContinue;
+  final int sectionIndex;
 
 
   const VideoPreviewScreen({
@@ -246,6 +251,7 @@ class VideoPreviewScreen extends StatefulWidget {
     required this.videoPath,
     required this.onDiscard,
     required this.onContinue,
+    required this.sectionIndex,
     super.key,
   });
 
@@ -537,8 +543,8 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
             child: SliderTheme(
               data: SliderThemeData(
                 trackHeight: 2,
-                thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
-                overlayShape: RoundSliderOverlayShape(overlayRadius: 12),
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
                 activeTrackColor: Colors.white,
                 inactiveTrackColor: Colors.white.withOpacity(0.3),
                 thumbColor: Colors.white,
@@ -610,7 +616,11 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                     print(widget.videoPath);
                     int count = 0;
                     Navigator.of(context).popUntil((_) => count++ >= 2);
-                    handleVideo(index);
+                    // Get reference to ReelUploaderScreen
+                    final reelUploaderState = context.findAncestorStateOfType<ReelUploaderScreenState>();
+                    if (reelUploaderState != null) {
+                      reelUploaderState.handleVideo(widget.sectionIndex);
+                    }
                   },
                   child: const Text(
                     "Upload",
