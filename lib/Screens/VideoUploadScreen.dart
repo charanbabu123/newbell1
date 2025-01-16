@@ -120,9 +120,8 @@ class _FullScreenCameraState extends State<FullScreenCamera> {
           },
           onContinue: () {
             widget.onVideoRecorded(File(_videoPath!));
-            Navigator.pop(context);
-            Navigator.pop(context);
           },
+
           sectionIndex: widget.sectionIndex,
 
         ),
@@ -616,11 +615,23 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                     print(widget.videoPath);
                     int count = 0;
                     Navigator.of(context).popUntil((_) => count++ >= 2);
-                    // Get reference to ReelUploaderScreen
-                    final reelUploaderState = context.findAncestorStateOfType<ReelUploaderScreenState>();
-                    if (reelUploaderState != null) {
-                      reelUploaderState.handleVideo(widget.sectionIndex);
-                    }
+                    // // Get reference to ReelUploaderScreen
+                    // final reelUploaderState = context.findAncestorStateOfType<ReelUploaderScreenState>();
+                    // if (reelUploaderState != null) {
+                    //   reelUploaderState.handleVideo(widget.sectionIndex);
+                    // }
+                    print("passing index ${widget.sectionIndex}");
+                    Navigator.push(
+
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ReelUploaderScreen(
+                          videoPath: widget.videoPath,
+                          sectionIndex: widget.sectionIndex,
+                        ),
+                      ),
+                    );
+
                   },
                   child: const Text(
                     "Upload",

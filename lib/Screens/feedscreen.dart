@@ -49,24 +49,25 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,Sin
 
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused) {
-      // Pause all videos when app goes to background
-      _pauseAllVideos();
-    }
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Add a post-frame callback to check if we're still mounted
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      // Check if the route has changed
+      final route = ModalRoute.of(context);
+      if (route != null && !route.isCurrent) {
+        _pauseAllVideos();
+      }
+    });
   }
 
   void _pauseAllVideos() {
-    // Get all video player widgets in the widget tree
-    final List<_VideoPlayerWidgetState> videoStates =
-    context.findAncestorStateOfType<_VideoPlayerWidgetState>() != null
-        ? [context.findAncestorStateOfType<_VideoPlayerWidgetState>()!]
-        : [];
-
-    for (var videoState in videoStates) {
-      if (videoState._controller.value.isPlaying) {
-        videoState._controller.pause();
+    // Pause all videos in the controllers map
+    for (var controller in _controllers.values) {
+      if (controller.value.isPlaying) {
+        controller.pause();
       }
     }
   }
@@ -285,6 +286,13 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
     _initializeControllers();
   }
 
+  void pauseAllVideos() {
+    for (var controller in _controllers.values) {
+      if (controller.value.isPlaying) {
+        controller.pause();
+      }
+    }
+  }
 
   void _registerController(int index, VideoPlayerController controller) {
     _controllers[index] = controller;
@@ -528,7 +536,25 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 
 
+  void _pauseVideo() {
+    if (_controller.value.isPlaying) {
+      _controller.pause();
+    }
+  }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      final route = ModalRoute.of(context);
+      if (route != null && !route.isCurrent) {
+        _pauseVideo();
+      }
+    });
+  }
 
 
   void _updateCaption() {
@@ -627,20 +653,16 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               ),
             ),
           ),
-
-
-
-
         // Progress bar
 
         Positioned(
-          bottom: 20, // Adjust this value to match your design
+          bottom: 15,
           left: 0,
           right: 0,
           child: InstagramStoryProgressBar(
             videos: widget.allVideos,
             currentController: _controller,
-            currentIndex: _currentVideoIndex,
+            currentIndex: widget.currentIndex,  // Use the index passed from parent
           ),
         ),
       ],
@@ -710,9 +732,12 @@ class InstagramStoryProgressBar extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2.0),
               child: index == currentIndex
-                  ? _ProgressBar(controller: currentController)
+                  ? _ProgressBar(
+                controller: currentController,
+                isActive: true,
+              )
                   : Container(
-                height: 2,
+                height: 6,
                 decoration: BoxDecoration(
                   color: index < currentIndex
                       ? Colors.white
@@ -730,10 +755,12 @@ class InstagramStoryProgressBar extends StatelessWidget {
 
 class _ProgressBar extends StatelessWidget {
   final VideoPlayerController controller;
+  final bool isActive;
 
   const _ProgressBar({
     Key? key,
     required this.controller,
+    required this.isActive,
   }) : super(key: key);
 
   @override
@@ -745,8 +772,13 @@ class _ProgressBar extends StatelessWidget {
         final position = value.position.inMilliseconds;
         double progress = duration == 0 ? 0 : position / duration;
 
+        // Only show progress if this is the active progress bar
+        if (!isActive) {
+          progress = 0;
+        }
+
         return Container(
-          height: 2,
+          height: 6,
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.5),
             borderRadius: BorderRadius.circular(2),

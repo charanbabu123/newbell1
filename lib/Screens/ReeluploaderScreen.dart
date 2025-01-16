@@ -8,10 +8,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:io';
-
 import 'package:video_compress/video_compress.dart';
 import 'package:http/http.dart' as http;
-
 import '../common/common_widgets.dart';
 import '../services/auth_service.dart';
 import 'VideoUploadScreen.dart';
@@ -51,12 +49,12 @@ class ReelUploaderScreen extends StatefulWidget {
     this.videoPath,
     this.showAppBar = true,
     this.showSkip = true,
-    this.sectionIndex = 0,
+    this.sectionIndex,
 
   });
   final String? videoPath;
   final bool showAppBar, showSkip;
-  final int sectionIndex;
+  final int? sectionIndex;
 
   @override
   ReelUploaderScreenState createState() => ReelUploaderScreenState();
@@ -86,9 +84,16 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
     super.initState();
     //Refresh token
     AuthService.refreshToken();
+    if (widget.videoPath != null) {
+      // Assuming `sectionIndex` is valid and matches a card
+      sections[widget.sectionIndex ?? 0].videoFile = File(widget.videoPath!);
+      print("index in reeluploaderscreen = ${widget.sectionIndex}");
+      handleVideo(widget.sectionIndex ?? 0);
+    }
   }
 
   Future<void> handleVideo(int index) async {
+    print("handling video for $index");
     if (sections[index].thumbnailController != null && sections[index].thumbnailController!.value.isPlaying) {
       return;
     }
@@ -198,7 +203,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
     }
   }
 
-  Future<void> _openCamera() async {
+  Future<void> _openCamera(int index) async {
     final cameras = await availableCameras();
     await Navigator.push(
       context,
@@ -209,7 +214,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
             setState(() {
               _selectedVideos.add(video);
             });
-          },sectionIndex: widget.sectionIndex,
+          },sectionIndex: index,
         ),
       ),
     );
@@ -759,7 +764,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   Expanded(
                     flex: 2,
                     child: CommonWidgets.recordVideoButton(
-                      onPressed: _openCamera,
+                    onPressed: () => _openCamera(index),
                     ),
                   ),
                 ],
