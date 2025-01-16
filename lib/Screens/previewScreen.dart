@@ -112,11 +112,14 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
   }
 
   void _playNextVideo() {
-    setState(() {
-      currentVideoIndex = (currentVideoIndex + 1) % videos.length;
-      progressValues[currentVideoIndex] = 0.0;
-    });
+    if (currentVideoIndex < videos.length - 1) {
+      setState(() {
+        currentVideoIndex++;
+        progressValues[currentVideoIndex] = 0.0;
+      });
+    }
   }
+
 
   void _updateProgress(int index, double progress) {
     setState(() {

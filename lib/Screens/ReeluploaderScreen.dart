@@ -92,6 +92,8 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
     }
   }
 
+
+
   Future<void> handleVideo(int index) async {
     print("handling video for $index");
     if (sections[index].thumbnailController != null && sections[index].thumbnailController!.value.isPlaying) {
@@ -939,14 +941,16 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
       backgroundColor: Colors.pink[50],
       appBar: widget.showAppBar
           ? AppBar(
-              iconTheme: const IconThemeData(
-                color: Colors.white, // Set the back arrow icon color to white
-              ),
-              backgroundColor: Colors.pink,
-              title: const Text("Create Your Video Resume",
-                  style: TextStyle(color: Colors.white)),
-              centerTitle: true,
-            )
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.pink,
+        leading: BackButton(
+          color: Colors.white,  // Makes it invisible
+          onPressed: () => SystemNavigator.pop(),
+        ),
+        title: const Text("Create Your Video Resume",
+            style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+      )
           : null,
       body: Column(
         children: [

@@ -612,17 +612,10 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                 // Upload button
                 TextButton(
                   onPressed: () {
+                    // Log video path for debugging
                     print(widget.videoPath);
-                    int count = 0;
-                    Navigator.of(context).popUntil((_) => count++ >= 2);
-                    // // Get reference to ReelUploaderScreen
-                    // final reelUploaderState = context.findAncestorStateOfType<ReelUploaderScreenState>();
-                    // if (reelUploaderState != null) {
-                    //   reelUploaderState.handleVideo(widget.sectionIndex);
-                    // }
-                    print("passing index ${widget.sectionIndex}");
-                    Navigator.push(
-
+                    // Navigate directly to ReelUploaderScreen without popping multiple screens
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (_) => ReelUploaderScreen(
@@ -631,7 +624,6 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                         ),
                       ),
                     );
-
                   },
                   child: const Text(
                     "Upload",
@@ -650,3 +642,5 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     );
   }
 }
+
+
