@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:bell_app1/Profile/user_preview_screen.dart';
 import 'package:bell_app1/Screens/ReeluploaderScreen.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
@@ -40,7 +40,8 @@ class UserProfileScreen extends StatefulWidget {
   _UserProfileScreenState createState() => _UserProfileScreenState();
 }
 
-class _UserProfileScreenState extends State<UserProfileScreen> {
+class _UserProfileScreenState extends State<UserProfileScreen> with TickerProviderStateMixin {
+  TabController? _tabController;
   File? _profileImage;
   String username = "Loading...";
   String bio = "";
@@ -49,6 +50,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   num yoe = 0;
   String? userProfilePicture;
   List<VideoModel> videos = [];
+
 
   num posts = 23;
   num followers = 500;
@@ -61,10 +63,15 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   @override
   void initState() {
     super.initState();
-    //Refresh token
+    _tabController = TabController(length: 2, vsync: this);
     AuthService.refreshToken();
     fetchUserProfile();
+  }
 
+  @override
+  void dispose() {
+    _tabController?.dispose(); // Dispose the controller
+    super.dispose();
   }
 
   Future<void> fetchUserProfile() async {
@@ -221,31 +228,120 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
+  Widget _buildProfileHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Stack(
+                children: [
+                  GestureDetector(
+                    onTap: _pickProfileImage,
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundImage: _profileImage != null
+                          ? FileImage(_profileImage!)
+                          : (userProfilePicture != null ? NetworkImage(userProfilePicture!) : null) as ImageProvider?,
+                      child: _profileImage == null && userProfilePicture == null
+                          ? const Icon(Icons.person, size: 40, color: Colors.grey)
+                          : null,
+                    ),
+                  ),
+                  if (_profileImage == null && userProfilePicture == null)
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: _pickProfileImage,
+                        child: const CircleAvatar(
+                          radius: 12,
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.add, size: 16, color: Colors.pink),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildStatColumn("Posts", posts),
+                    _buildStatColumn("Followers", followers),
+                    _buildStatColumn("Following", following),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            " $username",
+            style: const TextStyle(
+              color: Colors.pink,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            " $city",
+            style: const TextStyle(
+              color: Colors.pink,
+              fontSize: 18,
+
+            ),
+          ),
+          // Text(
+          //   " ${yoe.toString()} YOE",
+          //   style: const TextStyle(
+          //     color: Colors.pink,
+          //     fontSize: 18,
+          //   ),
+          // ),
+          Text(
+            " $bio",
+            style: const TextStyle(
+              color: Colors.pink,
+              fontSize: 18,
+
+            ),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: _editProfile,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.pink),
+              ),
+              child: const Center(
+                child: Text(
+                  "Edit Profile",
+                  style: TextStyle(
+                    color: Colors.pink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.pink[50],
-      appBar: AppBar(
-        backgroundColor: Colors.pink,
-        elevation: 0,
-        iconTheme: const IconThemeData(
-          color: Colors.white, // Set the back arrow icon color to white
-        ),
-        title: Text(
-          username,
-          style: const TextStyle(
-            color: Colors.pink,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: _openMenuScreen,
-          ),
-        ],
-      ),
       body: isLoggingOut
           ? const Center(
         child: Column(
@@ -260,156 +356,72 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ],
         ),
       )
-          : Column(
-        children: [
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                Stack(
-                  children: [
-                    GestureDetector(
-                      onTap: _pickProfileImage,
-                      child: CircleAvatar(
-                        radius: 40,
-                        backgroundImage: _profileImage != null
-                            ? FileImage(_profileImage!)
-                            : (userProfilePicture != null ? NetworkImage(userProfilePicture!) : null),
-                        child: _profileImage == null && userProfilePicture == null
-                            ? const Icon(Icons.person, size: 40, color: Colors.grey)
-                            : null,
-                      ),
-                    ),
-                    if (_profileImage == null && userProfilePicture == null) // Check if no profile picture
-                      Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: GestureDetector(
-                          onTap: _pickProfileImage,
-                          child: const CircleAvatar(
-                            radius: 12,
-                            backgroundColor: Colors.blue,
-                            child: Icon(Icons.add, size: 16, color: Colors.pink),
-                          ),
-                        ),
-                      ),
+          : NestedScrollView(
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return <Widget>[
+            SliverAppBar(
+              backgroundColor: Colors.pink,
+              expandedHeight: 285.0, // Adjust this value based on your header content
+              floating: false,
+              pinned: true,
+              stretch: true,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  color: Colors.pink[50],
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const SizedBox(height: 60), // Space for the app bar
+                      _buildProfileHeader(),
+                    ],
+                  ),
+                ),
+              ),
+              title: Text(
+                innerBoxIsScrolled ? username : "",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.menu, color: Colors.black),
+                  onPressed: _openMenuScreen,
+                ),
+              ],
+            ),
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _SliverAppBarDelegate(
+                TabBar(
+                  controller: _tabController,
+                  indicatorColor: Colors.pink,
+                  tabs: const [
+                    Tab(icon: Icon(Icons.video_library, color: Colors.pink)),
+                    Tab(icon: Icon(Icons.grid_on, color: Colors.pink)),
                   ],
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildStatColumn("Posts", posts),
-                      _buildStatColumn("Followers", followers),
-                      _buildStatColumn("Following", following),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Name : $username",
-                  style: const TextStyle(
-                    color: Colors.pink,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  "City : $city",
-                  style: const TextStyle(
-                    color: Colors.pink,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  "Year of Exp: ${yoe.toString()}",
-                  style: const TextStyle(
-                    color: Colors.pink,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  "Bio : $bio",
-                  style: const TextStyle(
-                    color: Colors.pink,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                GestureDetector(
-                  onTap: _editProfile,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[850],
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.grey),
-                    ),
-                    child: const Center(
-                      child: Text(
-                        "Edit Profile",
-                        style: TextStyle(
-                          color: Colors.pink,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          const Divider(color: Colors.grey),
-          Expanded(
-            child: DefaultTabController(
-              length: 2,
-              child: Column(
-                children: [
-                  const TabBar(
-                    indicatorColor: Colors.pink,
-                    tabs: [
-
-                      Tab(icon: Icon(Icons.video_library, color: Colors.pink)),
-                      Tab(icon: Icon(Icons.grid_on, color: Colors.pink)),
-                    ],
-                  ),
-                  Expanded(
-                    child: TabBarView(
-                      children: [
-
-                        SwipeableVideoView(videos: videos),
-                        //VideoGridSection(videos: videos),
-                        const ReelUploaderScreen(
-                          showAppBar: false,
-                          showSkip: false,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
               ),
             ),
-          ),
-        ],
+          ];
+        },
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            SwipeableVideoView(videos: videos),
+            const ReelUploaderScreen(
+              showAppBar: false,
+              showSkip: false,
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
 
   Widget _buildStatColumn(String label, num count) {
     return Column(
@@ -422,11 +434,36 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+        Text(label, style: const TextStyle(color: Colors.black, fontSize: 14)),
       ],
     );
   }
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  _SliverAppBarDelegate(this._tabBar);
+
+  final TabBar _tabBar;
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Colors.pink[50],
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return false;
+  }
 }
+
+
 
 class MenuScreen extends StatelessWidget {
   final VoidCallback onLogout;
@@ -581,7 +618,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           children: [
             const Text(
               "Username",
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              style: TextStyle(color: Colors.black, fontSize: 14),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -589,9 +626,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               style: const TextStyle(color: Colors.pink),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey[800],
+                fillColor: Colors.white,
                 hintText: "Enter username",
-                hintStyle: const TextStyle(color: Colors.grey),
+                hintStyle: const TextStyle(color: Colors.black),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -600,7 +637,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             const SizedBox(height: 16),
             const Text(
               "City",
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              style: TextStyle(color: Colors.black, fontSize: 14),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -608,18 +645,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               style: const TextStyle(color: Colors.pink),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey[800],
+                fillColor: Colors.white,
                 hintText: "Enter city",
-                hintStyle: const TextStyle(color: Colors.grey),
+                hintStyle: const TextStyle(color: Colors.black),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
             ),
-
+            const SizedBox(height: 16),
             const Text(
               "Bio",
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              style: TextStyle(color: Colors.black, fontSize: 14),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -628,7 +665,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               maxLines: 3,
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey[800],
+                fillColor: Colors.white,
                 hintText: "Enter bio",
                 hintStyle: const TextStyle(color: Colors.grey),
                 border: OutlineInputBorder(
@@ -644,7 +681,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _handleSave,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
+                    backgroundColor: Colors.pink,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
                   child: _isLoading
@@ -901,7 +938,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.pink,
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: GridView.builder(
