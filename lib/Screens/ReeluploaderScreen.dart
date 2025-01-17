@@ -855,14 +855,14 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                 if (caption1Controller.text.isEmpty ||
                     caption2Controller.text.isEmpty ||
                     caption3Controller.text.isEmpty ||
-                    caption1Controller.text.split(' ').length > 100 ||
-                    caption2Controller.text.split(' ').length > 100 ||
-                    caption3Controller.text.split(' ').length > 100) {
+                    caption1Controller.text.split(' ').length > 20 ||
+                    caption2Controller.text.split(' ').length > 20 ||
+                    caption3Controller.text.split(' ').length > 20) {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
-                          'Each caption must be less than 100 words and all fields are mandatory'),
+                          'Each caption must be less than 20 words and all fields are mandatory'),
                       backgroundColor: Colors.red,
                     ),
                   );

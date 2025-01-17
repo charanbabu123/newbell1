@@ -1,19 +1,22 @@
 import 'dart:convert';
+
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:http/http.dart' as http;
-import '../common/reel_player.dart';
 import '../services/auth_service.dart';
+import 'UserProfileScreen.dart';
 
-class PreviewReelsScreen extends StatefulWidget {
-  const PreviewReelsScreen({Key? key}) : super(key: key);
+class PreviewReelsScreen1 extends StatefulWidget {
+  const PreviewReelsScreen1({Key? key}) : super(key: key);
 
   @override
-  _PreviewReelsScreenState createState() => _PreviewReelsScreenState();
+  _PreviewReelsScreen1State createState() => _PreviewReelsScreen1State();
 }
 
-class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
+
+class _PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
   bool isLoading = true;
   Map<String, dynamic>? profileData;
   List<dynamic> videos = [];
@@ -130,111 +133,99 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
   Widget _buildProfileInfo() {
     return Positioned(
       bottom: MediaQuery.of(context).padding.top + 40,
-    left: 16,
-    child: Container(
-     // Debug background
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              if (profileData?['profile_picture'] == null)
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.pink.shade100, // Lighter shade for background
-                  child: (profileData?['profile_picture'] == null ||
-                      profileData!['profile_picture'].isEmpty)
-                      ? Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          Colors.pink.shade300,
-                          Colors.pink.shade400,
+      left: 16,
+      child: Container(
+        // Debug background
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                if (profileData?['profile_picture'] == null)
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.pink.shade100, // Light pink background
+                    child: profileData?['profile_picture'] != null &&
+                        profileData!['profile_picture'].isNotEmpty
+                        ? ClipOval(
+                      child: Image.network(
+                        profileData!['profile_picture'],
+                        fit: BoxFit.cover,
+                        width: 40,
+                        height: 40,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Show icon if image fails to load
+                          return Icon(
+                            Icons.person,
+                            color: Colors.pink.shade400,
+                            size: 20,
+                          );
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                  loadingProgress.expectedTotalBytes!
+                                  : null,
+                              strokeWidth: 2.0,
+                              color: Colors.pink.shade400,
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                        : Icon(
+                      Icons.person,
+                      color: Colors.pink.shade400,
+                      size: 20,
+                    ),
+                  ),
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      profileData?['name'] ?? '',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            blurRadius: 4.0,
+                            color: Colors.black,
+                            offset: Offset(1.0, 1.0),
+                          ),
                         ],
                       ),
                     ),
-                    child: const Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                  )
-                      : CircleAvatar(
-                    radius: 20,
-                    backgroundImage: NetworkImage(profileData!['profile_picture']),
-                  ),
+                  ],
                 ),
-              const SizedBox(width: 8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    profileData?['name'] ?? '',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      shadows: [
-                        Shadow(
-                          blurRadius: 4.0,
-                          color: Colors.black,
-                          offset: Offset(1.0, 1.0),
-                        ),
-                      ],
+              ],
+            ),
+            const SizedBox(height: 8),
+            Transform.translate(
+              offset: const Offset(48, 15), // 20 pixels right, 10 pixels down
+              child: Text(
+                profileData?['bio'] ?? '',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 4.0,
+                      color: Colors.black,
+                      offset: Offset(1.0, 1.0),
                     ),
-                  ),
-                  Row(
-                    children: [
-                      // const Icon(
-                      //   Icons.location_on,
-                      //   color: Colors.white,
-                      //   size: 14,
-                      // ),
-                      const SizedBox(width: 4),
-                      Text(
-                        profileData?['city'] ?? '',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 4.0,
-                              color: Colors.black,
-                              offset: Offset(1.0, 1.0),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Transform.translate(
-            offset: const Offset(48, -25), // 20 pixels right, 10 pixels down
-            child: Text(
-              profileData?['bio'] ?? '',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                shadows: [
-                  Shadow(
-                    blurRadius: 4.0,
-                    color: Colors.black,
-                    offset: Offset(1.0, 1.0),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -398,7 +389,6 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
                       )
 
                   ),
-
                   // Progress bars
                   Positioned(
                     bottom: 20,
@@ -454,30 +444,6 @@ class _PreviewReelsScreenState extends State<PreviewReelsScreen> {
           ),
         ],
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(top: 25.0), // Adjust top padding to account for AppBar
-        child: FloatingActionButton.extended(
-          onPressed: isPublishing ? null : _publishReel,
-          label: isPublishing
-              ? const SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 2,
-            ),
-          )
-              : const Text(
-            'Publish Reel',
-            style: TextStyle(color: Colors.white),
-          ),
-          icon: isPublishing ? null : const Icon(Icons.cloud_upload, color: Colors.white),
-          backgroundColor: isPublishing ? Colors.pink : Colors.pink,
-        ),
-      ),
-
-
     );
   }
 }
@@ -653,6 +619,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         : const Center(child: CircularProgressIndicator());
   }
 }
+
 
 String _formatCaption(String caption) {
   // Split the caption into words

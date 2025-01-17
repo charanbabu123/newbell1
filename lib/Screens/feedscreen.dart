@@ -141,16 +141,19 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,Sin
                 ],
               ),
             ),
-            padding:
-            const EdgeInsets.only(top: 63, left: 20, right: 16, bottom: 16),
-            child: const Row(
+            padding: const EdgeInsets.only(top: 63, left: 54, right: 10, bottom: 16),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Spacer(), // Pushes content to the center
+
+                // Center Content
                 Row(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
+                    // "Explore" Text
+                    const Text(
                       "Explore",
                       style: TextStyle(
                         color: Colors.white,
@@ -158,9 +161,21 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,Sin
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    const SizedBox(width: 6), // Space between text and dot
 
-                    const SizedBox(width: 10), // Space between the two texts
-                    Text(
+                    // Small Dot
+                    Container(
+                      width: 5,
+                      height: 5,
+                      decoration: const BoxDecoration(
+                        color: Colors.white, // Dot color
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 6), // Space between dot and text
+
+                    // "Following" Text
+                    const Text(
                       "Following",
                       style: TextStyle(
                         color: Colors.white,
@@ -170,10 +185,13 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,Sin
                     ),
                   ],
                 ),
+
                 const Spacer(), // Pushes content to the center
-                Icon(Icons.search, color: Colors.white, size: 28),
+
+                // Search Icon
+                const Icon(Icons.search, color: Colors.white, size: 28),
               ],
-            )
+            ),
           ),
         ],
       ),
@@ -330,32 +348,33 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
       fit: StackFit.expand,
       children: [
         // Full screen video
-        PageView.builder(
-          controller: _videoController,
-          itemCount: widget.feed.videos.length,
-          onPageChanged: (index) {
-            setState(() {
-              _currentVideoIndex = index;
+        Padding(
+          padding: const EdgeInsets.only(top: 25.0, bottom: 0.0), // Adjust the top and bottom padding
+          child: PageView.builder(
+            controller: _videoController,
+            itemCount: widget.feed.videos.length,
+            onPageChanged: (index) {
+              setState(() {
+                _currentVideoIndex = index;
 
-              // Pause all controllers
-              for (var controller in _controllers.values) {
-                controller.pause();
-              }
+                // Pause all controllers
+                for (var controller in _controllers.values) {
+                  controller.pause();
+                }
 
-              // Play the video for the current page
-              _controllers[index]?.play();
-            });
-          },
-
-          itemBuilder: (context, index) {
-            return VideoPlayerWidget(
-              video: widget.feed.videos[index],
-              allVideos: widget.feed.videos,  // Add this
-              currentIndex: index,            // Add this
-            );
-          },
+                // Play the video for the current page
+                _controllers[index]?.play();
+              });
+            },
+            itemBuilder: (context, index) {
+              return VideoPlayerWidget(
+                video: widget.feed.videos[index],
+                allVideos: widget.feed.videos,
+                currentIndex: index,
+              );
+            },
+          ),
         ),
-
 
         // User info overlay
         Positioned(
@@ -392,50 +411,108 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      // Text(
-                      //   '${widget.feed.user.city} • ${widget.feed.user.yoe} YOE',
-                      //   style: TextStyle(color: Colors.grey[300], fontSize: 14),
-                      // ),
                     ],
                   ),
                 ],
               ),
-
             ],
           ),
         ),
-
-
 
         // Static buttons like share, comment
         Positioned(
           right: 16,
           bottom: 120,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              IconButton(
-                icon: const Icon(Icons.favorite, color: Colors.white),
-                onPressed: () {},
+              // Like Button
+              Column(
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        height: 45,
+                        width: 45,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black.withOpacity(0.6),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.favorite, color: Colors.white),
+                        iconSize: 30,
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  const Text("Like", style: TextStyle(color: Colors.white, fontSize: 12)),
+                ],
               ),
-              const SizedBox(height: 5), // Add space here
-              IconButton(
-                icon: const Icon(Icons.comment, color: Colors.white),
-                onPressed: () {},
+              const SizedBox(height: 15), // Space between icons
+              // Comment Button
+              Column(
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        height: 45,
+                        width: 45,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black.withOpacity(0.6),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.comment, color: Colors.white),
+                        iconSize: 30,
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  const Text("Comment", style: TextStyle(color: Colors.white, fontSize: 12)),
+                ],
               ),
-              const SizedBox(height: 5), // Add space here
-              IconButton(
-                icon: const Icon(Icons.share, color: Colors.white),
-                onPressed: () {},
+              const SizedBox(height: 15), // Space between icons
+              // Share Button
+              Column(
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        height: 45,
+                        width: 45,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black.withOpacity(0.6),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.share, color: Colors.white),
+                        iconSize: 30,
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  const Text("Share", style: TextStyle(color: Colors.white, fontSize: 12)),
+                ],
               ),
             ],
           ),
         ),
 
-
         // Video tag overlay
         Positioned(
-          left: 143, // Keep this to position the container from the left edge
-          bottom: 30, // Position the container from the bottom
+          right: 143,
+          left: 143,
+          bottom: 30,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             decoration: BoxDecoration(
@@ -448,15 +525,14 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                 color: Colors.white,
                 fontSize: 14,
               ),
-              textAlign: TextAlign.center, // Center-aligns the text itself
+              textAlign: TextAlign.center,
             ),
           ),
         ),
-
-
       ],
     );
   }
+
 }
 
 class VideoPlayerWidget extends StatefulWidget {
@@ -631,7 +707,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
         if (_currentCaption != null)
           Positioned(
-            bottom: 180,
+            bottom: 160,
             left: 0, // Align the container to the left edge of the parent
             right: 0, // Align the container to the right edge of the parent
             child: Center( // Center the container within the available space
@@ -642,21 +718,22 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  _currentCaption!,
+                  _formatCaption(_currentCaption!), // Format the caption to limit 5 words per line
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.bold, // Ensures the text is bold
                   ),
                 ),
               ),
             ),
           ),
+
         // Progress bar
 
         Positioned(
-          bottom: 15,
+          bottom: 0,
           left: 0,
           right: 0,
           child: InstagramStoryProgressBar(
@@ -669,6 +746,20 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     );
   }
 }
+
+
+String _formatCaption(String caption) {
+  // Split the caption into words
+  List<String> words = caption.split(' ');
+  // Group words into lines of 5
+  List<String> lines = [];
+  for (int i = 0; i < words.length; i += 5) {
+    lines.add(words.sublist(i, i + 5 > words.length ? words.length : i + 5).join(' '));
+  }
+  // Join the lines with line breaks
+  return lines.join('\n');
+}
+
 
 Future<String?> _getValidToken() async {
   String? accessToken = await AuthService.getAuthToken();
@@ -737,7 +828,7 @@ class InstagramStoryProgressBar extends StatelessWidget {
                 isActive: true,
               )
                   : Container(
-                height: 6,
+                height: 4,
                 decoration: BoxDecoration(
                   color: index < currentIndex
                       ? Colors.white
@@ -778,7 +869,7 @@ class _ProgressBar extends StatelessWidget {
         }
 
         return Container(
-          height: 6,
+          height: 4,
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.5),
             borderRadius: BorderRadius.circular(2),

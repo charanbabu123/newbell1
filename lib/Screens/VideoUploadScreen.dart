@@ -168,6 +168,7 @@ class _FullScreenCameraState extends State<FullScreenCamera> {
           SizedBox.expand(
             child: CameraPreview(_cameraController),
           ),
+
           Positioned(
             bottom: 50,
             right: 40,

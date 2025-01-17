@@ -169,15 +169,15 @@ class _ExperienceScreenState extends State<ExperienceScreen> {
                     borderSide: const BorderSide(color: Colors.pink, width: 2),
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Experience is required";
-                  } else if (int.tryParse(value) == null ||
-                      int.parse(value) > 50) {
-                    return "Enter a valid experience (less than 50)";
-                  }
-                  return null;
-                },
+                // validator: (value) {
+                //   if (value == null || value.isEmpty) {
+                //     return "Experience is required";
+                //   } else if (int.tryParse(value) == null ||
+                //       int.parse(value) > 50) {
+                //     return "Enter a valid experience (less than 50)";
+                //   }
+                //   return null;
+                // },
               ),
               const SizedBox(height: 30),
               GestureDetector(
