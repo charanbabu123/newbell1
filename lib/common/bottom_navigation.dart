@@ -6,10 +6,10 @@ class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
 
   @override
-  _BottomNavBarState createState() => _BottomNavBarState();
+  BottomNavBarState createState() => BottomNavBarState();
 }
 
-class _BottomNavBarState extends State<BottomNavBar> {
+class BottomNavBarState extends State<BottomNavBar> {
   String profilePicUrl = '';
 
   @override
@@ -21,12 +21,14 @@ class _BottomNavBarState extends State<BottomNavBar> {
   Future<void> fetchProfilePic() async {
     try {
       final response = await http.get(
-        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/profile/'),
+        Uri.parse(
+            'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/profile/'),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          profilePicUrl = data['profile_pic'] ?? ''; // Ensure profile_pic exists
+          profilePicUrl =
+              data['profile_pic'] ?? ''; // Ensure profile_pic exists
         });
       } else {
         debugPrint('Failed to load profile picture: ${response.statusCode}');
@@ -49,7 +51,9 @@ class _BottomNavBarState extends State<BottomNavBar> {
             children: [
               IconButton(
                 padding: EdgeInsets.zero, // Remove default padding
-                icon: const Icon(Icons.home_filled, color: Colors.white, size: 26), // Adjust size to LinkedIn's icon size
+                icon: const Icon(Icons.home_filled,
+                    color: Colors.white,
+                    size: 26), // Adjust size to LinkedIn's icon size
                 onPressed: () {},
               ),
               Transform.translate(
@@ -66,7 +70,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
             children: [
               IconButton(
                 padding: EdgeInsets.zero, // Remove default padding
-                icon: const Icon(Icons.search, color: Colors.white, size: 26), // Adjust size
+                icon: const Icon(Icons.search,
+                    color: Colors.white, size: 26), // Adjust size
                 onPressed: () {},
               ),
               Transform.translate(
@@ -78,16 +83,15 @@ class _BottomNavBarState extends State<BottomNavBar> {
               ),
             ],
           ),
-
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
                 padding: EdgeInsets.zero, // Remove default padding
-                icon: const Icon(Icons.forward_to_inbox, color: Colors.white, size: 26), // Adjust size
+                icon: const Icon(Icons.forward_to_inbox,
+                    color: Colors.white, size: 26), // Adjust size
                 onPressed: () {},
               ),
-
               Transform.translate(
                 offset: const Offset(0, -5), // Move the text 5 pixels upward
                 child: const Text(
@@ -110,26 +114,27 @@ class _BottomNavBarState extends State<BottomNavBar> {
                   child: ClipOval(
                     child: profilePicUrl.isNotEmpty
                         ? Image.network(
-                      profilePicUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.person,
-                          color: Colors.grey,
-                        );
-                      },
-                    )
+                            profilePicUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Icons.person,
+                                color: Colors.grey,
+                              );
+                            },
+                          )
                         : const Icon(
-                      Icons.person,
-                      color: Colors.grey,
-                    ), // Fallback for empty profilePicUrl
+                            Icons.person,
+                            color: Colors.grey,
+                          ), // Fallback for empty profilePicUrl
                   ),
                 ),
-                const SizedBox(height: 6), // Space between profile icon and text
+                const SizedBox(
+                    height: 6), // Space between profile icon and text
                 Transform.translate(
                   offset: const Offset(0, -2), // Move the text 5 pixels upward
                   child: const Text(
-                    'Profile',
+                    'profile',
                     style: TextStyle(color: Colors.white, fontSize: 12),
                   ),
                 ),
@@ -140,5 +145,4 @@ class _BottomNavBarState extends State<BottomNavBar> {
       ),
     );
   }
-
 }

@@ -46,7 +46,8 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
   }
 
   Future<void> _submitDetails() async {
-    const String apiUrl = 'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/register/';
+    const String apiUrl =
+        'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/register/';
 
     setState(() {
       _isLoading = true;
@@ -83,9 +84,9 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
       final postResponse = await request.send();
       final response = await http.Response.fromStream(postResponse);
 
-      print('Status Code: ${response.statusCode}');
-      print('Response Headers: ${response.headers}');
-      print('Response Body: ${response.body}');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Response Headers: ${response.headers}');
+      debugPrint('Response Body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (!mounted) return;
@@ -161,15 +162,16 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                           backgroundColor: const Color(0xffffc0cb),
                           radius: 50,
                           child: _profileImage == null
-                              ? const Icon(Icons.person, size: 40, color: Colors.black)
+                              ? const Icon(Icons.person,
+                                  size: 40, color: Colors.black)
                               : ClipOval(
-                            child: Image.file(
-                              _profileImage!,
-                              fit: BoxFit.cover,
-                              width: 100.0,
-                              height: 100.0,
-                            ),
-                          ),
+                                  child: Image.file(
+                                    _profileImage!,
+                                    fit: BoxFit.cover,
+                                    width: 100.0,
+                                    height: 100.0,
+                                  ),
+                                ),
                         ),
                       ),
                       if (_profileImage == null)
@@ -230,7 +232,8 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.pink, width: 2),
+                      borderSide:
+                          const BorderSide(color: Colors.pink, width: 2),
                     ),
                   ),
                   validator: (value) {
@@ -253,11 +256,13 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                           labelStyle: const TextStyle(color: Colors.pinkAccent),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Colors.pinkAccent),
+                            borderSide:
+                                const BorderSide(color: Colors.pinkAccent),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Colors.pink, width: 2),
+                            borderSide:
+                                const BorderSide(color: Colors.pink, width: 2),
                           ),
                         ),
                       ),
@@ -272,11 +277,13 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                           labelStyle: const TextStyle(color: Colors.pinkAccent),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Colors.pinkAccent),
+                            borderSide:
+                                const BorderSide(color: Colors.pinkAccent),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Colors.pink, width: 2),
+                            borderSide:
+                                const BorderSide(color: Colors.pink, width: 2),
                           ),
                         ),
                         validator: (value) {
@@ -305,13 +312,15 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: Colors.pink, width: 2),
+                      borderSide:
+                          const BorderSide(color: Colors.pink, width: 2),
                     ),
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Email is required";
-                    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                        .hasMatch(value)) {
                       return "Enter a valid email address";
                     }
                     return null;
@@ -336,22 +345,22 @@ class _BasicDetailsScreenState extends State<BasicDetailsScreen> {
                     ),
                     child: _isLoading
                         ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        valueColor:
-                        AlwaysStoppedAnimation<Color>(Colors.white),
-                        strokeWidth: 2,
-                      ),
-                    )
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                              strokeWidth: 2,
+                            ),
+                          )
                         : const Text(
-                      "Submit",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
+                            "Submit",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                   ),
                 ),
               ],

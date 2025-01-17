@@ -1,7 +1,7 @@
 // // with progess bar
 // import 'dart:convert';
 //
-// import 'package:bell_app1/Screens/previewScreen.dart';
+// import '../..//screens/preview_screen.dart';
 // import 'package:camera/camera.dart';
 // import 'package:flutter/material.dart';
 // import 'package:file_picker/file_picker.dart';
@@ -71,7 +71,7 @@
 //     if (widget.videoPath != null) {
 //       // Assuming `sectionIndex` is valid and matches a card
 //       sections[widget.sectionIndex ?? 0].videoFile = File(widget.videoPath!);
-//       print("index in reeluploaderscreen = ${widget.sectionIndex}");
+//       debugPrint("index in reeluploaderscreen = ${widget.sectionIndex}");
 //       handleVideo(widget.sectionIndex ?? 0);
 //     }
 //   }
@@ -79,7 +79,7 @@
 //
 //
 //   Future<void> handleVideo(int index) async {
-//     print("handling video for $index");
+//     debugPrint("handling video for $index");
 //     if (sections[index].thumbnailController != null && sections[index].thumbnailController!.value.isPlaying) {
 //       return;
 //     }
@@ -178,7 +178,7 @@
 //
 //       notifyListeners();
 //     } catch (e) {
-//       print("Error handling video: $e");
+//       debugPrint("Error handling video: $e");
 //
 //       if (mounted) {
 //         setState(() {
@@ -240,12 +240,12 @@
 //         },
 //         body: jsonEncode({'reels': reelsData}),
 //       );
-//       print('Status Code: ${response.statusCode}');
-//       print('Response Headers: ${response.headers}');
-//       print('Response Body: ${response.body}');
+//       debugPrint('Status Code: ${response.statusCode}');
+//       debugPrint('Response Headers: ${response.headers}');
+//       debugPrint('Response Body: ${response.body}');
 //       if (response.statusCode == 200) {
 //         final jsonResponse = jsonDecode(response.body);
-//         print('Reels reordered successfully: $jsonResponse');
+//         debugPrint('Reels reordered successfully: $jsonResponse');
 //         ScaffoldMessenger.of(context).showSnackBar(
 //           const SnackBar(
 //             content: Text('Reels reordered successfully.'),
@@ -255,7 +255,7 @@
 //         // Navigate to the preview screen after reordering
 //         navigateToPreview();
 //       } else {
-//         print('Failed to reorder reels: ${response.statusCode}');
+//         debugPrint('Failed to reorder reels: ${response.statusCode}');
 //         ScaffoldMessenger.of(context).showSnackBar(
 //           SnackBar(
 //             content: Text('Failed to reorder reels: ${response.statusCode}'),
@@ -264,7 +264,7 @@
 //         );
 //       }
 //     } catch (e) {
-//       print('Error reordering reels: $e');
+//       debugPrint('Error reordering reels: $e');
 //       ScaffoldMessenger.of(context).showSnackBar(
 //         SnackBar(
 //           content: Text('Error reordering reels: $e'),
@@ -400,7 +400,7 @@
 //         await uploadVideo(compressedFile, index);
 //       }
 //     } catch (e) {
-//       print("Error picking or initializing video: $e");
+//       debugPrint("Error picking or initializing video: $e");
 //
 //       if (mounted) {
 //         setState(() {
@@ -456,9 +456,9 @@
 //           sections[index].videoId = jsonResponse['id'];
 //         });
 //
-//         print('Video uploaded: $jsonResponse');
+//         debugPrint('Video uploaded: $jsonResponse');
 //       } else {
-//         print('Failed to upload video: ${response.statusCode}');
+//         debugPrint('Failed to upload video: ${response.statusCode}');
 //         ScaffoldMessenger.of(context).showSnackBar(
 //           SnackBar(
 //             content: Text('Failed to upload video: ${response.statusCode}'),
@@ -467,7 +467,7 @@
 //         );
 //       }
 //     } catch (e) {
-//       print('Error uploading video: $e');
+//       debugPrint('Error uploading video: $e');
 //       ScaffoldMessenger.of(context).showSnackBar(
 //         SnackBar(
 //           content: Text('Error uploading video: $e'),
@@ -526,7 +526,7 @@
 //           'Authorization': 'Bearer $token',
 //         },
 //       );
-//       print('Status Code: ${response.statusCode}');
+//       debugPrint('Status Code: ${response.statusCode}');
 //       if (response.statusCode == 204) {
 //         // Successfully deleted
 //         setState(() {
@@ -536,9 +536,9 @@
 //           sections[index].videoId = null; // Reset the video ID
 //         });
 //
-//         print('Video deleted successfully');
+//         debugPrint('Video deleted successfully');
 //       } else {
-//         print('Failed to delete video: ${response.statusCode}');
+//         debugPrint('Failed to delete video: ${response.statusCode}');
 //         ScaffoldMessenger.of(context).showSnackBar(
 //           SnackBar(
 //             content: Text('Failed to delete video: ${response.statusCode}'),
@@ -547,7 +547,7 @@
 //         );
 //       }
 //     } catch (e) {
-//       print('Error deleting video: $e');
+//       debugPrint('Error deleting video: $e');
 //       ScaffoldMessenger.of(context).showSnackBar(
 //         SnackBar(
 //           content: Text('Error deleting video: $e'),

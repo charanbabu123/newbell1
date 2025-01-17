@@ -5,12 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-import '../Screens/BasicDetailsScreen.dart';
-import '../Screens/feedscreen.dart';
-import '../Screens/name.dart';
+import '../screens/feed_screen.dart';
+import '../screens/name.dart';
 import '../services/auth_service.dart';
-
 
 class OtpScreen extends StatefulWidget {
   final String phoneNumber;
@@ -20,9 +17,9 @@ class OtpScreen extends StatefulWidget {
   State<OtpScreen> createState() => _OtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen>  {
+class _OtpScreenState extends State<OtpScreen> {
   final List<TextEditingController> _controllers =
-  List.generate(4, (index) => TextEditingController());
+      List.generate(4, (index) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(4, (index) => FocusNode());
   String enteredOtp = "";
   String? _errorMessage;
@@ -40,11 +37,6 @@ class _OtpScreenState extends State<OtpScreen>  {
     });
   }
 
-
-
-  @override
-
-
   Future<bool> checkFirstTimeUser() async {
     try {
       final response = await http.post(
@@ -56,11 +48,11 @@ class _OtpScreenState extends State<OtpScreen>  {
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
-        return jsonResponse['exists'] && jsonResponse['has_profile'] ?? false;
+        return jsonResponse['exists'] && jsonResponse['has_profile'];
       }
       return true;
     } catch (error) {
-      print("Error checking first time user: $error");
+      debugPrint("Error checking first time user: $error");
       return true;
     }
   }
@@ -113,30 +105,30 @@ class _OtpScreenState extends State<OtpScreen>  {
                   ),
                   child: isLoading
                       ? const CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2.0,
-                  )
+                          color: Colors.white,
+                          strokeWidth: 2.0,
+                        )
                       : isSuccess
-                      ? const Icon(
-                    Icons.check_circle,
-                    color: Colors.white,
-                    size: 30,
-                  )
-                      : isError
-                      ? const Icon(
-                    Icons.close_rounded,
-                    color: Colors.white,
-                    size: 30,
-                  )
-                      : Text(
-                    "Verify OTP",
-                    style: TextStyle(
-                      color: _isOtpComplete()
-                          ? Colors.white
-                          : Colors.black38,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                          ? const Icon(
+                              Icons.check_circle,
+                              color: Colors.white,
+                              size: 30,
+                            )
+                          : isError
+                              ? const Icon(
+                                  Icons.close_rounded,
+                                  color: Colors.white,
+                                  size: 30,
+                                )
+                              : Text(
+                                  "Verify OTP",
+                                  style: TextStyle(
+                                    color: _isOtpComplete()
+                                        ? Colors.white
+                                        : Colors.black38,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
                 ),
               ),
             ],
@@ -182,9 +174,9 @@ class _OtpScreenState extends State<OtpScreen>  {
         }),
       );
 
-      print('Status Code: ${response.statusCode}');
-      print('Response Body: ${response.body}');
-      print('existing_user : $isNewUser ');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Response Body: ${response.body}');
+      debugPrint('existing_user : $isNewUser ');
       final jsonResponse = jsonDecode(response.body);
       final sessionId = jsonResponse['sessionId'];
       final accessToken = jsonResponse['tokens']['access'];
@@ -212,9 +204,9 @@ class _OtpScreenState extends State<OtpScreen>  {
               context,
               MaterialPageRoute(
                 builder: (context) =>
-                isNewUser! ? const FeedScreen() : const NameScreen(),
+                    isNewUser! ? const FeedScreen() : const NameScreen(),
               ),
-                  (route) => false,
+              (route) => false,
             );
           });
         }
@@ -233,7 +225,7 @@ class _OtpScreenState extends State<OtpScreen>  {
         isError = true;
         _errorMessage = "Something went wrong. Please try again later.";
       });
-      print("Error occurred: $error");
+      debugPrint("Error occurred: $error");
       _showSnackbar(_errorMessage!);
     }
   }
@@ -303,7 +295,7 @@ class _OtpScreenState extends State<OtpScreen>  {
 
   @override
   void dispose() {
-   //
+    //
     for (var controller in _controllers) {
       controller.dispose();
     }

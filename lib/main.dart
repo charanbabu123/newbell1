@@ -1,26 +1,34 @@
-import 'package:bell_app1/Profile/UserProfileScreen.dart';
-import 'package:bell_app1/Screens/feedscreen.dart';
-import 'package:bell_app1/login/LoginPhoneScreen.dart';
-import 'package:bell_app1/splash/Splash.dart';
+import '../../profile/user_profile_screen.dart';
+import '../../providers/video_section_provider.dart';
+import '../../screens/feed_screen.dart';
+import '../../login/login_phone_screen.dart';
+import '../../splash/splash.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'Screens/BasicDetailsScreen.dart';
+import 'package:provider/provider.dart';
 
-import 'Screens/ReeluploaderScreen.dart';
-import 'Screens/name.dart';
-import 'login/OtpScreen.dart';
-import 'Screens/VideoUploadScreen.dart';
-import 'splash/ProductTourScreen.dart';
+import 'screens/reel_uploader_screen.dart';
+import 'screens/name.dart';
+import 'login/otp_screen.dart';
+import 'splash/product_tour_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final cameras = await availableCameras();
-  runApp(MyApp(cameras: cameras));
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => VideoSectionsProvider()),
+      ],
+      child: MyApp(
+        cameras: cameras,
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   final List<CameraDescription> cameras;
-  
 
   const MyApp({super.key, required this.cameras});
 
@@ -35,19 +43,18 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) =>  const SplashScreen(),
+        '/': (context) => const SplashScreen(),
         '/tour': (context) => const ProductTourScreen(),
         '/login': (context) => const LoginPhoneScreen(),
         '/otp': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>;
           return OtpScreen(phoneNumber: args['phoneNumber']);
         },
-
         '/details': (context) => const NameScreen(),
         '/reel': (context) => const ReelUploaderScreen(),
         '/feed': (context) => const FeedScreen(),
         '/profile': (context) => const UserProfileScreen(),
-
       },
     );
   }

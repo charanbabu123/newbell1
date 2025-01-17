@@ -1,31 +1,32 @@
 import 'package:flutter/material.dart';
-import 'city.dart';
 
-class NameScreen extends StatefulWidget {
-  const NameScreen({Key? key}) : super(key: key);
+import 'email.dart';
+
+class CityScreen extends StatefulWidget {
+  final String name;
+  const CityScreen({super.key, required this.name});
 
   @override
-  _NameScreenState createState() => _NameScreenState();
+  _CityScreenState createState() => _CityScreenState();
 }
 
-class _NameScreenState extends State<NameScreen> {
-  final TextEditingController nameController = TextEditingController();
+class _CityScreenState extends State<CityScreen> {
+  final TextEditingController cityController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final FocusNode _nameFocusNode = FocusNode();
+  final FocusNode _cityFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    // Request focus when the screen is loaded
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context).requestFocus(_nameFocusNode);
+      FocusScope.of(context).requestFocus(_cityFocusNode);
     });
   }
 
   @override
   void dispose() {
-    nameController.dispose();
-    _nameFocusNode.dispose();  // Dispose the FocusNode
+    cityController.dispose();
+    _cityFocusNode.dispose();
     super.dispose();
   }
 
@@ -34,19 +35,19 @@ class _NameScreenState extends State<NameScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F8F7),
       appBar: AppBar(
-        title: const Text("Name"),
+        title: const Text("City"),
         centerTitle: true,
         elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(45.0),
+        padding: const EdgeInsets.all(43.0),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                "What's your name?",
+                "Which city do you live in?",
                 style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -54,10 +55,10 @@ class _NameScreenState extends State<NameScreen> {
               ),
               const SizedBox(height: 15),
               TextFormField(
-                controller: nameController,
-                focusNode: _nameFocusNode,  // Attach the FocusNode
+                focusNode: _cityFocusNode,
+                controller: cityController,
                 decoration: InputDecoration(
-                  labelText: "Name",
+                  labelText: "City",
                   labelStyle: const TextStyle(color: Colors.pinkAccent),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -68,21 +69,22 @@ class _NameScreenState extends State<NameScreen> {
                     borderSide: const BorderSide(color: Colors.pink, width: 2),
                   ),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Name is required";
-                  } else if (value.length < 2) {
-                    return "Name must be at least 2 characters long";
-                  }
-                  return null;
-                },
+                // validator: (value) {
+                //   if (value == null || value.isEmpty) {
+                //     return "City is required";
+                //   }
+                //   return null;
+                // },
               ),
               const SizedBox(height: 30),
               GestureDetector(
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => CityScreen(name: nameController.text),
+                      builder: (context) => EmailScreen(
+                        name: widget.name,
+                        city: cityController.text,
+                      ),
                     ));
                   }
                 },
@@ -98,6 +100,38 @@ class _NameScreenState extends State<NameScreen> {
                   ),
                   child: const Text(
                     "Next",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              GestureDetector(
+                onTap: () {
+                  if (_formKey.currentState!.validate()) {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => EmailScreen(
+                        name: widget.name,
+                        city: cityController.text,
+                      ),
+                    ));
+                  }
+                },
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 15),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Colors.pink, Colors.pinkAccent],
+                    ),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Text(
+                    "Skip",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

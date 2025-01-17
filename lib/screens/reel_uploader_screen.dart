@@ -1,48 +1,21 @@
-// with progess bar
+// with progress bar
 import 'dart:convert';
-
-import 'package:bell_app1/Screens/previewScreen.dart';
+import '../../screens/preview_screen.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'dart:io';
 import 'package:video_compress/video_compress.dart';
 import 'package:http/http.dart' as http;
 import '../common/common_widgets.dart';
+import '../models/video_section.dart';
+import '../providers/video_section_provider.dart';
 import '../services/auth_service.dart';
-import 'VideoUploadScreen.dart';
+import 'full_screen_camera_screen.dart';
 
-class VideoSection {
-  final String label;
-  File? videoFile;
-  VideoPlayerController? thumbnailController;
-  List<String>? captions;
-  bool isLoading = false;
-  double uploadProgress = 0.0;
-  bool isProcessing = false;
-  String processingTime = '';
-  int? videoId;
-  String? errorMessage; // New property to store error messages
-
-  VideoSection({
-    required this.label,
-    this.videoFile,
-    this.thumbnailController,
-    this.captions,
-    this.videoId,
-    this.errorMessage,
-  });
-
-  void updateCaptions(List<String> newCaptions) {
-    captions = newCaptions.toList();
-  }
-
-  void clearCaptions() {
-    captions = null;
-  }
-}
 class ReelUploaderScreen extends StatefulWidget {
   const ReelUploaderScreen({
     super.key,
@@ -50,7 +23,6 @@ class ReelUploaderScreen extends StatefulWidget {
     this.showAppBar = true,
     this.showSkip = true,
     this.sectionIndex,
-
   });
   final String? videoPath;
   final bool showAppBar, showSkip;
@@ -84,25 +56,45 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
     super.initState();
     //Refresh token
     AuthService.refreshToken();
+
     if (widget.videoPath != null) {
       // Assuming `sectionIndex` is valid and matches a card
       sections[widget.sectionIndex ?? 0].videoFile = File(widget.videoPath!);
-      print("index in reeluploaderscreen = ${widget.sectionIndex}");
+      debugPrint("index in reeluploaderscreen = ${widget.sectionIndex}");
       handleVideo(widget.sectionIndex ?? 0);
+    }
+
+    // Reinitialize controllers for existing videos
+    reinitializeControllers();
+  }
+
+  void reinitializeControllers() {
+    for (var section in sections) {
+      if (section.videoFile != null &&
+          (section.thumbnailController == null ||
+              !section.thumbnailController!.value.isInitialized)) {
+        section.thumbnailController =
+            VideoPlayerController.file(section.videoFile!);
+        section.thumbnailController!.initialize().then((_) {
+          if (mounted) {
+            setState(() {});
+          }
+        });
+      }
     }
   }
 
-
-
   Future<void> handleVideo(int index) async {
-    print("handling video for $index");
-    if (sections[index].thumbnailController != null && sections[index].thumbnailController!.value.isPlaying) {
+    debugPrint("handling video for $index");
+    if (sections[index].thumbnailController != null &&
+        sections[index].thumbnailController!.value.isPlaying) {
       return;
     }
 
     try {
       File videoFile = sections[index].videoFile!;
-      final VideoPlayerController tempController = VideoPlayerController.file(videoFile);
+      final VideoPlayerController tempController =
+          VideoPlayerController.file(videoFile);
       await tempController.initialize();
       final int videoDuration = tempController.value.duration.inSeconds;
       tempController.dispose();
@@ -111,7 +103,8 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
         // Show a SnackBar message if the video duration is less than 10 seconds
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Please upload a video which is greater than 10 seconds'),
+            content:
+                Text('Please upload a video which is greater than 10 seconds'),
             backgroundColor: Colors.red,
           ),
         );
@@ -144,7 +137,8 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
       }
 
       if (videoFile.lengthSync() < 5 * 1024 * 1024) {
-        VideoPlayerController controller = VideoPlayerController.file(videoFile);
+        VideoPlayerController controller =
+            VideoPlayerController.file(videoFile);
         await controller.initialize();
 
         await Future.delayed(Duration(seconds: estimatedDuration));
@@ -173,7 +167,8 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
 
       File compressedFile = File(compressedVideo.file!.path);
 
-      VideoPlayerController controller = VideoPlayerController.file(compressedFile);
+      VideoPlayerController controller =
+          VideoPlayerController.file(compressedFile);
       await controller.initialize();
 
       await Future.delayed(Duration(seconds: estimatedDuration));
@@ -192,7 +187,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
       // Make the API call to upload the video
       await uploadVideo(compressedFile, index);
     } catch (e) {
-      print("Error handling video: $e");
+      debugPrint("Error handling video: $e");
 
       if (mounted) {
         setState(() {
@@ -216,7 +211,8 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
             setState(() {
               _selectedVideos.add(video);
             });
-          },sectionIndex: index,
+          },
+          sectionIndex: index,
         ),
       ),
     );
@@ -238,26 +234,27 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
     final List<Map<String, dynamic>> reelsData = sections
         .where((section) => section.videoId != null)
         .map((section) => {
-      'id': section.videoId,
-      'position': sections.indexOf(section),
-    })
+              'id': section.videoId,
+              'position': sections.indexOf(section),
+            })
         .toList();
 
     try {
       final response = await http.post(
-        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/videos/reorder/'),
+        Uri.parse(
+            'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/videos/reorder/'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
         body: jsonEncode({'reels': reelsData}),
       );
-      print('Status Code: ${response.statusCode}');
-      print('Response Headers: ${response.headers}');
-      print('Response Body: ${response.body}');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Response Headers: ${response.headers}');
+      debugPrint('Response Body: ${response.body}');
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
-        print('Reels reordered successfully: $jsonResponse');
+        debugPrint('Reels reordered successfully: $jsonResponse');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Reels reordered successfully.'),
@@ -267,7 +264,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
         // Navigate to the preview screen after reordering
         navigateToPreview();
       } else {
-        print('Failed to reorder reels: ${response.statusCode}');
+        debugPrint('Failed to reorder reels: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to reorder reels: ${response.statusCode}'),
@@ -276,22 +273,23 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
         );
       }
     } catch (e) {
-      print('Error reordering reels: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error reordering reels: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      debugPrint('Error reordering reels: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error reordering reels: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
-
   void navigateToPreview() {
-    List<String> videoPaths = sections
-        .where((section) => section.videoFile != null)
-        .map((section) => section.videoFile!.path)
-        .toList();
+    // List<String> videoPaths = sections
+    //     .where((section) => section.videoFile != null)
+    //     .map((section) => section.videoFile!.path)
+    //     .toList();
 
     Navigator.push(
       context,
@@ -300,7 +298,6 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
       ),
     );
   }
-
 
   Future<void> pickVideo(int index) async {
     if (sections[index].thumbnailController != null &&
@@ -324,13 +321,15 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
 
         if (videoDuration < 10) {
           // Show a SnackBar message if the video duration is less than 10 seconds
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  'Please upload a video which is greater than 10 seconds'),
-              backgroundColor: Colors.red,
-            ),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                    'Please upload a video which is greater than 10 seconds'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
           return;
         }
 
@@ -375,6 +374,8 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
               sections[index].isProcessing = false;
               sections[index].processingTime = '';
               sections[index].uploadProgress = 0.0;
+              Provider.of<VideoSectionsProvider>(context, listen: false)
+                  .updateVideo(index, videoFile);
             });
           }
         }
@@ -412,7 +413,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
         await uploadVideo(compressedFile, index);
       }
     } catch (e) {
-      print("Error picking or initializing video: $e");
+      debugPrint("Error picking or initializing video: $e");
 
       if (mounted) {
         setState(() {
@@ -425,16 +426,18 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
     }
   }
 
-
   Future<void> uploadVideo(File videoFile, int index) async {
     final String? token = await AuthService.getAuthToken();
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Authentication token not found. Please log in again.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('Authentication token not found. Please log in again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
@@ -468,9 +471,9 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
           sections[index].videoId = jsonResponse['id'];
         });
 
-        print('Video uploaded: $jsonResponse');
+        debugPrint('Video uploaded: $jsonResponse');
       } else {
-        print('Failed to upload video: ${response.statusCode}');
+        debugPrint('Failed to upload video: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to upload video: ${response.statusCode}'),
@@ -479,7 +482,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
         );
       }
     } catch (e) {
-      print('Error uploading video: $e');
+      debugPrint('Error uploading video: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error uploading video: $e'),
@@ -519,12 +522,15 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
 
     final String? token = await AuthService.getAuthToken();
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Authentication token not found. Please log in again.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('Authentication token not found. Please log in again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
@@ -538,7 +544,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
           'Authorization': 'Bearer $token',
         },
       );
-      print('Status Code: ${response.statusCode}');
+      debugPrint('Status Code: ${response.statusCode}');
       if (response.statusCode == 204) {
         // Successfully deleted
         setState(() {
@@ -548,9 +554,9 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
           sections[index].videoId = null; // Reset the video ID
         });
 
-        print('Video deleted successfully');
+        debugPrint('Video deleted successfully');
       } else {
-        print('Failed to delete video: ${response.statusCode}');
+        debugPrint('Failed to delete video: ${response.statusCode}');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to delete video: ${response.statusCode}'),
@@ -559,7 +565,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
         );
       }
     } catch (e) {
-      print('Error deleting video: $e');
+      debugPrint('Error deleting video: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Error deleting video: $e'),
@@ -627,9 +633,9 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
   }
 
   Widget buildVideoSection(int index) {
+    final sections = Provider.of<VideoSectionsProvider>(context).sections;
     VideoSection section = sections[index];
-    bool isPreviousVideoUploaded =
-        index == 0 || sections[index - 1].videoFile != null;
+    //bool isPreviousVideoUploaded = index == 0 || sections[index - 1].videoFile != null;
 
     return Card(
       elevation: 4,
@@ -679,33 +685,37 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   Expanded(
                     child: section.captions != null
                         ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (int i = 0; i < section.captions!.length; i++)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Text(
-                              "Caption ${i + 1}: ${section.captions![i]}",
-                              style: const TextStyle(color: Colors.pink),
-                              maxLines: 5, // Limit to two lines
-                              overflow: TextOverflow.ellipsis, // Adds ellipsis if text exceeds two lines
-                              softWrap: true, // Ensures text wraps if it exceeds one line
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (int i = 0; i < section.captions!.length; i++)
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 4.0),
+                                  child: Text(
+                                    "Caption ${i + 1}: ${section.captions![i]}",
+                                    style: const TextStyle(color: Colors.pink),
+                                    maxLines: 5, // Limit to two lines
+                                    overflow: TextOverflow
+                                        .ellipsis, // Adds ellipsis if text exceeds two lines
+                                    softWrap:
+                                        true, // Ensures text wraps if it exceeds one line
+                                  ),
+                                ),
+
+                              const SizedBox(
+                                  width: 60.0), // Adjust spacing here
+                            ],
+                          )
+                        : TextButton.icon(
+                            onPressed: () {
+                              _showCaptionDialog(section, index, isEdit: false);
+                            },
+                            icon: const Icon(Icons.add, color: Colors.pink),
+                            label: const Text(
+                              'Add Captions',
+                              style: TextStyle(color: Colors.pink),
                             ),
                           ),
-
-                        const SizedBox(width: 60.0), // Adjust spacing here
-                      ],
-                    )
-                        : TextButton.icon(
-                      onPressed: () {
-                        _showCaptionDialog(section, index, isEdit: false);
-                      },
-                      icon: const Icon(Icons.add, color: Colors.pink),
-                      label: const Text(
-                        'Add Captions',
-                        style: TextStyle(color: Colors.pink),
-                      ),
-                    ),
                   ),
                   //const Spacer(),
                   Column(
@@ -731,7 +741,6 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   ),
                 ],
               ),
-
             ] else if (section.isProcessing) ...[
               Text(
                 section.processingTime,
@@ -766,7 +775,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   Expanded(
                     flex: 2,
                     child: CommonWidgets.recordVideoButton(
-                    onPressed: () => _openCamera(index),
+                      onPressed: () => _openCamera(index),
                     ),
                   ),
                 ],
@@ -776,24 +785,27 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
         ),
       ),
     );
-
   }
-  void _showCaptionDialog(VideoSection section, int index, {required bool isEdit}) {
+
+  void _showCaptionDialog(VideoSection section, int index,
+      {required bool isEdit}) {
+    final provider = Provider.of<VideoSectionsProvider>(context, listen: false);
     final TextEditingController caption1Controller =
-    TextEditingController(text: section.captions?.elementAt(0) ?? '');
+        TextEditingController(text: section.captions?.elementAt(0) ?? '');
     final TextEditingController caption2Controller =
-    TextEditingController(text: section.captions?.elementAt(1) ?? '');
+        TextEditingController(text: section.captions?.elementAt(1) ?? '');
     final TextEditingController caption3Controller =
-    TextEditingController(text: section.captions?.elementAt(2) ?? '');
+        TextEditingController(text: section.captions?.elementAt(2) ?? '');
 
     if (isEdit && section.captions != null) {
       caption1Controller.text = section.captions![0];
       caption2Controller.text = section.captions![1];
       caption3Controller.text = section.captions![2];
     }
-    final int videoDuration = section.thumbnailController?.value.duration.inSeconds ?? 60; // Default 60 seconds
+    final int videoDuration =
+        section.thumbnailController?.value.duration.inSeconds ??
+            60; // Default 60 seconds
     final List<String> intervals = _getCaptionIntervals(videoDuration, 3);
-
 
     showDialog(
       context: context,
@@ -806,7 +818,9 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
               TextField(
                 controller: caption1Controller,
                 decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty ? 'Caption 1 (${intervals[0]}) *' : 'Caption 1 *',
+                  labelText: intervals.isNotEmpty
+                      ? 'Caption 1 (${intervals[0]}) *'
+                      : 'Caption 1 *',
                   errorText: section.errorMessage,
                   labelStyle: const TextStyle(color: Colors.pink),
                   enabledBorder: const UnderlineInputBorder(
@@ -816,12 +830,15 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                     borderSide: BorderSide(color: Colors.pink),
                   ),
                 ),
-                style: const TextStyle(fontSize: 14), // Adjust font size to fit within 3 rows
-        ),
+                style: const TextStyle(
+                    fontSize: 14), // Adjust font size to fit within 3 rows
+              ),
               TextField(
                 controller: caption2Controller,
                 decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty ? 'Caption 2 (${intervals[1]}) *' : 'Caption 2 *',
+                  labelText: intervals.isNotEmpty
+                      ? 'Caption 2 (${intervals[1]}) *'
+                      : 'Caption 2 *',
                   errorText: section.errorMessage,
                   labelStyle: const TextStyle(color: Colors.pink),
                   enabledBorder: const UnderlineInputBorder(
@@ -835,7 +852,9 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
               TextField(
                 controller: caption3Controller,
                 decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty ? 'Caption 3 (${intervals[2]}) *' : 'Caption 3 *',
+                  labelText: intervals.isNotEmpty
+                      ? 'Caption 3 (${intervals[2]}) *'
+                      : 'Caption 3 *',
                   errorText: section.errorMessage,
                   labelStyle: const TextStyle(color: Colors.pink),
                   enabledBorder: const UnderlineInputBorder(
@@ -846,7 +865,6 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   ),
                 ),
               ),
-
             ],
           ),
           actions: [
@@ -858,6 +876,12 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                     caption1Controller.text.split(' ').length > 20 ||
                     caption2Controller.text.split(' ').length > 20 ||
                     caption3Controller.text.split(' ').length > 20) {
+                  final captions = [
+                    caption1Controller.text,
+                    caption2Controller.text,
+                    caption3Controller.text,
+                  ].where((caption) => caption.isNotEmpty).toList();
+                  provider.updateCaptions(index, captions);
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -877,14 +901,13 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
 
                 try {
                   // Call API to upload captions only on first submission
-                    await uploadCaptions(newCaptions, section.videoId.toString());
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Captions added successfully'),
-                        backgroundColor: Colors.pink,
-                      ),
-                    );
-
+                  await uploadCaptions(newCaptions, section.videoId.toString());
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Captions added successfully'),
+                      backgroundColor: Colors.pink,
+                    ),
+                  );
 
                   // Update local state
                   setState(() {
@@ -908,6 +931,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
       },
     );
   }
+
   List<String> _getCaptionIntervals(int videoDuration, int segmentCount) {
     int segmentLength = (videoDuration / segmentCount).ceil();
     List<String> intervals = [];
@@ -915,42 +939,32 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
       int start = i * segmentLength;
       int end = (i + 1) * segmentLength;
       if (end > videoDuration) end = videoDuration;
-      intervals.add('$start-${end} seconds');
+      intervals.add('$start-$end seconds');
     }
     return intervals;
   }
-
-
-
 
   void skipToNext() {
     Navigator.of(context, rootNavigator: true).pushNamed("/feed");
   }
 
   @override
-  void dispose() {
-    for (var section in sections) {
-      section.thumbnailController?.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    sections = Provider.of<VideoSectionsProvider>(context).sections;
     return Scaffold(
       backgroundColor: Colors.pink[50],
       appBar: widget.showAppBar
           ? AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: Colors.pink,
-        leading: BackButton(
-          color: Colors.white,  // Makes it invisible
-          onPressed: () => SystemNavigator.pop(),
-        ),
-        title: const Text("Create Your Video Resume",
-            style: TextStyle(color: Colors.white)),
-        centerTitle: true,
-      )
+              automaticallyImplyLeading: false,
+              backgroundColor: Colors.pink,
+              leading: BackButton(
+                color: Colors.white, // Makes it invisible
+                onPressed: () => SystemNavigator.pop(),
+              ),
+              title: const Text("Create Your Video Resume",
+                  style: TextStyle(color: Colors.white)),
+              centerTitle: true,
+            )
           : null,
       body: Column(
         children: [
@@ -975,15 +989,16 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                 ElevatedButton(
                   onPressed: allVideosUploaded ? reorderReels : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: allVideosUploaded ? Colors.pink : Colors.grey,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                    backgroundColor:
+                        allVideosUploaded ? Colors.pink : Colors.grey,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 30, vertical: 15),
                   ),
                   child: const Text(
                     "Preview Your Reel",
                     style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
                 ),
-
                 const SizedBox(width: 20),
                 widget.showSkip
                     ? TextButton(
