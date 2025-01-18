@@ -92,8 +92,6 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
     }
   }
 
-
-
   Future<void> handleVideo(int index) async {
     print("handling video for $index");
     if (sections[index].thumbnailController != null && sections[index].thumbnailController!.value.isPlaying) {
@@ -684,14 +682,25 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                         for (int i = 0; i < section.captions!.length; i++)
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: Text(
-                              "Caption ${i + 1}: ${section.captions![i]}",
-                              style: const TextStyle(color: Colors.pink),
-                              maxLines: 5, // Limit to two lines
-                              overflow: TextOverflow.ellipsis, // Adds ellipsis if text exceeds two lines
+                            child: RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "Caption ${i + 1}: ",
+                                    style: const TextStyle(color: Colors.pink), // Pink color for "Caption ${i + 1}:"
+                                  ),
+                                  TextSpan(
+                                    text: section.captions![i],
+                                    style: const TextStyle(color: Colors.black), // Black color for the actual caption
+                                  ),
+                                ],
+                              ),
+                              maxLines: 5,
+                              overflow: TextOverflow.ellipsis, // Adds ellipsis if text exceeds the limit
                               softWrap: true, // Ensures text wraps if it exceeds one line
                             ),
                           ),
+
 
                         const SizedBox(width: 60.0), // Adjust spacing here
                       ],
@@ -806,7 +815,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
               TextField(
                 controller: caption1Controller,
                 decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty ? 'Caption 1 (${intervals[0]}) *' : 'Caption 1 *',
+                  labelText: intervals.isNotEmpty ? 'Caption 1 (${intervals[0]}) ' : 'Caption 1 ',
                   errorText: section.errorMessage,
                   labelStyle: const TextStyle(color: Colors.pink),
                   enabledBorder: const UnderlineInputBorder(
@@ -821,7 +830,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
               TextField(
                 controller: caption2Controller,
                 decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty ? 'Caption 2 (${intervals[1]}) *' : 'Caption 2 *',
+                  labelText: intervals.isNotEmpty ? 'Caption 2 (${intervals[1]}) ' : 'Caption 2 ',
                   errorText: section.errorMessage,
                   labelStyle: const TextStyle(color: Colors.pink),
                   enabledBorder: const UnderlineInputBorder(
@@ -835,7 +844,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
               TextField(
                 controller: caption3Controller,
                 decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty ? 'Caption 3 (${intervals[2]}) *' : 'Caption 3 *',
+                  labelText: intervals.isNotEmpty ? 'Caption 3 (${intervals[2]}) ' : 'Caption 3 ',
                   errorText: section.errorMessage,
                   labelStyle: const TextStyle(color: Colors.pink),
                   enabledBorder: const UnderlineInputBorder(
@@ -852,17 +861,15 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
           actions: [
             TextButton(
               onPressed: () async {
-                if (caption1Controller.text.isEmpty ||
-                    caption2Controller.text.isEmpty ||
-                    caption3Controller.text.isEmpty ||
-                    caption1Controller.text.split(' ').length > 20 ||
-                    caption2Controller.text.split(' ').length > 20 ||
-                    caption3Controller.text.split(' ').length > 20) {
+                if (
+                    caption1Controller.text.length > 100 || // Change to character limit
+                    caption2Controller.text.length > 100 || // Change to character limit
+                    caption3Controller.text.length > 100) { // Change to character limit
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
-                          'Each caption must be less than 20 words and all fields are mandatory'),
+                          'Each caption must be less than 100 characters'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -877,14 +884,13 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
 
                 try {
                   // Call API to upload captions only on first submission
-                    await uploadCaptions(newCaptions, section.videoId.toString());
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Captions added successfully'),
-                        backgroundColor: Colors.pink,
-                      ),
-                    );
-
+                  await uploadCaptions(newCaptions, section.videoId.toString());
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Captions added successfully'),
+                      backgroundColor: Colors.pink,
+                    ),
+                  );
 
                   // Update local state
                   setState(() {

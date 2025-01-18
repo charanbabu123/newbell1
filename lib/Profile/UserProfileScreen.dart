@@ -89,15 +89,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
         final data = json.decode(response.body);
         setState(() {
           final user = data['user'];
-          username = user['name'] ?? "Unknown";
-          bio = user['bio'] ?? "unknown";
+          username = user['name'] ?? "";
+          bio = user['bio'] ?? "";
           email = user['email'] ?? "Unknown";
-          city = user['city'] ?? "Unknown";
+          city = user['city'] ?? "";
           userProfilePicture = user['profile_picture'];
           yoe = user['yoe'] ?? 0;
           videos = (data['videos'] as List)
               .map((video) => VideoModel.fromJson(video))
               .toList();
+
           isLoading = false;
         });
       } else {
@@ -802,7 +803,29 @@ class VideoGridSection extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              //_buildThumbnail(video.thumbnail),
+              _buildThumbnail(video.thumbnail),
+              if (video.tag != null) // Check if tag exists
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      video.tag!, // Display the tag
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ),
               Positioned(
                 bottom: 8,
                 right: 8,
@@ -812,21 +835,14 @@ class VideoGridSection extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.grey
-                        .withOpacity(0.7),
+                    color: Colors.grey.withOpacity(0.7),
                     borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Text(
-                    _formatDuration(video.duration.toInt()),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
                   ),
                 ),
               ),
             ],
           ),
+
         );
       },
     );
@@ -896,7 +912,39 @@ class _SwipeableVideoViewState extends State<SwipeableVideoView> {
         }
         return Padding(
           padding: const EdgeInsets.all(4.0), // Add padding around each card
-          child: VideoPlayerScreen(video: video),
+          child: AspectRatio(
+            aspectRatio: 9 / 16, // Ensure 9:16 aspect ratio for each thumbnail
+            child: Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8), // Optional: Rounded corners
+                  child: VideoPlayerScreen(video: video), // Your existing video player screen
+                ),
+                if (video.tag != null) // Only display the tag if it exists
+                  Positioned(
+                    top: 8,
+                    left: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        video.tag!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         );
       },
     );

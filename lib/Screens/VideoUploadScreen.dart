@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:bell_app1/common/common_widgets.dart';
 import 'package:camera/camera.dart';
@@ -59,10 +60,23 @@ class _FullScreenCameraState extends State<FullScreenCamera> {
 
 
   Future<void> _initializeCamera(CameraDescription cameraDescription) async {
-    _cameraController =
-        CameraController(cameraDescription, ResolutionPreset.high);
-    await _cameraController.initialize();
-    setState(() {});
+    _cameraController = CameraController(
+      cameraDescription,
+      ResolutionPreset.high,
+      enableAudio: true,
+    );
+
+    try {
+      await _cameraController.initialize();
+      if (cameraDescription.lensDirection == CameraLensDirection.front) {
+        await _cameraController.prepareForVideoRecording();
+        // Set the video orientation for front camera
+        await _cameraController.lockCaptureOrientation(DeviceOrientation.portraitUp);
+      }
+      setState(() {});
+    } catch (e) {
+      print('Error initializing camera: $e');
+    }
   }
 
   void _startRecording() async {

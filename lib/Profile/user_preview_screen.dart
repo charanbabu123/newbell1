@@ -141,73 +141,70 @@ class _PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
           children: [
             Row(
               children: [
-                if (profileData?['profile_picture'] == null)
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.pink.shade100, // Light pink background
-                    child: profileData?['profile_picture'] != null &&
-                        profileData!['profile_picture'].isNotEmpty
-                        ? ClipOval(
-                      child: Image.network(
-                        profileData!['profile_picture'],
-                        fit: BoxFit.cover,
-                        width: 40,
-                        height: 40,
-                        errorBuilder: (context, error, stackTrace) {
-                          // Show icon if image fails to load
-                          return Icon(
-                            Icons.person,
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: Colors.pink.shade100, // Light pink background
+                  child: profileData != null && profileData?['profile_picture'] != null && profileData?['profile_picture'].isNotEmpty
+                      ? ClipOval(
+                    child: Image.network(
+                      profileData?['profile_picture'],
+                      fit: BoxFit.cover,
+                      width: 40,
+                      height: 40,
+                      errorBuilder: (context, error, stackTrace) {
+                        // Show icon if image fails to load
+                        return Icon(
+                          Icons.person,
+                          color: Colors.pink.shade400,
+                          size: 20,
+                        );
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                                : null,
+                            strokeWidth: 2.0,
                             color: Colors.pink.shade400,
-                            size: 20,
-                          );
-                        },
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                                  : null,
-                              strokeWidth: 2.0,
-                              color: Colors.pink.shade400,
-                            ),
-                          );
-                        },
-                      ),
-                    )
-                        : Icon(
-                      Icons.person,
-                      color: Colors.pink.shade400,
-                      size: 20,
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                      : Icon(
+                    Icons.person,
+                    color: Colors.pink.shade400,
+                    size: 20,
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+                Transform.translate(
+                  offset: const Offset(4, -9), // 20 pixels right, 10 pixels down
+                  child: Text(
+                    profileData?['name'] ?? '',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold, // Added to make the font bold
+                      shadows: [
+                        Shadow(
+                          blurRadius: 4.0,
+                          color: Colors.black,
+                          offset: Offset(1.0, 1.0),
+                        ),
+                      ],
                     ),
                   ),
-                const SizedBox(width: 8),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      profileData?['name'] ?? '',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        shadows: [
-                          Shadow(
-                            blurRadius: 4.0,
-                            color: Colors.black,
-                            offset: Offset(1.0, 1.0),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
             const SizedBox(height: 8),
             Transform.translate(
-              offset: const Offset(48, 15), // 20 pixels right, 10 pixels down
+              offset: const Offset(50, -24), // 20 pixels right, 10 pixels down
               child: Text(
                 profileData?['bio'] ?? '',
                 style: const TextStyle(
@@ -574,9 +571,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         ),
         if (currentCaption != null)
           Positioned(
-            bottom: 160,
+            bottom: 150,
             left: 0, // Align the container to the left edge of the parent
-            right: 0, // Align the container to the right edge of the parent
+            right: 10, // Align the container to the right edge of the parent
             child: Center( // Center the container within the available space
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5), // Adjust padding for the background
@@ -620,14 +617,11 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 }
 
-
 String _formatCaption(String caption) {
-  // Split the caption into words
-  List<String> words = caption.split(' ');
-  // Group words into lines of 5
+  // Ensure the caption is split into chunks of 38 characters
   List<String> lines = [];
-  for (int i = 0; i < words.length; i += 5) {
-    lines.add(words.sublist(i, i + 5 > words.length ? words.length : i + 5).join(' '));
+  for (int i = 0; i < caption.length; i += 38) {
+    lines.add(caption.substring(i, i + 38 > caption.length ? caption.length : i + 38));
   }
   // Join the lines with line breaks
   return lines.join('\n');

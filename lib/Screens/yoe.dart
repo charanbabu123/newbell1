@@ -80,7 +80,8 @@ class _ExperienceScreenState extends State<ExperienceScreen> {
       final postResponse = await request.send();
       final response = await http.Response.fromStream(postResponse);
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      print("Response: ${response.body}");
+      if (response.statusCode == 200 || response.statusCode == 201 ) {
         if (!mounted) return;
 
         ScaffoldMessenger.of(context).showSnackBar(

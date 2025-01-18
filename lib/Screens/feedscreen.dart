@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../common/BottomNavigation.dart';
+
 import '../services/auth_service.dart';
 
 class FeedScreen extends StatefulWidget {
@@ -141,7 +141,7 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,Sin
                 ],
               ),
             ),
-            padding: const EdgeInsets.only(top: 63, left: 54, right: 10, bottom: 16),
+            padding: const EdgeInsets.only(top: 46, left: 54, right: 10, bottom: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -298,6 +298,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
   final Map<int, VideoPlayerController> _controllers = {};
   int _currentVideoIndex = 0;
 
+
   @override
   void initState() {
     super.initState();
@@ -379,7 +380,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         // User info overlay
         Positioned(
           left: 16,
-          bottom: 75,
+          bottom: 70,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -408,7 +409,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          //fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -422,7 +423,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         // Static buttons like share, comment
         Positioned(
           right: 16,
-          bottom: 120,
+          bottom: 85,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -512,7 +513,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         Positioned(
           right: 143,
           left: 143,
-          bottom: 30,
+          bottom: 20,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             decoration: BoxDecoration(
@@ -540,6 +541,7 @@ class VideoPlayerWidget extends StatefulWidget {
   final List<Video> allVideos;  // Add this
   final int currentIndex;
 
+
   const VideoPlayerWidget({super.key, required this.video,required this.allVideos,   // Add this
     required this.currentIndex,});
 
@@ -552,6 +554,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   bool _isInitialized = false;
   String? _currentCaption;
   int _currentVideoIndex = 0;
+
 
 
   @override
@@ -591,6 +594,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       print('Error initializing video: $e');
     }
   }
+
 
 
 
@@ -707,9 +711,9 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
         if (_currentCaption != null)
           Positioned(
-            bottom: 160,
+            bottom: 150,
             left: 0, // Align the container to the left edge of the parent
-            right: 0, // Align the container to the right edge of the parent
+            right: 10, // Align the container to the right edge of the parent
             child: Center( // Center the container within the available space
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5), // Adjust padding for the background
@@ -749,12 +753,10 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
 
 String _formatCaption(String caption) {
-  // Split the caption into words
-  List<String> words = caption.split(' ');
-  // Group words into lines of 5
+  // Ensure the caption is split into chunks of 38 characters
   List<String> lines = [];
-  for (int i = 0; i < words.length; i += 5) {
-    lines.add(words.sublist(i, i + 5 > words.length ? words.length : i + 5).join(' '));
+  for (int i = 0; i < caption.length; i += 38) {
+    lines.add(caption.substring(i, i + 38 > caption.length ? caption.length : i + 38));
   }
   // Join the lines with line breaks
   return lines.join('\n');
@@ -888,4 +890,161 @@ class _ProgressBar extends StatelessWidget {
       },
     );
   }
+}
+
+class BottomNavBar extends StatefulWidget {
+  const BottomNavBar({super.key});
+
+  @override
+  _BottomNavBarState createState() => _BottomNavBarState();
+}
+
+class _BottomNavBarState extends State<BottomNavBar> {
+  String profilePicUrl = '';
+
+  @override
+  void initState() {
+    super.initState();
+    fetchProfilePic();
+  }
+
+  Future<void> fetchProfilePic() async {
+    try {
+      final accessToken = await AuthService.getAuthToken();
+      if (accessToken == null) {
+        debugPrint('Access token not found. Please log in.');
+        return;
+      }
+
+      final response = await http.get(
+        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/profile/'),
+        headers: {
+          'Authorization': 'Bearer $accessToken', // Include the access token
+        },
+      );
+
+      print('Status Code: ${response.statusCode}');
+      print('Response Headers: ${response.headers}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final user = data['user'];
+        setState(() {
+          profilePicUrl = user['profile_picture'] ?? ''; // Set profile picture URL
+        });
+      } else {
+        debugPrint('Failed to load profile picture: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error fetching profile picture: $e');
+    }
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black,
+      height: 65, // Adjust the height to match LinkedIn's style
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                padding: EdgeInsets.zero, // Remove default padding
+                icon: const Icon(Icons.home_filled, color: Colors.white, size: 26), // Adjust size to LinkedIn's icon size
+                onPressed: () {},
+              ),
+              Transform.translate(
+                offset: const Offset(0, -5), // Move the text 5 pixels upward
+                child: const Text(
+                  'Home',
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                padding: EdgeInsets.zero, // Remove default padding
+                icon: const Icon(Icons.search, color: Colors.white, size: 26), // Adjust size
+                onPressed: () {},
+              ),
+              Transform.translate(
+                offset: const Offset(0, -5), // Move the text 5 pixels upward
+                child: const Text(
+                  'Search',
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                padding: EdgeInsets.zero, // Remove default padding
+                icon: const Icon(Icons.forward_to_inbox, color: Colors.white, size: 26), // Adjust size
+                onPressed: () {},
+              ),
+
+              Transform.translate(
+                offset: const Offset(0, -5), // Move the text 5 pixels upward
+                child: const Text(
+                  'Inbox',
+                  style: TextStyle(color: Colors.white, fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushNamed('/profile');
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 16, // Adjust size for profile picture
+                  backgroundColor: Colors.white,
+                  child: ClipOval(
+                    child: profilePicUrl.isNotEmpty
+                        ? Image.network(
+                      profilePicUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.person,
+                          color: Colors.grey,
+                        );
+                      },
+                    )
+                        : const Icon(
+                      Icons.person,
+                      color: Colors.grey,
+                    ), // Fallback for empty profilePicUrl
+                  ),
+                ),
+                const SizedBox(height: 4), // Space between profile icon and text
+                Transform.translate(
+                  offset: const Offset(0, -0), // Move the text 5 pixels upward
+                  child: const Text(
+                    'Profile',
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }
