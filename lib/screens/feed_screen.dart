@@ -139,8 +139,7 @@ class _FeedScreenState extends State<FeedScreen>
                 ],
               ),
             ),
-            padding:
-                const EdgeInsets.only(top: 63, left: 54, right: 10, bottom: 16),
+            padding: const EdgeInsets.only(top: 46, left: 54, right: 10, bottom: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -295,6 +294,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
   final Map<int, VideoPlayerController> _controllers = {};
   int _currentVideoIndex = 0;
 
+
   @override
   void initState() {
     super.initState();
@@ -372,7 +372,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         // User info overlay
         Positioned(
           left: 16,
-          bottom: 75,
+          bottom: 70,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,7 +401,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          //fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -415,7 +415,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         // Static buttons like share, comment
         Positioned(
           right: 16,
-          bottom: 120,
+          bottom: 85,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -508,7 +508,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         Positioned(
           right: 143,
           left: 143,
-          bottom: 30,
+          bottom: 20,
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             decoration: BoxDecoration(
@@ -534,6 +534,7 @@ class VideoPlayerWidget extends StatefulWidget {
   final Video video;
   final List<Video> allVideos; // Add this
   final int currentIndex;
+
 
   const VideoPlayerWidget({
     super.key,
@@ -593,6 +594,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       debugPrint('Error initializing video: $e');
     }
   }
+
+
 
   void _onVideoEnd() {
     final parentState =
@@ -707,11 +710,10 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
         if (_currentCaption != null)
           Positioned(
-            bottom: 160,
+            bottom: 150,
             left: 0, // Align the container to the left edge of the parent
-            right: 0, // Align the container to the right edge of the parent
-            child: Center(
-              // Center the container within the available space
+            right: 10, // Align the container to the right edge of the parent
+            child: Center( // Center the container within the available space
               child: Container(
                 padding: const EdgeInsets.symmetric(
                     vertical: 0,
@@ -753,9 +755,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 }
 
 String _formatCaption(String caption) {
-  // Split the caption into words
-  List<String> words = caption.split(' ');
-  // Group words into lines of 5
+  // Ensure the caption is split into chunks of 38 characters
   List<String> lines = [];
   for (int i = 0; i < words.length; i += 5) {
     lines.add(words
