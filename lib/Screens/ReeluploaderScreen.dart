@@ -836,6 +836,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   enabledBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.pink),
                   ),
+
                   focusedBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.pink),
                   ),
