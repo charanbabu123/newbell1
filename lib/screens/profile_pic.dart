@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:bell_app1/Screens/yoe.dart';
+import '../../screens/yoe.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -8,11 +8,11 @@ class ProfilePictureScreen extends StatefulWidget {
   final String city;
   final String email;
   const ProfilePictureScreen({
-    Key? key,
+    super.key,
     required this.name,
     required this.city,
     required this.email,
-  }) : super(key: key);
+  });
 
   @override
   _ProfilePictureScreenState createState() => _ProfilePictureScreenState();
@@ -45,7 +45,7 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F8F7),
       appBar: AppBar(
-        title: const Text("Profile Picture"),
+        title: const Text("profile Picture"),
         centerTitle: true,
         elevation: 0,
       ),
@@ -71,15 +71,16 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
                       backgroundColor: const Color(0xffffc0cb),
                       radius: 50,
                       child: _profileImage == null
-                          ? const Icon(Icons.person, size: 40, color: Colors.black)
+                          ? const Icon(Icons.person,
+                              size: 40, color: Colors.black)
                           : ClipOval(
-                        child: Image.file(
-                          _profileImage!,
-                          fit: BoxFit.cover,
-                          width: 100.0,
-                          height: 100.0,
-                        ),
-                      ),
+                              child: Image.file(
+                                _profileImage!,
+                                fit: BoxFit.cover,
+                                width: 100.0,
+                                height: 100.0,
+                              ),
+                            ),
                     ),
                   ),
                   if (_profileImage == null)

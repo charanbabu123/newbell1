@@ -3,255 +3,12 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
-import 'package:bell_app1/common/common_widgets.dart';
-import 'package:camera/camera.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:video_compress/video_compress.dart';
 import 'package:video_player/video_player.dart';
-
-import '../Profile/UserProfileScreen.dart';
+import '../models/video_section.dart';
 import '../services/auth_service.dart';
-import 'ReeluploaderScreen.dart';
-
-
-class FullScreenCamera extends StatefulWidget {
-  final List<CameraDescription> cameras;
-  final Function(File video) onVideoRecorded;
-  final int sectionIndex;
-
-  const FullScreenCamera({
-    required this.cameras,
-    required this.onVideoRecorded,
-    required this.sectionIndex,
-    super.key,
-  });
-
-  @override
-  State<FullScreenCamera> createState() => _FullScreenCameraState();
-}
-
-class _FullScreenCameraState extends State<FullScreenCamera> {
-  late CameraController _cameraController;
-  double _recordingProgress = 0.0;
-  late Timer _timer;
-  late int _recordingTime;
-  String _formattedTime = "00:00";
-  bool _isRecording = false;
-  String? _videoPath;
-  bool _isFrontCamera = false;
-  bool _canStopRecording = false;
-
-
-  @override
-  void initState() {
-    super.initState();
-    final frontCamera = widget.cameras.firstWhere(
-          (camera) => camera.lensDirection == CameraLensDirection.front,
-      orElse: () => widget.cameras.first, // Fallback to default if no front camera
-    );
-    _initializeCamera(frontCamera);
-  }
-
-
-
-
-
-  Future<void> _initializeCamera(CameraDescription cameraDescription) async {
-    _cameraController = CameraController(
-      cameraDescription,
-      ResolutionPreset.high,
-      enableAudio: true,
-    );
-
-    try {
-      await _cameraController.initialize();
-      if (cameraDescription.lensDirection == CameraLensDirection.front) {
-        await _cameraController.prepareForVideoRecording();
-        // Set the video orientation for front camera
-        await _cameraController.lockCaptureOrientation(DeviceOrientation.portraitUp);
-      }
-      setState(() {});
-    } catch (e) {
-      print('Error initializing camera: $e');
-    }
-  }
-
-  void _startRecording() async {
-    if (_cameraController.value.isInitialized) {
-      _recordingTime = 0;
-      _formattedTime = "00:00";
-      _canStopRecording = false;
-      _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-        setState(() {
-          _recordingTime++;
-          _recordingProgress = _recordingTime / 90;
-          _formattedTime =
-          "${(_recordingTime ~/ 60).toString().padLeft(2, '0')}:${(_recordingTime % 60).toString().padLeft(2, '0')}";
-          if (_recordingTime >= 10) {
-            _canStopRecording = true;
-          }
-        });
-
-        if (_recordingTime >= 90) {
-          _stopRecording();
-        }
-      });
-
-      final tempDir = await getTemporaryDirectory();
-      final videoFile =
-      File("${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.mp4");
-      await _cameraController.startVideoRecording();
-      setState(() {
-        _isRecording = true;
-        _videoPath = videoFile.path;
-      });
-    }
-  }
-
-  void _stopRecording() async {
-    if (_cameraController.value.isRecordingVideo && _canStopRecording) {
-      final XFile videoFile = await _cameraController.stopVideoRecording();
-      _timer.cancel();
-      setState(() {
-        _isRecording = false;
-        _videoPath = videoFile.path;
-      });
-      _showVideoPreview();
-    }
-  }
-
-  void _showVideoPreview() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => VideoPreviewScreen(
-          videoPath: _videoPath!,
-          onDiscard: () {
-            Navigator.pop(context);
-          },
-          onContinue: () {
-            widget.onVideoRecorded(File(_videoPath!));
-          },
-
-          sectionIndex: widget.sectionIndex,
-
-        ),
-      ),
-    );
-  }
-
-  void _toggleCamera() async {
-    if (_isRecording) return;
-
-    final cameras = await availableCameras();
-    final newCamera = cameras[_isFrontCamera ? 1 : 0];
-
-    await _initializeCamera(newCamera);
-    setState(() {
-      _isFrontCamera = !_isFrontCamera;
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    _cameraController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!_cameraController.value.isInitialized) {
-      return Scaffold(
-        backgroundColor: Colors.black,
-        body: Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[600]!),
-          ),
-        ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          SizedBox.expand(
-            child: CameraPreview(_cameraController),
-          ),
-
-          Positioned(
-            bottom: 50,
-            right: 40,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.pink.withOpacity(0.7),
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: Icon(
-                  _isFrontCamera ? Icons.camera_rear : Icons.camera_front,
-                  color: Colors.white,
-                ),
-                onPressed: _toggleCamera,
-              ),
-            ),
-          ),
-          if (_isRecording)
-            Positioned(
-              top: 30,
-              left: 20,
-              child: Container(
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                    color: Colors.pink[600]?.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(5)),
-                child: Text(_formattedTime,
-                    style: const TextStyle(color: Colors.white, fontSize: 18)),
-              ),
-            ),
-          Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  SizedBox(
-                    width: 100,
-                    height: 100,
-                    child: CircularProgressIndicator(
-                      value: _isRecording ? _recordingProgress : 0.0,
-                      strokeWidth: 6,
-                      color: Colors.pink[600],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: _isRecording ? _stopRecording : _startRecording,
-                    child: CircleAvatar(
-                      radius: 45,
-                      backgroundColor: Colors.pink[600],
-                      child: _isRecording && !_canStopRecording
-                          ? const Icon(Icons.lock, color: Colors.white)
-                          : (_isRecording
-                          ? const Icon(Icons.stop, color: Colors.white)
-                          : const Icon(Icons.fiber_manual_record,
-                          color: Colors.white)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+import 'reel_uploader_screen.dart';
 
 class VideoPreviewScreen extends StatefulWidget {
   final String videoPath;
@@ -259,9 +16,7 @@ class VideoPreviewScreen extends StatefulWidget {
   final VoidCallback onContinue;
   final int sectionIndex;
 
-
   const VideoPreviewScreen({
-
     required this.videoPath,
     required this.onDiscard,
     required this.onContinue,
@@ -284,7 +39,6 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
   ];
   late int index;
 
-
   @override
   void initState() {
     super.initState();
@@ -303,27 +57,31 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     });
   }
 
-
   Future<void> handleVideo(int index) async {
-    if (sections[index].thumbnailController != null && sections[index].thumbnailController!.value.isPlaying) {
+    if (sections[index].thumbnailController != null &&
+        sections[index].thumbnailController!.value.isPlaying) {
       return;
     }
 
     try {
       File videoFile = sections[index].videoFile!;
-      final VideoPlayerController tempController = VideoPlayerController.file(videoFile);
+      final VideoPlayerController tempController =
+          VideoPlayerController.file(videoFile);
       await tempController.initialize();
       final int videoDuration = tempController.value.duration.inSeconds;
       tempController.dispose();
 
       if (videoDuration < 10) {
         // Show a SnackBar message if the video duration is less than 10 seconds
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please upload a video which is greater than 10 seconds'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'Please upload a video which is greater than 10 seconds'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
         return;
       }
 
@@ -353,7 +111,8 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
       }
 
       if (videoFile.lengthSync() < 5 * 1024 * 1024) {
-        VideoPlayerController controller = VideoPlayerController.file(videoFile);
+        VideoPlayerController controller =
+            VideoPlayerController.file(videoFile);
         await controller.initialize();
 
         await Future.delayed(Duration(seconds: estimatedDuration));
@@ -382,7 +141,8 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
 
       File compressedFile = File(compressedVideo.file!.path);
 
-      VideoPlayerController controller = VideoPlayerController.file(compressedFile);
+      VideoPlayerController controller =
+          VideoPlayerController.file(compressedFile);
       await controller.initialize();
 
       await Future.delayed(Duration(seconds: estimatedDuration));
@@ -401,7 +161,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
       // Make the API call to upload the video
       await uploadVideo(compressedFile, index);
     } catch (e) {
-      print("Error handling video: $e");
+      debugPrint("Error handling video: $e");
 
       if (mounted) {
         setState(() {
@@ -417,12 +177,15 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
   Future<void> uploadVideo(File videoFile, int index) async {
     final String? token = await AuthService.getAuthToken();
     if (token == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Authentication token not found. Please log in again.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('Authentication token not found. Please log in again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
@@ -437,11 +200,11 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     request.fields['position'] = index.toString();
     request.fields['tag'] = sections[index].label;
     request.fields['duration'] = sections[index]
-        .thumbnailController
-        ?.value
-        .duration
-        .inSeconds
-        .toString() ??
+            .thumbnailController
+            ?.value
+            .duration
+            .inSeconds
+            .toString() ??
         '0';
     request.fields['status'] = 'PUBLISHED';
 
@@ -456,24 +219,28 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
           sections[index].videoId = jsonResponse['id'];
         });
 
-        print('Video uploaded: $jsonResponse');
+        debugPrint('Video uploaded: $jsonResponse');
       } else {
-        print('Failed to upload video: ${response.statusCode}');
+        debugPrint('Failed to upload video: ${response.statusCode}');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to upload video: ${response.statusCode}'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error uploading video: $e');
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to upload video: ${response.statusCode}'),
+            content: Text('Error uploading video: $e'),
             backgroundColor: Colors.red,
           ),
         );
       }
-    } catch (e) {
-      print('Error uploading video: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error uploading video: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
     }
   }
 
@@ -495,18 +262,18 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
           SizedBox.expand(
             child: _videoPlayerController.value.isInitialized
                 ? FittedBox(
-              fit: BoxFit.cover,
-              child: SizedBox(
-                width: _videoPlayerController.value.size.width,
-                height: _videoPlayerController.value.size.height,
-                child: VideoPlayer(_videoPlayerController),
-              ),
-            )
+                    fit: BoxFit.cover,
+                    child: SizedBox(
+                      width: _videoPlayerController.value.size.width,
+                      height: _videoPlayerController.value.size.height,
+                      child: VideoPlayer(_videoPlayerController),
+                    ),
+                  )
                 : const Center(
-              child: CircularProgressIndicator(
-                color: Colors.white,
-              ),
-            ),
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                    ),
+                  ),
           ),
 
           // Top status bar background gradient
@@ -521,7 +288,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withOpacity(0.7),
+                    Colors.black.withValues(alpha: 0.7),
                     Colors.transparent,
                   ],
                 ),
@@ -541,7 +308,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                   colors: [
-                    Colors.black.withOpacity(0.8),
+                    Colors.black.withValues(alpha: .8),
                     Colors.transparent,
                   ],
                 ),
@@ -560,7 +327,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                 thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
                 overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
                 activeTrackColor: Colors.white,
-                inactiveTrackColor: Colors.white.withOpacity(0.3),
+                inactiveTrackColor: Colors.white.withValues(alpha: .3),
                 thumbColor: Colors.white,
               ),
               child: Slider(
@@ -574,7 +341,8 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                   setState(() {
                     _sliderValue = value;
                   });
-                  _videoPlayerController.seekTo(Duration(seconds: value.toInt()));
+                  _videoPlayerController
+                      .seekTo(Duration(seconds: value.toInt()));
                 },
                 onChangeEnd: (value) {
                   _videoPlayerController.play();
@@ -628,7 +396,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                 TextButton(
                   onPressed: () {
                     // Log video path for debugging
-                    print(widget.videoPath);
+                    debugPrint(widget.videoPath);
                     // Navigate directly to ReelUploaderScreen without popping multiple screens
                     Navigator.pushReplacement(
                       context,
@@ -657,5 +425,3 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
     );
   }
 }
-
-

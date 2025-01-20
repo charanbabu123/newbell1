@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
+import '../common/bottom_navigation.dart';
 import '../services/auth_service.dart';
 
 class FeedScreen extends StatefulWidget {
@@ -12,12 +12,13 @@ class FeedScreen extends StatefulWidget {
   State<FeedScreen> createState() => _FeedScreenState();
 }
 
-class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,SingleTickerProviderStateMixin {
+class _FeedScreenState extends State<FeedScreen>
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   List<UserFeed> feeds = [];
   bool isLoading = false;
   String? nextPageUrl;
   final PageController _pageController = PageController();
-  int _currentPageIndex = 0;
+  //final int _currentPageIndex = 0;
   late TabController _tabController;
   final Map<int, VideoPlayerController> _controllers = {};
 
@@ -28,8 +29,6 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,Sin
     _loadFeeds();
   }
 
-
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -38,6 +37,7 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,Sin
     _disposeAllVideos();
     super.dispose();
   }
+
   void _disposeAllVideos() {
     for (var controller in _controllers.values) {
       if (controller.value.isInitialized) {
@@ -46,7 +46,6 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,Sin
     }
     _controllers.clear();
   }
-
 
   @override
   void didChangeDependencies() {
@@ -72,7 +71,6 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,Sin
     }
   }
 
-
   Future<void> _loadFeeds() async {
     if (isLoading) return;
     setState(() => isLoading = true);
@@ -87,9 +85,9 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,Sin
         Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/feed/'),
         headers: {'Authorization': 'Bearer $validToken'},
       );
-      print('Status Code: ${response.statusCode}');
-      print('Response Headers: ${response.headers}');
-      print('Response Body: ${response.body}');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Response Headers: ${response.headers}');
+      debugPrint('Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -136,7 +134,7 @@ class _FeedScreenState extends State<FeedScreen> with WidgetsBindingObserver,Sin
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.7),
+                  Colors.black.withValues(alpha: 0.7),
                   Colors.transparent,
                 ],
               ),
@@ -241,7 +239,7 @@ class User {
       yoe: json['yoe'] ?? 0,
       email: json['email'] ?? '',
       city: json['city'] ?? '',
-      bio: json['bio'] ,
+      bio: json['bio'],
     );
   }
 }
@@ -261,7 +259,6 @@ class Video {
     required this.id,
     required this.tag,
     required this.videoUrl,
-
     required this.title,
     this.caption1,
     this.caption2,
@@ -272,7 +269,7 @@ class Video {
   factory Video.fromJson(Map<String, dynamic> json) {
     return Video(
       id: json['id'] ?? 0,
-      duration: (json['duration'] ?? 0.0) ,
+      duration: (json['duration'] ?? 0.0),
       tag: json['tag'] ?? '',
       videoUrl: json['video_url'] ?? '',
       title: json['title'] ?? '',
@@ -285,7 +282,6 @@ class Video {
 
 class FullScreenFeedItem extends StatefulWidget {
   final UserFeed feed;
-
 
   const FullScreenFeedItem({super.key, required this.feed});
 
@@ -327,20 +323,15 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
     _controllers.clear();
     super.dispose();
   }
+
   void _initializeControllers() {
     for (int i = 0; i < widget.feed.videos.length; i++) {
       final video = widget.feed.videos[i];
-      final controller = VideoPlayerController.network(video.videoUrl);
+      final controller =
+          VideoPlayerController.networkUrl(Uri.parse(video.videoUrl));
       _controllers[i] = controller;
       controller.initialize();
     }
-  }
-
-  void _disposeControllers() {
-    for (final controller in _controllers.values) {
-      controller.dispose();
-    }
-    _controllers.clear();
   }
 
   @override
@@ -350,7 +341,8 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
       children: [
         // Full screen video
         Padding(
-          padding: const EdgeInsets.only(top: 25.0, bottom: 0.0), // Adjust the top and bottom padding
+          padding: const EdgeInsets.only(
+              top: 25.0, bottom: 0.0), // Adjust the top and bottom padding
           child: PageView.builder(
             controller: _videoController,
             itemCount: widget.feed.videos.length,
@@ -390,7 +382,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                   CircleAvatar(
                     radius: 20,
                     backgroundImage:
-                    NetworkImage(widget.feed.user.profilePictureUrl),
+                        NetworkImage(widget.feed.user.profilePictureUrl),
                   ),
                   const SizedBox(width: 12),
                   Column(
@@ -439,7 +431,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                         width: 45,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.black.withOpacity(0.6),
+                          color: Colors.black.withValues(alpha: 0.6),
                         ),
                       ),
                       IconButton(
@@ -450,7 +442,8 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                     ],
                   ),
                   const SizedBox(height: 5),
-                  const Text("Like", style: TextStyle(color: Colors.white, fontSize: 12)),
+                  const Text("Like",
+                      style: TextStyle(color: Colors.white, fontSize: 12)),
                 ],
               ),
               const SizedBox(height: 15), // Space between icons
@@ -465,7 +458,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                         width: 45,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.black.withOpacity(0.6),
+                          color: Colors.black.withValues(alpha: 0.6),
                         ),
                       ),
                       IconButton(
@@ -476,7 +469,8 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                     ],
                   ),
                   const SizedBox(height: 5),
-                  const Text("Comment", style: TextStyle(color: Colors.white, fontSize: 12)),
+                  const Text("Comment",
+                      style: TextStyle(color: Colors.white, fontSize: 12)),
                 ],
               ),
               const SizedBox(height: 15), // Space between icons
@@ -491,7 +485,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                         width: 45,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.black.withOpacity(0.6),
+                          color: Colors.black.withValues(alpha: 0.6),
                         ),
                       ),
                       IconButton(
@@ -502,7 +496,8 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                     ],
                   ),
                   const SizedBox(height: 5),
-                  const Text("Share", style: TextStyle(color: Colors.white, fontSize: 12)),
+                  const Text("Share",
+                      style: TextStyle(color: Colors.white, fontSize: 12)),
                 ],
               ),
             ],
@@ -517,7 +512,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             decoration: BoxDecoration(
-              color: Colors.pink.withOpacity(0.7),
+              color: Colors.pink.withValues(alpha: 0.7),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -533,17 +528,20 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
       ],
     );
   }
-
 }
 
 class VideoPlayerWidget extends StatefulWidget {
   final Video video;
-  final List<Video> allVideos;  // Add this
+  final List<Video> allVideos; // Add this
   final int currentIndex;
 
 
-  const VideoPlayerWidget({super.key, required this.video,required this.allVideos,   // Add this
-    required this.currentIndex,});
+  const VideoPlayerWidget({
+    super.key,
+    required this.video,
+    required this.allVideos, // Add this
+    required this.currentIndex,
+  });
 
   @override
   State<VideoPlayerWidget> createState() => _VideoPlayerWidgetState();
@@ -553,26 +551,28 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
   bool _isInitialized = false;
   String? _currentCaption;
-  int _currentVideoIndex = 0;
-
-
+  //final int _currentVideoIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _initializeVideo();
     _controller.addListener(() {
-      setState(() {});  // This will rebuild the widget when video position changes
+      setState(
+          () {}); // This will rebuild the widget when video position changes
     });
   }
 
   Future<void> _initializeVideo() async {
-    _controller = VideoPlayerController.network(widget.video.videoUrl);
+    _controller =
+        VideoPlayerController.networkUrl(Uri.parse(widget.video.videoUrl));
     try {
       await _controller.initialize();
       if (mounted) {
-        setState((){  _isInitialized = true;
-        _currentCaption = widget.video.caption1;});
+        setState(() {
+          _isInitialized = true;
+          _currentCaption = widget.video.caption1;
+        });
         _controller.addListener(_updateCaption);
         _controller.play();
         _controller.addListener(() {
@@ -585,21 +585,21 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
         // Register controller with parent
         final parentState =
-        context.findAncestorStateOfType<_FullScreenFeedItemState>();
+            context.findAncestorStateOfType<_FullScreenFeedItemState>();
         if (parentState != null) {
           parentState._registerController(widget.video.id, _controller);
         }
       }
     } catch (e) {
-      print('Error initializing video: $e');
+      debugPrint('Error initializing video: $e');
     }
   }
 
 
 
-
   void _onVideoEnd() {
-    final parentState = context.findAncestorStateOfType<_FullScreenFeedItemState>();
+    final parentState =
+        context.findAncestorStateOfType<_FullScreenFeedItemState>();
     if (parentState != null) {
       // Determine the next video index
       final nextVideoIndex = parentState._currentVideoIndex + 1;
@@ -614,7 +614,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       }
     }
   }
-
 
   void _pauseVideo() {
     if (_controller.value.isPlaying) {
@@ -636,9 +635,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     });
   }
 
-
   void _updateCaption() {
-    if (!_controller.value.isInitialized || _controller.value.duration == null) {
+    if (!_controller.value.isInitialized) {
       return;
     }
 
@@ -689,7 +687,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       fit: StackFit.expand,
       children: [
         Padding(
-          padding: const EdgeInsets.only(top: 50), // Adjust the top padding as needed
+          padding: const EdgeInsets.only(
+              top: 50), // Adjust the top padding as needed
           child: GestureDetector(
             onTap: () {
               setState(() {
@@ -701,8 +700,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             child: FittedBox(
               fit: BoxFit.contain,
               child: SizedBox(
-                width: _controller.value.size?.width ?? 0,
-                height: _controller.value.size?.height ?? 0,
+                width: _controller.value.size.width,
+                height: _controller.value.size.height,
                 child: VideoPlayer(_controller),
               ),
             ),
@@ -716,13 +715,16 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             right: 10, // Align the container to the right edge of the parent
             child: Center( // Center the container within the available space
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5), // Adjust padding for the background
+                padding: const EdgeInsets.symmetric(
+                    vertical: 0,
+                    horizontal: 5), // Adjust padding for the background
                 decoration: BoxDecoration(
-                  color: Colors.pink.withOpacity(0.7),
+                  color: Colors.pink.withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
-                  _formatCaption(_currentCaption!), // Format the caption to limit 5 words per line
+                  _formatCaption(
+                      _currentCaption!), // Format the caption to limit 5 words per line
                   textAlign: TextAlign.center,
                   style: const TextStyle(
                     color: Colors.white,
@@ -743,7 +745,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           child: InstagramStoryProgressBar(
             videos: widget.allVideos,
             currentController: _controller,
-            currentIndex: widget.currentIndex,  // Use the index passed from parent
+            currentIndex:
+                widget.currentIndex, // Use the index passed from parent
           ),
         ),
       ],
@@ -751,17 +754,17 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 }
 
-
 String _formatCaption(String caption) {
   // Ensure the caption is split into chunks of 38 characters
   List<String> lines = [];
-  for (int i = 0; i < caption.length; i += 38) {
-    lines.add(caption.substring(i, i + 38 > caption.length ? caption.length : i + 38));
+  for (int i = 0; i < words.length; i += 5) {
+    lines.add(words
+        .sublist(i, i + 5 > words.length ? words.length : i + 5)
+        .join(' '));
   }
   // Join the lines with line breaks
   return lines.join('\n');
 }
-
 
 Future<String?> _getValidToken() async {
   String? accessToken = await AuthService.getAuthToken();
@@ -808,11 +811,11 @@ class InstagramStoryProgressBar extends StatelessWidget {
   final int currentIndex;
 
   const InstagramStoryProgressBar({
-    Key? key,
+    super.key,
     required this.videos,
     required this.currentController,
     required this.currentIndex,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -821,23 +824,23 @@ class InstagramStoryProgressBar extends StatelessWidget {
       child: Row(
         children: List.generate(
           videos.length,
-              (index) => Expanded(
+          (index) => Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2.0),
               child: index == currentIndex
                   ? _ProgressBar(
-                controller: currentController,
-                isActive: true,
-              )
+                      controller: currentController,
+                      isActive: true,
+                    )
                   : Container(
-                height: 4,
-                decoration: BoxDecoration(
-                  color: index < currentIndex
-                      ? Colors.white
-                      : Colors.white.withOpacity(0.5),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: index < currentIndex
+                            ? Colors.white
+                            : Colors.white.withValues(alpha: .5),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
             ),
           ),
         ),
@@ -851,10 +854,9 @@ class _ProgressBar extends StatelessWidget {
   final bool isActive;
 
   const _ProgressBar({
-    Key? key,
     required this.controller,
     required this.isActive,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -873,7 +875,7 @@ class _ProgressBar extends StatelessWidget {
         return Container(
           height: 4,
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.5),
+            color: Colors.white.withValues(alpha: .5),
             borderRadius: BorderRadius.circular(2),
           ),
           child: FractionallySizedBox(
@@ -890,161 +892,4 @@ class _ProgressBar extends StatelessWidget {
       },
     );
   }
-}
-
-class BottomNavBar extends StatefulWidget {
-  const BottomNavBar({super.key});
-
-  @override
-  _BottomNavBarState createState() => _BottomNavBarState();
-}
-
-class _BottomNavBarState extends State<BottomNavBar> {
-  String profilePicUrl = '';
-
-  @override
-  void initState() {
-    super.initState();
-    fetchProfilePic();
-  }
-
-  Future<void> fetchProfilePic() async {
-    try {
-      final accessToken = await AuthService.getAuthToken();
-      if (accessToken == null) {
-        debugPrint('Access token not found. Please log in.');
-        return;
-      }
-
-      final response = await http.get(
-        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/profile/'),
-        headers: {
-          'Authorization': 'Bearer $accessToken', // Include the access token
-        },
-      );
-
-      print('Status Code: ${response.statusCode}');
-      print('Response Headers: ${response.headers}');
-      print('Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final user = data['user'];
-        setState(() {
-          profilePicUrl = user['profile_picture'] ?? ''; // Set profile picture URL
-        });
-      } else {
-        debugPrint('Failed to load profile picture: ${response.statusCode}');
-      }
-    } catch (e) {
-      debugPrint('Error fetching profile picture: $e');
-    }
-  }
-
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      height: 65, // Adjust the height to match LinkedIn's style
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                padding: EdgeInsets.zero, // Remove default padding
-                icon: const Icon(Icons.home_filled, color: Colors.white, size: 26), // Adjust size to LinkedIn's icon size
-                onPressed: () {},
-              ),
-              Transform.translate(
-                offset: const Offset(0, -5), // Move the text 5 pixels upward
-                child: const Text(
-                  'Home',
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ),
-            ],
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                padding: EdgeInsets.zero, // Remove default padding
-                icon: const Icon(Icons.search, color: Colors.white, size: 26), // Adjust size
-                onPressed: () {},
-              ),
-              Transform.translate(
-                offset: const Offset(0, -5), // Move the text 5 pixels upward
-                child: const Text(
-                  'Search',
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ),
-            ],
-          ),
-
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                padding: EdgeInsets.zero, // Remove default padding
-                icon: const Icon(Icons.forward_to_inbox, color: Colors.white, size: 26), // Adjust size
-                onPressed: () {},
-              ),
-
-              Transform.translate(
-                offset: const Offset(0, -5), // Move the text 5 pixels upward
-                child: const Text(
-                  'Inbox',
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ),
-            ],
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushNamed('/profile');
-            },
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 16, // Adjust size for profile picture
-                  backgroundColor: Colors.white,
-                  child: ClipOval(
-                    child: profilePicUrl.isNotEmpty
-                        ? Image.network(
-                      profilePicUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.person,
-                          color: Colors.grey,
-                        );
-                      },
-                    )
-                        : const Icon(
-                      Icons.person,
-                      color: Colors.grey,
-                    ), // Fallback for empty profilePicUrl
-                  ),
-                ),
-                const SizedBox(height: 4), // Space between profile icon and text
-                Transform.translate(
-                  offset: const Offset(0, -0), // Move the text 5 pixels upward
-                  child: const Text(
-                    'Profile',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
 }

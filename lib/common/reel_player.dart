@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -27,10 +26,10 @@ class VideoPlayerWidget extends StatefulWidget {
   });
 
   @override
-  _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
+  VideoPlayerWidgetState createState() => VideoPlayerWidgetState();
 }
 
-class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
+class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
   bool _isPlaying = false;
   String? currentCaption;
@@ -44,7 +43,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 
   Future<void> _initializeController() async {
-    _controller = VideoPlayerController.network(widget.videoUrl);
+    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
     await _controller.initialize();
     if (widget.isPlaying && widget.autoPlay) {
       _controller.play();
@@ -116,67 +115,73 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   Widget build(BuildContext context) {
     return _controller.value.isInitialized
         ? Stack(
-      fit: StackFit.expand,
-      children: [
-        FittedBox(
-          fit: BoxFit.cover, // Ensures videos scale properly
-          child: SizedBox(
-            width: _controller.value.size.width,
-            height: _controller.value.size.height,
-            child: VideoPlayer(_controller),
-          ),
-        ),
-        if (currentCaption != null)
-          Positioned(
-            bottom: 180, // Adjust this value for vertical positioning
-            left: 0, // Required to ensure the child can center horizontally
-            right: 0, // Required to ensure the child can center horizontally
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2), // Padding for the background
-                decoration: BoxDecoration(
-                  color: Colors.pink.withOpacity(0.6), // Background color tightly wrapping the text
-                  borderRadius: BorderRadius.circular(8), // Rounded corners
+            fit: StackFit.expand,
+            children: [
+              FittedBox(
+                fit: BoxFit.cover, // Ensures videos scale properly
+                child: SizedBox(
+                  width: _controller.value.size.width,
+                  height: _controller.value.size.height,
+                  child: VideoPlayer(_controller),
                 ),
-                child: Text(
-                  currentCaption!,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        blurRadius: 4.0,
-                        color: Colors.black,
-                        offset: Offset(1.0, 1.0),
+              ),
+              if (currentCaption != null)
+                Positioned(
+                  bottom: 180, // Adjust this value for vertical positioning
+                  left:
+                      0, // Required to ensure the child can center horizontally
+                  right:
+                      0, // Required to ensure the child can center horizontally
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 2), // Padding for the background
+                      decoration: BoxDecoration(
+                        color: Colors.pink.withValues(
+                            alpha:
+                                .6), // Background color tightly wrapping the text
+                        borderRadius:
+                            BorderRadius.circular(8), // Rounded corners
                       ),
-                    ],
+                      child: Text(
+                        currentCaption!,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 4.0,
+                              color: Colors.black,
+                              offset: Offset(1.0, 1.0),
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   ),
-                  textAlign: TextAlign.center,
+                ),
+              GestureDetector(
+                onTap: _togglePlayPause,
+                child: AnimatedOpacity(
+                  opacity: !_isPlaying ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Container(
+                    color: Colors.black.withValues(alpha: .3),
+                    child: Center(
+                      child: Icon(
+                        _isPlaying ? Icons.pause : Icons.play_arrow,
+                        color: Colors.white,
+                        size: 60.0,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-
-        GestureDetector(
-          onTap: _togglePlayPause,
-          child: AnimatedOpacity(
-            opacity: !_isPlaying ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 300),
-            child: Container(
-              color: Colors.black.withOpacity(0.3),
-              child: Center(
-                child: Icon(
-                  _isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: Colors.white,
-                  size: 60.0,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    )
+            ],
+          )
         : const Center(child: CircularProgressIndicator());
   }
 }

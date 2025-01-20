@@ -10,12 +10,12 @@ class ExperienceScreen extends StatefulWidget {
   final File? profileImage;
 
   const ExperienceScreen({
-    Key? key,
+    super.key,
     required this.name,
     required this.city,
     required this.email,
     this.profileImage,
-  }) : super(key: key);
+  });
 
   @override
   _ExperienceScreenState createState() => _ExperienceScreenState();
@@ -38,7 +38,8 @@ class _ExperienceScreenState extends State<ExperienceScreen> {
   }
 
   Future<void> _submitDetails({bool isSkipped = false}) async {
-    const String apiUrl = 'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/register/';
+    const String apiUrl =
+        'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/register/';
 
     setState(() {
       if (isSkipped) {
@@ -68,7 +69,7 @@ class _ExperienceScreenState extends State<ExperienceScreen> {
       };
 
       var request = http.MultipartRequest('POST', Uri.parse(apiUrl));
-      request.fields.addAll(body.map((key, value) => MapEntry(key, value ?? '')));
+      request.fields.addAll(body.map((key, value) => MapEntry(key, value)));
       request.headers.addAll(headerData);
       if (widget.profileImage != null) {
         request.files.add(await http.MultipartFile.fromPath(
@@ -93,7 +94,7 @@ class _ExperienceScreenState extends State<ExperienceScreen> {
         );
 
         Future.delayed(const Duration(seconds: 2), () {
-          Navigator.of(context).pushNamed('/reel');
+          if (mounted) Navigator.of(context).pushNamed('/reel');
         });
       } else {
         if (!mounted) return;
@@ -199,21 +200,22 @@ class _ExperienceScreenState extends State<ExperienceScreen> {
                   ),
                   child: _isSubmitLoading
                       ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      strokeWidth: 2,
-                    ),
-                  )
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            strokeWidth: 2,
+                          ),
+                        )
                       : const Text(
-                    "Submit",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                          "Submit",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                 ),
               ),
               const SizedBox(height: 30),
@@ -235,21 +237,22 @@ class _ExperienceScreenState extends State<ExperienceScreen> {
                   ),
                   child: _isSkipLoading
                       ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                      strokeWidth: 2,
-                    ),
-                  )
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            strokeWidth: 2,
+                          ),
+                        )
                       : const Text(
-                    "Skip",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                          "Skip",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                 ),
               ),
             ],

@@ -1,46 +1,24 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:bell_app1/Profile/user_preview_screen.dart';
-import 'package:bell_app1/Screens/ReeluploaderScreen.dart';
-
+import '../../profile/user_preview_screen.dart';
+import '../../screens/reel_uploader_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
-
-import '../common/BottomNavigation.dart';
-import '../common/reel_player.dart';
-import '../common/videoplayer.dart';
-import '../login/LoginPhoneScreen.dart';
+import '../login/login_phone_screen.dart';
 import '../models/video_model.dart';
 import '../services/auth_service.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(),
-      home: const UserProfileScreen(),
-    );
-  }
-}
-
 class UserProfileScreen extends StatefulWidget {
-  const UserProfileScreen({Key? key}) : super(key: key);
+  const UserProfileScreen({super.key});
 
   @override
-  _UserProfileScreenState createState() => _UserProfileScreenState();
+  UserProfileScreenState createState() => UserProfileScreenState();
 }
 
-class _UserProfileScreenState extends State<UserProfileScreen> with TickerProviderStateMixin {
+class UserProfileScreenState extends State<UserProfileScreen>
+    with TickerProviderStateMixin {
   TabController? _tabController;
   File? _profileImage;
   String username = "Loading...";
@@ -51,14 +29,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
   String? userProfilePicture;
   List<VideoModel> videos = [];
 
-
   num posts = 23;
   num followers = 500;
   num following = 340;
   bool isLoading = true;
   bool isLoggingOut = false;
 
-  final String apiEndpoint = "https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/profile/";
+  final String apiEndpoint =
+      "https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/profile/";
 
   @override
   void initState() {
@@ -79,11 +57,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
       setState(() => isLoading = true);
 
       final response = await _makeAuthenticatedRequest((token) => http.get(
-        Uri.parse(apiEndpoint),
-        headers: {
-          'Authorization': 'Bearer $token',
-        },
-      ));
+            Uri.parse(apiEndpoint),
+            headers: {
+              'Authorization': 'Bearer $token',
+            },
+          ));
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -122,7 +100,8 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
       }
 
       final response = await http.post(
-        Uri.parse('${apiEndpoint}refresh-token'), // Adjust the endpoint as needed
+        Uri.parse(
+            '${apiEndpoint}refresh-token'), // Adjust the endpoint as needed
         headers: {
           'Content-Type': 'application/json',
         },
@@ -138,12 +117,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
         throw Exception('Failed to refresh token');
       }
     } catch (e) {
-      print('Error refreshing token: $e');
+      debugPrint('Error refreshing token: $e');
       return null;
     }
   }
 
-  Future<http.Response> _makeAuthenticatedRequest(Future<http.Response> Function(String token) requestFunction) async {
+  Future<http.Response> _makeAuthenticatedRequest(
+      Future<http.Response> Function(String token) requestFunction) async {
     // First try with current access token
     String? accessToken = await AuthService.getAuthToken();
     if (accessToken == null) {
@@ -165,7 +145,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
         if (mounted) {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const LoginPhoneScreen()),
-                (route) => false,
+            (route) => false,
           );
         }
         throw Exception("Session expired. Please login again.");
@@ -189,7 +169,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
   void _editProfile() async {
     final updatedData = await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => EditProfileScreen(username: username, bio: bio , city: city,),
+        builder: (context) => EditProfileScreen(
+          username: username,
+          bio: bio,
+          city: city,
+        ),
       ),
     );
 
@@ -197,7 +181,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
       setState(() {
         username = updatedData['username'];
         bio = updatedData['bio'];
-        city =updatedData['city'];
+        city = updatedData['city'];
       });
     }
   }
@@ -219,13 +203,14 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const LoginPhoneScreen()),
-          (route) => false,
+      (route) => false,
     );
   }
 
   void _openMenuScreen() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => MenuScreen(onLogout: _handleLogout)),
+      MaterialPageRoute(
+          builder: (context) => MenuScreen(onLogout: _handleLogout)),
     );
   }
 
@@ -245,9 +230,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
                       radius: 40,
                       backgroundImage: _profileImage != null
                           ? FileImage(_profileImage!)
-                          : (userProfilePicture != null ? NetworkImage(userProfilePicture!) : null) as ImageProvider?,
+                          : (userProfilePicture != null
+                              ? NetworkImage(userProfilePicture!)
+                              : null) as ImageProvider?,
                       child: _profileImage == null && userProfilePicture == null
-                          ? const Icon(Icons.person, size: 40, color: Colors.grey)
+                          ? const Icon(Icons.person,
+                              size: 40, color: Colors.grey)
                           : null,
                     ),
                   ),
@@ -293,7 +281,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
             style: const TextStyle(
               color: Colors.pink,
               fontSize: 18,
-
             ),
           ),
           // Text(
@@ -308,7 +295,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
             style: const TextStyle(
               color: Colors.pink,
               fontSize: 18,
-
             ),
           ),
           const SizedBox(height: 12),
@@ -324,7 +310,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
               ),
               child: const Center(
                 child: Text(
-                  "Edit Profile",
+                  "Edit profile",
                   style: TextStyle(
                     color: Colors.pink,
                     fontSize: 14,
@@ -345,100 +331,103 @@ class _UserProfileScreenState extends State<UserProfileScreen> with TickerProvid
       backgroundColor: Colors.pink[50],
       body: isLoggingOut
           ? const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: Colors.red),
-            SizedBox(height: 16),
-            Text(
-              "Logging off...",
-              style: TextStyle(color: Colors.pink, fontSize: 18),
-            ),
-          ],
-        ),
-      )
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: Colors.red),
+                  SizedBox(height: 16),
+                  Text(
+                    "Logging off...",
+                    style: TextStyle(color: Colors.pink, fontSize: 18),
+                  ),
+                ],
+              ),
+            )
           : NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            SliverAppBar(
-              backgroundColor: Colors.pink,
-              expandedHeight: 285.0, // Adjust this value based on your header content
-              floating: false,
-              pinned: true,
-              stretch: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  color: Colors.pink[50],
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      const SizedBox(height: 60), // Space for the app bar
-                      _buildProfileHeader(),
+              headerSliverBuilder:
+                  (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[
+                  SliverAppBar(
+                    backgroundColor: Colors.pink,
+                    expandedHeight:
+                        285.0, // Adjust this value based on your header content
+                    floating: false,
+                    pinned: true,
+                    stretch: true,
+                    flexibleSpace: FlexibleSpaceBar(
+                      background: Container(
+                        color: Colors.pink[50],
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            const SizedBox(height: 60), // Space for the app bar
+                            _buildProfileHeader(),
+                          ],
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      innerBoxIsScrolled ? username : "",
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    actions: [
+                      IconButton(
+                        icon: const Icon(Icons.menu, color: Colors.black),
+                        onPressed: _openMenuScreen,
+                      ),
                     ],
                   ),
-                ),
-              ),
-              title: Text(
-                innerBoxIsScrolled ? username : "",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.menu, color: Colors.black),
-                  onPressed: _openMenuScreen,
-                ),
-              ],
-            ),
-            SliverPersistentHeader(
-              pinned: true,
-              delegate: _SliverAppBarDelegate(
-                TabBar(
-                  controller: _tabController,
-                  indicatorColor: Colors.pink,
-                  tabs: const [
-                    Tab(icon: Icon(Icons.video_library, color: Colors.pink)),
-                    Tab(icon: Icon(Icons.grid_on, color: Colors.pink)),
-                  ],
-                ),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _SliverAppBarDelegate(
+                      TabBar(
+                        controller: _tabController,
+                        indicatorColor: Colors.pink,
+                        tabs: const [
+                          Tab(
+                              icon: Icon(Icons.video_library,
+                                  color: Colors.pink)),
+                          Tab(icon: Icon(Icons.grid_on, color: Colors.pink)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ];
+              },
+              body: TabBarView(
+                controller: _tabController,
+                children: [
+                  SwipeableVideoView(videos: videos),
+                  const ReelUploaderScreen(
+                    showAppBar: false,
+                    showSkip: false,
+                  ),
+                ],
               ),
             ),
-          ];
-        },
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            SwipeableVideoView(videos: videos),
-            const ReelUploaderScreen(
-              showAppBar: false,
-              showSkip: false,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
 
-
-  Widget _buildStatColumn(String label, num count) {
-    return Column(
-      children: [
-        Text(
-          count.toString(),
-          style: const TextStyle(
-            color: Colors.pink,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+Widget _buildStatColumn(String label, num count) {
+  return Column(
+    children: [
+      Text(
+        count.toString(),
+        style: const TextStyle(
+          color: Colors.pink,
+          fontSize: 16,
+          fontWeight: FontWeight.bold,
         ),
-        Text(label, style: const TextStyle(color: Colors.black, fontSize: 14)),
-      ],
-    );
-  }
+      ),
+      Text(label, style: const TextStyle(color: Colors.black, fontSize: 14)),
+    ],
+  );
+}
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate(this._tabBar);
@@ -451,7 +440,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       color: Colors.pink[50],
       child: _tabBar,
@@ -464,12 +454,10 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-
-
 class MenuScreen extends StatelessWidget {
   final VoidCallback onLogout;
 
-  const MenuScreen({Key? key, required this.onLogout}) : super(key: key);
+  const MenuScreen({super.key, required this.onLogout});
 
   @override
   Widget build(BuildContext context) {
@@ -520,11 +508,11 @@ class EditProfileScreen extends StatefulWidget {
   final String bio;
   final String city;
 
-
-
-
-  const EditProfileScreen({Key? key, required this.username, required this.bio , required this.city })
-      : super(key: key);
+  const EditProfileScreen(
+      {super.key,
+      required this.username,
+      required this.bio,
+      required this.city});
 
   @override
   _EditProfileScreenState createState() => _EditProfileScreenState();
@@ -540,7 +528,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   void initState() {
     super.initState();
 
-    _cityController=TextEditingController(text: widget.city);
+    _cityController = TextEditingController(text: widget.city);
     _usernameController = TextEditingController(text: widget.username);
     _bioController = TextEditingController(text: widget.bio);
   }
@@ -561,27 +549,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (token == null) throw Exception('No auth token found');
 
       final response = await http.post(
-        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/register/'),
+        Uri.parse(
+            'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/register/'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
         body: json.encode({
           'bio': _bioController.text,
-          'city':_cityController.text,
-
+          'city': _cityController.text,
         }),
       );
-      print('Status Code: ${response.statusCode}');
-      print('Response Headers: ${response.headers}');
-      print('Response Body: ${response.body}');
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Response Headers: ${response.headers}');
+      debugPrint('Response Body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (mounted) {
           Navigator.of(context).pop({
             'username': _usernameController.text,
             'bio': _bioController.text,
-            'city':_cityController.text,
+            'city': _cityController.text,
           });
         }
       } else {
@@ -605,7 +593,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.pink[50],
       appBar: AppBar(
-        title: const Text("Edit Profile", style: TextStyle(color: Colors.pink)),
+        title: const Text("Edit profile", style: TextStyle(color: Colors.pink)),
         backgroundColor: Colors.pink[50],
         elevation: 0,
         iconTheme: const IconThemeData(
@@ -687,17 +675,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                   child: _isLoading
                       ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
                       : const Text(
-                    "Update",
-                    style: TextStyle(color: Colors.white),
-                  ),
+                          "Update",
+                          style: TextStyle(color: Colors.white),
+                        ),
                 ),
               ),
             ),
@@ -711,7 +699,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 class VideoGridSection extends StatelessWidget {
   final List<VideoModel> videos;
 
-  const VideoGridSection({Key? key, required this.videos}) : super(key: key);
+  const VideoGridSection({super.key, required this.videos});
   bool _isValidUrl(String? url) {
     if (url == null || url.isEmpty) return false;
     try {
@@ -721,7 +709,9 @@ class VideoGridSection extends StatelessWidget {
       return false;
     }
   }
-  Widget _buildThumbnail(String? thumbnail) {
+
+  ///TODO: Uncomment the below code to display the thumbnail of the video
+  /*Widget _buildThumbnail(String? thumbnail) {
     if (!_isValidUrl(thumbnail)) {
       return Container(
         color: Colors.grey[900],
@@ -759,7 +749,7 @@ class VideoGridSection extends StatelessWidget {
         );
       },
     );
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -848,7 +838,7 @@ class VideoGridSection extends StatelessWidget {
     );
   }
 
-  String _formatDuration(int  seconds) {
+  String _formatDuration(int seconds) {
     final duration = Duration(seconds: seconds);
     final minutes = duration.inMinutes;
     final remainingSeconds = duration.inSeconds % 60;
@@ -859,7 +849,7 @@ class VideoGridSection extends StatelessWidget {
 class SwipeableVideoView extends StatefulWidget {
   final List<VideoModel> videos;
 
-  const SwipeableVideoView({Key? key, required this.videos}) : super(key: key);
+  const SwipeableVideoView({super.key, required this.videos});
 
   @override
   _SwipeableVideoViewState createState() => _SwipeableVideoViewState();
@@ -867,12 +857,14 @@ class SwipeableVideoView extends StatefulWidget {
 
 class _SwipeableVideoViewState extends State<SwipeableVideoView> {
   late PageController _pageController;
-  int _currentIndex = 0;
+  //final int _currentIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.6); // Adjust the viewport fraction to make the cards smaller
+    _pageController = PageController(
+        viewportFraction:
+            0.6); // Adjust the viewport fraction to make the cards smaller
   }
 
   @override
@@ -897,7 +889,8 @@ class _SwipeableVideoViewState extends State<SwipeableVideoView> {
         crossAxisCount: 3, // Number of videos per row
         crossAxisSpacing: 0.5,
         mainAxisSpacing: 0.5,
-        childAspectRatio: 9 /16, // Adjust the aspect ratio to make it look like a reel card
+        childAspectRatio:
+            9 / 16, // Adjust the aspect ratio to make it look like a reel card
       ),
       itemCount: widget.videos.length,
       itemBuilder: (context, index) {
@@ -951,16 +944,15 @@ class _SwipeableVideoViewState extends State<SwipeableVideoView> {
   }
 }
 
-
 class FullScreenVideoPlayer extends StatefulWidget {
   final List<VideoModel> videos;
   final int initialIndex;
 
   const FullScreenVideoPlayer({
-    Key? key,
+    super.key,
     required this.videos,
     required this.initialIndex,
-  }) : super(key: key);
+  });
 
   @override
   _FullScreenVideoPlayerState createState() => _FullScreenVideoPlayerState();
@@ -1010,7 +1002,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
 class VideoPlayerScreen extends StatefulWidget {
   final VideoModel video;
 
-  const VideoPlayerScreen({Key? key, required this.video}) : super(key: key);
+  const VideoPlayerScreen({super.key, required this.video});
 
   @override
   _VideoPlayerScreenState createState() => _VideoPlayerScreenState();
@@ -1045,7 +1037,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         _controller?.setLooping(true);
       }
     } catch (e) {
-      print("Error initializing video: $e");
+      debugPrint("Error initializing video: $e");
       if (mounted) {
         setState(() {
           _isInitialized = false;
@@ -1053,24 +1045,25 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       }
     }
   }
-  void _playNextVideo() {
-    setState(() {
-      currentVideoIndex = (currentVideoIndex + 1) % videos.length;
-      progressValues[currentVideoIndex] = 0.0;
-    });
-  }
-  void _updateProgress(int index, double progress) {
-    setState(() {
-      progressValues[index] = progress;
-    });
-  }
+
+  // void _playNextVideo() {
+  //   setState(() {
+  //     currentVideoIndex = (currentVideoIndex + 1) % videos.length;
+  //     progressValues[currentVideoIndex] = 0.0;
+  //   });
+  // }
+  //
+  // void _updateProgress(int index, double progress) {
+  //   setState(() {
+  //     progressValues[index] = progress;
+  //   });
+  // }
+
   @override
   void dispose() {
     _controller?.dispose();
     super.dispose();
   }
-
-
 
   @override
   //
@@ -1080,25 +1073,21 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>const PreviewReelsScreen1(),
-
+            builder: (context) => const PreviewReelsScreen1(),
           ),
         );
       },
-
       child: Container(
         color: Colors.black,
         child: _isInitialized && _controller != null
             ? AspectRatio(
-          aspectRatio: _controller!.value.aspectRatio,
-          child: VideoPlayer(_controller!),
-        )
+                aspectRatio: _controller!.value.aspectRatio,
+                child: VideoPlayer(_controller!),
+              )
             : const Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
       ),
     );
   }
 }
-
-
