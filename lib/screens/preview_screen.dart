@@ -219,6 +219,7 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -279,9 +280,8 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.pink.withValues(
-                                alpha:
-                                    .6), // Background color tightly wrapping the text
+                            color: Colors.pink.withOpacity(0.5),
+                            // Background color tightly wrapping the text
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -312,10 +312,10 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
                                   Container(
                                     height: 45,
                                     width: 45,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       shape: BoxShape.circle,
                                       color:
-                                          Colors.black.withValues(alpha: 0.6),
+                                          Colors.black,
                                     ),
                                   ),
                                   IconButton(
@@ -344,10 +344,10 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
                                   Container(
                                     height: 45,
                                     width: 45,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       shape: BoxShape.circle,
                                       color:
-                                          Colors.black.withValues(alpha: 0.6),
+                                          Colors.black,
                                     ),
                                   ),
                                   IconButton(
@@ -376,10 +376,10 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
                                   Container(
                                     height: 45,
                                     width: 45,
-                                    decoration: BoxDecoration(
+                                    decoration: const BoxDecoration(
                                       shape: BoxShape.circle,
                                       color:
-                                          Colors.black.withValues(alpha: 0.6),
+                                          Colors.black,
                                     ),
                                   ),
                                   IconButton(
@@ -418,7 +418,7 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
                                         ? progressValues[i]
                                         : 0.0),
                                 backgroundColor:
-                                    Colors.grey.withValues(alpha: .5),
+                                    Colors.grey,
                                 valueColor: const AlwaysStoppedAnimation<Color>(
                                     Colors.white),
                                 minHeight: 3,

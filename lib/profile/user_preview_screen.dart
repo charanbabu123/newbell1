@@ -279,9 +279,8 @@ class PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.pink.withValues(
-                                alpha:
-                                    0.6), // Background color tightly wrapping the text
+                            color: Colors.pink.withOpacity(0.3), // Makes the color semi-transparent
+                            // Background color tightly wrapping the text
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -314,8 +313,8 @@ class PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
                                     width: 45,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color:
-                                          Colors.black.withValues(alpha: 0.6),
+                                      color: Colors.black.withOpacity(0.3), // Makes the color semi-transparent
+
                                     ),
                                   ),
                                   IconButton(
@@ -346,8 +345,8 @@ class PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
                                     width: 45,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color:
-                                          Colors.black.withValues(alpha: 0.6),
+                                      color: Colors.black.withOpacity(0.3), // Makes the color semi-transparent
+
                                     ),
                                   ),
                                   IconButton(
@@ -378,8 +377,8 @@ class PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
                                     width: 45,
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
-                                      color:
-                                          Colors.black.withValues(alpha: 0.6),
+                                      color: Colors.black.withOpacity(0.3), // Makes the color semi-transparent
+
                                     ),
                                   ),
                                   IconButton(
@@ -416,8 +415,7 @@ class PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
                                     : (i == currentVideoIndex
                                         ? progressValues[i]
                                         : 0.0),
-                                backgroundColor:
-                                    Colors.grey.withValues(alpha: .5),
+                                backgroundColor: Colors.grey.withOpacity(0.5),
                                 valueColor: const AlwaysStoppedAnimation<Color>(
                                     Colors.white),
                                 minHeight: 3,
@@ -633,10 +631,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 String _formatCaption(String caption) {
   // Ensure the caption is split into chunks of 38 characters
   List<String> lines = [];
-  for (int i = 0; i < words.length; i += 5) {
-    lines.add(words
-        .sublist(i, i + 5 > words.length ? words.length : i + 5)
-        .join(' '));
   for (int i = 0; i < caption.length; i += 38) {
     lines.add(caption.substring(i, i + 38 > caption.length ? caption.length : i + 38));
   }

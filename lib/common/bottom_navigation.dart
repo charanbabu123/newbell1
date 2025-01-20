@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../services/auth_service.dart';
+
 class BottomNavBar extends StatefulWidget {
   const BottomNavBar({super.key});
 

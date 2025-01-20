@@ -283,12 +283,12 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
             right: 0,
             height: MediaQuery.of(context).padding.top + 50,
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: 0.7),
+                    Colors.black,
                     Colors.transparent,
                   ],
                 ),
@@ -303,12 +303,12 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
             right: 0,
             height: 150,
             child: Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
                   colors: [
-                    Colors.black.withValues(alpha: .8),
+                    Colors.black,
                     Colors.transparent,
                   ],
                 ),
@@ -322,12 +322,12 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
             left: 0,
             right: 0,
             child: SliderTheme(
-              data: SliderThemeData(
+              data: const SliderThemeData(
                 trackHeight: 2,
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-                overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+                overlayShape: RoundSliderOverlayShape(overlayRadius: 12),
                 activeTrackColor: Colors.white,
-                inactiveTrackColor: Colors.white.withValues(alpha: .3),
+                inactiveTrackColor: Colors.white,
                 thumbColor: Colors.white,
               ),
               child: Slider(

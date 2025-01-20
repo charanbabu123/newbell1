@@ -1,19 +1,21 @@
-import '../../screens/profile_pic.dart';
+
+import 'package:bell_app1/screens/profile_pic.dart';
 import 'package:flutter/material.dart';
 
 class EmailScreen extends StatefulWidget {
   final String name;
   final String city;
-  const EmailScreen({super.key, required this.name, required this.city});
+  const EmailScreen({Key? key, required this.name, required this.city}) : super(key: key);
 
   @override
-  EmailScreenState createState() => EmailScreenState();
+  _EmailScreenState createState() => _EmailScreenState();
 }
 
-class EmailScreenState extends State<EmailScreen> {
+class _EmailScreenState extends State<EmailScreen> {
   final TextEditingController emailController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FocusNode _emailFocusNode = FocusNode();
+
 
   @override
   void initState() {
@@ -79,6 +81,7 @@ class EmailScreenState extends State<EmailScreen> {
                   }
                   return null; // No error if the email is valid
                 },
+
               ),
               const SizedBox(height: 30),
               GestureDetector(

@@ -156,7 +156,8 @@ class FullScreenCameraState extends State<FullScreenCamera> {
             right: 40,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.pink.withValues(alpha: 0.7),
+                color: Colors.pink.withOpacity(0.5),
+
                 shape: BoxShape.circle,
               ),
               child: IconButton(
@@ -175,7 +176,7 @@ class FullScreenCameraState extends State<FullScreenCamera> {
               child: Container(
                 padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
-                    color: Colors.pink[600]?.withValues(alpha: 0.7),
+                    color: Colors.pink[600],
                     borderRadius: BorderRadius.circular(5)),
                 child: Text(_formattedTime,
                     style: const TextStyle(color: Colors.white, fontSize: 18)),

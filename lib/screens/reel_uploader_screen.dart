@@ -314,13 +314,12 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
         File videoFile = File(result.files.single.path!);
 
         final VideoPlayerController tempController =
-            VideoPlayerController.file(videoFile);
+        VideoPlayerController.file(videoFile);
         await tempController.initialize();
         final int videoDuration = tempController.value.duration.inSeconds;
         tempController.dispose();
 
         if (videoDuration < 10) {
-          // Show a SnackBar message if the video duration is less than 10 seconds
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -338,6 +337,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
           sections[index].uploadProgress = 0.0;
         });
 
+        // Simulate upload progress
         int fileSizeMB = (videoFile.lengthSync() / (1024 * 1024)).ceil();
         int estimatedDuration = fileSizeMB.clamp(3, 15);
 
@@ -359,27 +359,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
           });
         }
 
-        if (videoFile.lengthSync() < 5 * 1024 * 1024) {
-          VideoPlayerController controller =
-              VideoPlayerController.file(videoFile);
-          await controller.initialize();
-
-          await Future.delayed(Duration(seconds: estimatedDuration));
-
-          if (mounted) {
-            setState(() {
-              sections[index].thumbnailController?.dispose();
-              sections[index].videoFile = videoFile;
-              sections[index].thumbnailController = controller;
-              sections[index].isProcessing = false;
-              sections[index].processingTime = '';
-              sections[index].uploadProgress = 0.0;
-              Provider.of<VideoSectionsProvider>(context, listen: false)
-                  .updateVideo(index, videoFile);
-            });
-          }
-        }
-
+        // Compress the video if needed
         final MediaInfo? compressedVideo = await VideoCompress.compressVideo(
           videoFile.path,
           quality: VideoQuality.LowQuality,
@@ -392,11 +372,13 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
 
         File compressedFile = File(compressedVideo.file!.path);
 
-        VideoPlayerController controller =
-            VideoPlayerController.file(compressedFile);
-        await controller.initialize();
+        // Wait for the video to upload
+        await uploadVideo(compressedFile, index);
 
-        await Future.delayed(Duration(seconds: estimatedDuration));
+        // Update UI after successful upload
+        VideoPlayerController controller =
+        VideoPlayerController.file(compressedFile);
+        await controller.initialize();
 
         if (mounted) {
           setState(() {
@@ -407,10 +389,10 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
             sections[index].processingTime = '';
             sections[index].uploadProgress = 0.0;
           });
-        }
 
-        // Make the API call to upload the video
-        await uploadVideo(compressedFile, index);
+          Provider.of<VideoSectionsProvider>(context, listen: false)
+              .updateVideo(index, compressedFile);
+        }
       }
     } catch (e) {
       debugPrint("Error picking or initializing video: $e");
@@ -425,6 +407,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
       }
     }
   }
+
 
   Future<void> uploadVideo(File videoFile, int index) async {
     final String? token = await AuthService.getAuthToken();
@@ -825,9 +808,6 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
               TextField(
                 controller: caption1Controller,
                 decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty
-                      ? 'Caption 1 (${intervals[0]}) *'
-                      : 'Caption 1 *',
                   labelText: intervals.isNotEmpty ? 'Caption 1 (${intervals[0]}) ' : 'Caption 1 ',
                   errorText: section.errorMessage,
                   labelStyle: const TextStyle(color: Colors.pink),

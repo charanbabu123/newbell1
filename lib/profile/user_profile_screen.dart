@@ -636,7 +636,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 filled: true,
                 fillColor: Colors.white,
                 hintText: "Enter city",
-                hintStyle: const TextStyle(color: Colors.black),
+                hintStyle: const TextStyle(color: Colors.pink),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -656,7 +656,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 filled: true,
                 fillColor: Colors.white,
                 hintText: "Enter bio",
-                hintStyle: const TextStyle(color: Colors.grey),
+                hintStyle: const TextStyle(color: Colors.pink),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
@@ -793,7 +793,7 @@ class VideoGridSection extends StatelessWidget {
           child: Stack(
             fit: StackFit.expand,
             children: [
-              _buildThumbnail(video.thumbnail),
+              //_buildThumbnail(video.thumbnail),
               if (video.tag != null) // Check if tag exists
                 Positioned(
                   top: 8,

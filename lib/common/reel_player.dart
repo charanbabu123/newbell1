@@ -138,12 +138,10 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                           horizontal: 10,
                           vertical: 2), // Padding for the background
                       decoration: BoxDecoration(
-                        color: Colors.pink.withValues(
-                            alpha:
-                                .6), // Background color tightly wrapping the text
-                        borderRadius:
-                            BorderRadius.circular(8), // Rounded corners
+                        color: Colors.pink.withOpacity(0.6), // Semi-transparent background color
+                        borderRadius: BorderRadius.circular(8), // Rounded corners
                       ),
+
                       child: Text(
                         currentCaption!,
                         style: const TextStyle(
@@ -169,7 +167,7 @@ class VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                   opacity: !_isPlaying ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 300),
                   child: Container(
-                    color: Colors.black.withValues(alpha: .3),
+                    color: Colors.black.withOpacity(0.3), // Makes the color semi-transparent
                     child: Center(
                       child: Icon(
                         _isPlaying ? Icons.pause : Icons.play_arrow,

@@ -134,12 +134,13 @@ class _FeedScreenState extends State<FeedScreen>
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withValues(alpha: 0.7),
-                  Colors.transparent,
+                  Colors.grey.withOpacity(0.5), // Semi-transparent grey
+                  Colors.transparent,           // Fully transparent
                 ],
               ),
             ),
-            padding: const EdgeInsets.only(top: 46, left: 54, right: 10, bottom: 16),
+            padding:
+                const EdgeInsets.only(top: 46, left: 54, right: 10, bottom: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -283,6 +284,7 @@ class Video {
 class FullScreenFeedItem extends StatefulWidget {
   final UserFeed feed;
 
+
   const FullScreenFeedItem({super.key, required this.feed});
 
   @override
@@ -293,7 +295,6 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
   final PageController _videoController = PageController();
   final Map<int, VideoPlayerController> _controllers = {};
   int _currentVideoIndex = 0;
-
 
   @override
   void initState() {
@@ -431,7 +432,8 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                         width: 45,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.black.withValues(alpha: 0.6),
+                          color: Colors.black.withOpacity(0.5),
+
                         ),
                       ),
                       IconButton(
@@ -458,7 +460,8 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                         width: 45,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.black.withValues(alpha: 0.6),
+                          color: Colors.black.withOpacity(0.5),
+
                         ),
                       ),
                       IconButton(
@@ -485,7 +488,8 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                         width: 45,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: Colors.black.withValues(alpha: 0.6),
+                          color: Colors.black.withOpacity(0.3), // Makes the color semi-transparent
+
                         ),
                       ),
                       IconButton(
@@ -512,7 +516,8 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
             decoration: BoxDecoration(
-              color: Colors.pink.withValues(alpha: 0.7),
+              color: Colors.pink.withOpacity(0.5),
+
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -535,7 +540,6 @@ class VideoPlayerWidget extends StatefulWidget {
   final List<Video> allVideos; // Add this
   final int currentIndex;
 
-
   const VideoPlayerWidget({
     super.key,
     required this.video,
@@ -551,7 +555,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
   bool _isInitialized = false;
   String? _currentCaption;
-  //final int _currentVideoIndex = 0;
+
 
   @override
   void initState() {
@@ -594,8 +598,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       debugPrint('Error initializing video: $e');
     }
   }
-
-
 
   void _onVideoEnd() {
     final parentState =
@@ -713,13 +715,15 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             bottom: 150,
             left: 0, // Align the container to the left edge of the parent
             right: 10, // Align the container to the right edge of the parent
-            child: Center( // Center the container within the available space
+            child: Center(
+              // Center the container within the available space
               child: Container(
                 padding: const EdgeInsets.symmetric(
                     vertical: 0,
                     horizontal: 5), // Adjust padding for the background
                 decoration: BoxDecoration(
-                  color: Colors.pink.withValues(alpha: 0.7),
+                  color: Colors.pink.withOpacity(0.5),
+
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -757,10 +761,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 String _formatCaption(String caption) {
   // Ensure the caption is split into chunks of 38 characters
   List<String> lines = [];
-  for (int i = 0; i < words.length; i += 5) {
-    lines.add(words
-        .sublist(i, i + 5 > words.length ? words.length : i + 5)
-        .join(' '));
+  for (int i = 0; i < caption.length; i += 38) {
+    lines.add(caption.substring(i, i + 38 > caption.length ? caption.length : i + 38));
   }
   // Join the lines with line breaks
   return lines.join('\n');
@@ -837,7 +839,7 @@ class InstagramStoryProgressBar extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: index < currentIndex
                             ? Colors.white
-                            : Colors.white.withValues(alpha: .5),
+                            : Colors.grey.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -875,7 +877,8 @@ class _ProgressBar extends StatelessWidget {
         return Container(
           height: 4,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: .5),
+            color: Colors.white.withOpacity(0.5),
+
             borderRadius: BorderRadius.circular(2),
           ),
           child: FractionallySizedBox(
