@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:bell_app1/splash/ProductTourScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,10 +9,10 @@ class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  _SplashScreenState createState() => _SplashScreenState();
+  SplashScreenState createState() => SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -66,7 +65,7 @@ class _SplashScreenState extends State<SplashScreen>
         final data = json.decode(response.body);
         final newAccessToken = data['access_token'];
         final newRefreshToken = data[
-        'refresh_token']; // In case the server sends a new refresh token too
+            'refresh_token']; // In case the server sends a new refresh token too
 
         // Save the new tokens
         await AuthService.saveTokens(
@@ -78,7 +77,7 @@ class _SplashScreenState extends State<SplashScreen>
       }
       return false;
     } catch (e) {
-      print('Error refreshing token: $e');
+      debugPrint('Error refreshing token: $e');
       return false;
     }
   }
@@ -106,14 +105,14 @@ class _SplashScreenState extends State<SplashScreen>
         debugPrint('User exists: $userExists');
         //Routing
         if (!userExists) {
-          Navigator.of(context).pushReplacementNamed('/tour');
+          if (mounted) Navigator.of(context).pushReplacementNamed('/tour');
         } else {
           if (shouldStayLoggedIn) {
-            Navigator.of(context).pushReplacementNamed('/feed');
+            if (mounted) Navigator.of(context).pushReplacementNamed('/feed');
           } else {
             // Clear any old tokens if refresh failed
             AuthService.logout();
-            Navigator.of(context).pushReplacementNamed('/login');
+            if (mounted) Navigator.of(context).pushReplacementNamed('/login');
           }
         }
       });

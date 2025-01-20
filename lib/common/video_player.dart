@@ -1,5 +1,4 @@
 // First, let's create a VideoPlayerScreen
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../models/video_model.dart';
@@ -9,16 +8,16 @@ class FullScreenVideoPlayer extends StatefulWidget {
   final int initialIndex;
 
   const FullScreenVideoPlayer({
-    Key? key,
+    super.key,
     required this.videos,
     required this.initialIndex,
-  }) : super(key: key);
+  });
 
   @override
-  _FullScreenVideoPlayerState createState() => _FullScreenVideoPlayerState();
+  FullScreenVideoPlayerState createState() => FullScreenVideoPlayerState();
 }
 
-class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
+class FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
   late PageController _pageController;
   int _currentIndex = 0;
 
@@ -62,13 +61,13 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
 class VideoPlayerScreen extends StatefulWidget {
   final VideoModel video;
 
-  const VideoPlayerScreen({Key? key, required this.video}) : super(key: key);
+  const VideoPlayerScreen({super.key, required this.video});
 
   @override
-  _VideoPlayerScreenState createState() => _VideoPlayerScreenState();
+  VideoPlayerScreenState createState() => VideoPlayerScreenState();
 }
 
-class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+class VideoPlayerScreenState extends State<VideoPlayerScreen> {
   VideoPlayerController? _controller;
   bool _isInitialized = false;
 
@@ -94,7 +93,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         _controller?.setLooping(true);
       }
     } catch (e) {
-      print("Error initializing video: $e");
+      debugPrint("Error initializing video: $e");
       if (mounted) {
         setState(() {
           _isInitialized = false;
@@ -116,22 +115,21 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => FullScreenVideoPlayback(controller: _controller),
-
+            builder: (context) =>
+                FullScreenVideoPlayback(controller: _controller),
           ),
         );
       },
-
       child: Container(
         color: Colors.black,
         child: _isInitialized && _controller != null
             ? AspectRatio(
-          aspectRatio: _controller!.value.aspectRatio,
-          child: VideoPlayer(_controller!),
-        )
+                aspectRatio: _controller!.value.aspectRatio,
+                child: VideoPlayer(_controller!),
+              )
             : const Center(
-          child: CircularProgressIndicator(color: Colors.white),
-        ),
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
       ),
     );
   }
@@ -140,7 +138,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
 class FullScreenVideoPlayback extends StatelessWidget {
   final VideoPlayerController? controller;
 
-  const FullScreenVideoPlayback({Key? key, this.controller}) : super(key: key);
+  const FullScreenVideoPlayback({super.key, this.controller});
 
   @override
   Widget build(BuildContext context) {
@@ -154,28 +152,28 @@ class FullScreenVideoPlayback extends StatelessWidget {
       body: Center(
         child: controller != null && controller!.value.isInitialized
             ? AspectRatio(
-          aspectRatio: controller!.value.aspectRatio,
-          child: VideoPlayer(controller!),
-        )
+                aspectRatio: controller!.value.aspectRatio,
+                child: VideoPlayer(controller!),
+              )
             : const Center(
-          child: CircularProgressIndicator(
-            color: Colors.white,
-          ),
-        ),
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                ),
+              ),
       ),
       floatingActionButton: controller != null
           ? FloatingActionButton(
-        onPressed: () {
-          if (controller!.value.isPlaying) {
-            controller!.pause();
-          } else {
-            controller!.play();
-          }
-        },
-        child: Icon(
-          controller!.value.isPlaying ? Icons.pause : Icons.play_arrow,
-        ),
-      )
+              onPressed: () {
+                if (controller!.value.isPlaying) {
+                  controller!.pause();
+                } else {
+                  controller!.play();
+                }
+              },
+              child: Icon(
+                controller!.value.isPlaying ? Icons.pause : Icons.play_arrow,
+              ),
+            )
           : null,
     );
   }
