@@ -247,193 +247,29 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
+          // Video Carousel
           CarouselSlider.builder(
             itemCount: videos.length,
             itemBuilder: (context, index, _) {
               final video = videos[index];
-              return Stack(
-                fit: StackFit.expand,
-                children: [
-                  VideoPlayerWidget(
-                    videoUrl: video['video_url'],
-                    onVideoEnd: _playNextVideo,
-                    isPlaying: currentVideoIndex == index,
-                    onProgressUpdate: (progress) =>
-                        _updateProgress(index, progress),
-                    autoPlay: true,
-                    caption1: video['caption_1'],
-                    caption2: video['caption_2'],
-                    caption3: video['caption_3'],
-                    duration: video['duration'] ?? 30.0,
-                  ),
-                  // Video tag
-                  Positioned(
-                    bottom: MediaQuery.of(context).padding.top +
-                        20, // Adjust as needed
-                    left: 0,
-                    right: 0,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment
-                          .center, // Center the container horizontally
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.pink.withOpacity(0.5),
-                            // Background color tightly wrapping the text
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            video['tag'] ?? '',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                      right: 16,
-                      bottom: 120,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          // Like Button
-                          Column(
-                            children: [
-                              Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Container(
-                                    height: 45,
-                                    width: 45,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          Colors.black,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.favorite,
-                                        color: Colors.white),
-                                    iconSize: 30,
-                                    onPressed: () {},
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 5),
-                              const Text("Like",
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 12)),
-                            ],
-                          ),
-
-                          const SizedBox(height: 15), // Space between icons
-
-                          // Comment Button
-                          Column(
-                            children: [
-                              Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Container(
-                                    height: 45,
-                                    width: 45,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          Colors.black,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.comment,
-                                        color: Colors.white),
-                                    iconSize: 30,
-                                    onPressed: () {},
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 5),
-                              const Text("Comment",
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 12)),
-                            ],
-                          ),
-
-                          const SizedBox(height: 15), // Space between icons
-
-                          // Share Button
-                          Column(
-                            children: [
-                              Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  Container(
-                                    height: 45,
-                                    width: 45,
-                                    decoration: const BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color:
-                                          Colors.black,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.share,
-                                        color: Colors.white),
-                                    iconSize: 30,
-                                    onPressed: () {},
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 5),
-                              const Text("Share",
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 12)),
-                            ],
-                          ),
-                        ],
-                      )),
-
-                  // Progress bars
-                  Positioned(
-                    bottom: 20,
-                    left: 10,
-                    right: 10,
-                    child: Row(
-                      children: List.generate(videos.length, (i) {
-                        return Expanded(
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 2),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(2),
-                              child: LinearProgressIndicator(
-                                value: i < currentVideoIndex
-                                    ? 1.0
-                                    : (i == currentVideoIndex
-                                        ? progressValues[i]
-                                        : 0.0),
-                                backgroundColor:
-                                    Colors.grey,
-                                valueColor: const AlwaysStoppedAnimation<Color>(
-                                    Colors.white),
-                                minHeight: 3,
-                              ),
-                            ),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                ],
+              return VideoPlayerWidget(
+                videoUrl: video['video_url'],
+                onVideoEnd: _playNextVideo,
+                isPlaying: currentVideoIndex == index,
+                onProgressUpdate: (progress) =>
+                    _updateProgress(index, progress),
+                autoPlay: true,
+                caption1: video['caption_1'],
+                caption2: video['caption_2'],
+                caption3: video['caption_3'],
+                duration: video['duration'] ?? 30.0,
               );
             },
             options: CarouselOptions(
-              height: MediaQuery.of(context).size.height,
+              height: MediaQuery
+                  .of(context)
+                  .size
+                  .height,
               viewportFraction: 1.0,
               enlargeCenterPage: false,
               enableInfiniteScroll: false,
@@ -444,9 +280,89 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
               },
             ),
           ),
+
+          // Static Video Tag
+          Positioned(
+            right: 143,
+            left: 143,
+            bottom: 20,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.pink.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    videos[currentVideoIndex]['tag'] ?? '',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Static Like/Comment/Share Buttons
+          Positioned(
+            right: 16,
+            bottom: 85,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                buildStaticButton(Icons.favorite, "Like", () {}),
+                const SizedBox(height: 15),
+                buildStaticButton(Icons.comment, "Comment", () {}),
+                const SizedBox(height: 15),
+                buildStaticButton(Icons.share, "Share", () {}),
+              ],
+            ),
+          ),
+
+          // Static Progress Bar
+          Positioned(
+            bottom: 5,
+            left: 10,
+            right: 10,
+            child: Row(
+              children: List.generate(videos.length, (i) {
+                return Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(2),
+                      child: LinearProgressIndicator(
+                        value: i < currentVideoIndex
+                            ? 1.0
+                            : (i == currentVideoIndex
+                            ? progressValues[i]
+                            : 0.0),
+                        backgroundColor: Colors.grey.withOpacity(0.5),
+                        valueColor:
+                        const AlwaysStoppedAnimation<Color>(Colors.white),
+                        minHeight: 3,
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+
+          // Profile Info and Back Button
           _buildProfileInfo(),
           Positioned(
-            top: MediaQuery.of(context).padding.top + 12,
+            top: MediaQuery
+                .of(context)
+                .padding
+                .top + 12,
             left: 6,
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -482,6 +398,36 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
       ),
     );
   }
+}
+Widget buildStaticButton(IconData icon, String label,
+    VoidCallback onPressed) {
+  return Column(
+    children: [
+      Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            height: 45,
+            width: 45,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black.withOpacity(0.3),
+            ),
+          ),
+          IconButton(
+            icon: Icon(icon, color: Colors.white),
+            iconSize: 30,
+            onPressed: onPressed,
+          ),
+        ],
+      ),
+      const SizedBox(height: 5),
+      Text(
+        label,
+        style: const TextStyle(color: Colors.white, fontSize: 12),
+      ),
+    ],
+  );
 }
 
 class VideoPlayerWidget extends StatefulWidget {
@@ -526,8 +472,14 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 
   Future<void> _initializeController() async {
-    _controller = VideoPlayerController.networkUrl(Uri.parse(widget.videoUrl));
+    _controller = VideoPlayerController.network(widget.videoUrl);
     await _controller.initialize();
+
+    // Calculate segment duration after controller is initialized
+    segmentDuration = _controller.value.duration.inSeconds / 3;
+    print('Total Video Duration: ${_controller.value.duration.inSeconds}');
+    print('Calculated Segment Duration: $segmentDuration');
+
     if (widget.isPlaying && widget.autoPlay) {
       _controller.play();
       _isPlaying = true;
@@ -545,21 +497,26 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         final progress = position / duration;
         widget.onProgressUpdate?.call(progress);
 
-        // Update caption based on video position
         final currentTime = _controller.value.position.inSeconds;
+        final totalDuration = _controller.value.duration.inSeconds;
+        segmentDuration = totalDuration / 3;
+
         setState(() {
-          if (currentTime < segmentDuration) {
+          if (currentTime <= segmentDuration) {
+            print('Showing Caption 1: $currentTime <= $segmentDuration');
             currentCaption = widget.caption1;
-          } else if (currentTime < segmentDuration * 2) {
+          } else if (currentTime <= segmentDuration * 2) {
+            print('Showing Caption 2: $currentTime <= ${segmentDuration * 2}');
             currentCaption = widget.caption2;
           } else {
+            print('Showing Caption 3: $currentTime > ${segmentDuration * 2}');
             currentCaption = widget.caption3;
           }
         });
-      }
 
-      if (_controller.value.position >= _controller.value.duration) {
-        widget.onVideoEnd?.call();
+        if (_controller.value.position >= _controller.value.duration) {
+          widget.onVideoEnd?.call();
+        }
       }
     }
   }
