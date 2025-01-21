@@ -155,16 +155,6 @@ class UserProfileScreenState extends State<UserProfileScreen>
     return response;
   }
 
-  Future<void> _pickProfileImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
-    }
-  }
 
   void _editProfile() async {
     final updatedData = await Navigator.of(context).push(
@@ -173,6 +163,8 @@ class UserProfileScreenState extends State<UserProfileScreen>
           username: username,
           bio: bio,
           city: city,
+          yoe: yoe,
+          profilePicture: userProfilePicture,
         ),
       ),
     );
@@ -182,9 +174,15 @@ class UserProfileScreenState extends State<UserProfileScreen>
         username = updatedData['username'];
         bio = updatedData['bio'];
         city = updatedData['city'];
+        yoe = updatedData['yoe'];
+        if (updatedData['profile_picture'] != null) {
+          userProfilePicture = updatedData['profile_picture'];
+          _profileImage = File(updatedData['profile_picture']); // Optional for local file handling
+        }
       });
     }
   }
+
 
   void _handleLogout() async {
     setState(() {
@@ -224,27 +222,25 @@ class UserProfileScreenState extends State<UserProfileScreen>
             children: [
               Stack(
                 children: [
-                  GestureDetector(
-                    onTap: _pickProfileImage,
-                    child: CircleAvatar(
-                      radius: 40,
-                      backgroundImage: _profileImage != null
-                          ? FileImage(_profileImage!)
-                          : (userProfilePicture != null
-                              ? NetworkImage(userProfilePicture!)
-                              : null) as ImageProvider?,
-                      child: _profileImage == null && userProfilePicture == null
-                          ? const Icon(Icons.person,
-                              size: 40, color: Colors.grey)
-                          : null,
-                    ),
+                  CircleAvatar(
+                    radius: 40,
+                    backgroundImage: _profileImage != null
+                        ? FileImage(_profileImage!)
+                        : (userProfilePicture != null && userProfilePicture!.startsWith('http')
+                        ? NetworkImage(userProfilePicture!)
+                        : null),
+                    child: (_profileImage == null &&
+                        (userProfilePicture == null || !userProfilePicture!.startsWith('http')))
+                        ? const Icon(Icons.person, size: 40, color: Colors.grey)
+                        : null,
                   ),
+
                   if (_profileImage == null && userProfilePicture == null)
                     Positioned(
                       bottom: 0,
                       right: 0,
                       child: GestureDetector(
-                        onTap: _pickProfileImage,
+                        //onTap: _pickProfileImage,
                         child: const CircleAvatar(
                           radius: 12,
                           backgroundColor: Colors.white,
@@ -507,12 +503,16 @@ class EditProfileScreen extends StatefulWidget {
   final String username;
   final String bio;
   final String city;
+  final num yoe;
+  final String? profilePicture;
 
   const EditProfileScreen(
       {super.key,
       required this.username,
       required this.bio,
-      required this.city});
+      required this.city,
+        required this.yoe,
+        this.profilePicture,});
 
   @override
   _EditProfileScreenState createState() => _EditProfileScreenState();
@@ -522,6 +522,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _usernameController;
   late TextEditingController _cityController;
   late TextEditingController _bioController;
+  late TextEditingController _yoeController;
+  File? _profileImage;
+
   bool _isLoading = false;
 
   @override
@@ -531,6 +534,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _cityController = TextEditingController(text: widget.city);
     _usernameController = TextEditingController(text: widget.username);
     _bioController = TextEditingController(text: widget.bio);
+    _yoeController = TextEditingController(text: widget.yoe.toString());
   }
 
   @override
@@ -538,7 +542,43 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _usernameController.dispose();
     _bioController.dispose();
     _cityController.dispose();
+    _yoeController.dispose();
     super.dispose();
+  }
+
+
+  Future<void> _pickProfileImage() async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 800, // Add reasonable image size constraints
+        maxHeight: 800,
+        imageQuality: 85,
+      );
+
+      if (pickedFile != null) {
+        final imageFile = File(pickedFile.path);
+        // Verify the file exists before setting state
+        if (await imageFile.exists()) {
+          setState(() {
+            _profileImage = imageFile;
+          });
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Selected image file not found')),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error picking image: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _handleSave() async {
@@ -548,21 +588,38 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final token = await AuthService.getAuthToken();
       if (token == null) throw Exception('No auth token found');
 
-      final response = await http.post(
-        Uri.parse(
-            'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/register/'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'bio': _bioController.text,
-          'city': _cityController.text,
-        }),
-      );
-      debugPrint('Status Code: ${response.statusCode}');
-      debugPrint('Response Headers: ${response.headers}');
-      debugPrint('Response Body: ${response.body}');
+      // Create multipart request
+      var uri = Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/register/');
+      var request = http.MultipartRequest('POST', uri);
+
+      // Add authorization header
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add text fields
+      request.fields['bio'] = _bioController.text;
+      request.fields['city'] = _cityController.text;
+      request.fields['yoe'] = _yoeController.text;
+      request.fields['name'] = _usernameController.text;
+
+      // Add profile image if selected
+      if (_profileImage != null) {
+        var profileImageStream = await http.ByteStream(_profileImage!.openRead());
+        var profileImageLength = await _profileImage!.length();
+
+        var multipartFile = http.MultipartFile(
+            'profile_picture',
+            profileImageStream,
+            profileImageLength,
+            filename: _profileImage!.path.split('/').last
+        );
+
+        request.files.add(multipartFile);
+      }
+
+      // Send request
+      var response = await request.send();
+      var responseData = await response.stream.bytesToString();
+      debugPrint('Response: $responseData');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (mounted) {
@@ -570,9 +627,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             'username': _usernameController.text,
             'bio': _bioController.text,
             'city': _cityController.text,
+            'yoe': num.tryParse(_yoeController.text) ?? 0,
+            'profile_picture': _profileImage != null
+                ? _profileImage!.path
+                : widget.profilePicture, // Use existing profile picture if none is uploaded
           });
         }
-      } else {
+      }
+      else {
         throw Exception('Failed to update profile: ${response.statusCode}');
       }
     } catch (e) {
@@ -597,99 +659,171 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         backgroundColor: Colors.pink[50],
         elevation: 0,
         iconTheme: const IconThemeData(
-          color: Colors.pink, // Set the back arrow icon color to white
+          color: Colors.pink,
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Username",
-              style: TextStyle(color: Colors.black, fontSize: 14),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _usernameController,
-              style: const TextStyle(color: Colors.pink),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                hintText: "Enter username",
-                hintStyle: const TextStyle(color: Colors.black),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              "City",
-              style: TextStyle(color: Colors.black, fontSize: 14),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _cityController,
-              style: const TextStyle(color: Colors.pink),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                hintText: "Enter city",
-                hintStyle: const TextStyle(color: Colors.pink),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              "Bio",
-              style: TextStyle(color: Colors.black, fontSize: 14),
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _bioController,
-              style: const TextStyle(color: Colors.pink),
-              maxLines: 3,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                hintText: "Enter bio",
-                hintStyle: const TextStyle(color: Colors.pink),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleSave,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pink,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Profile Picture Section
+              Center(
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage: _profileImage != null
+                          ? FileImage(_profileImage!)
+                          : (widget.profilePicture != null && widget.profilePicture!.startsWith('http')
+                          ? NetworkImage(widget.profilePicture!)
+                          : null) as ImageProvider?,
+                      child: (_profileImage == null &&
+                          (widget.profilePicture == null || !widget.profilePicture!.startsWith('http')))
+                          ? const Icon(Icons.person, size: 50, color: Colors.grey)
+                          : null,
+                    ),
+
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: _pickProfileImage,
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: Colors.pink,
+                            shape: BoxShape.circle,
                           ),
-                        )
-                      : const Text(
-                          "Update",
-                          style: TextStyle(color: Colors.white),
+                          child: const Icon(
+                            Icons.camera_alt,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+
+              // Username field
+              const Text(
+                "Username",
+                style: TextStyle(color: Colors.black, fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _usernameController,
+                style: const TextStyle(color: Colors.pink),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: "Enter username",
+                  hintStyle: const TextStyle(color: Colors.black),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // YOE field
+              const Text(
+                "Years of Experience",
+                style: TextStyle(color: Colors.black, fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _yoeController,
+                style: const TextStyle(color: Colors.pink),
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: "Enter years of experience",
+                  hintStyle: const TextStyle(color: Colors.pink),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // City field
+              const Text(
+                "City",
+                style: TextStyle(color: Colors.black, fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _cityController,
+                style: const TextStyle(color: Colors.pink),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: "Enter city",
+                  hintStyle: const TextStyle(color: Colors.pink),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Bio field
+              const Text(
+                "Bio",
+                style: TextStyle(color: Colors.black, fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _bioController,
+                style: const TextStyle(color: Colors.pink),
+                maxLines: 3,
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Colors.white,
+                  hintText: "Enter bio",
+                  hintStyle: const TextStyle(color: Colors.pink),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Update button
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleSave,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.pink,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                        : const Text(
+                      "Update",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1046,18 +1180,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     }
   }
 
-  // void _playNextVideo() {
-  //   setState(() {
-  //     currentVideoIndex = (currentVideoIndex + 1) % videos.length;
-  //     progressValues[currentVideoIndex] = 0.0;
-  //   });
-  // }
-  //
-  // void _updateProgress(int index, double progress) {
-  //   setState(() {
-  //     progressValues[index] = progress;
-  //   });
-  // }
 
   @override
   void dispose() {
