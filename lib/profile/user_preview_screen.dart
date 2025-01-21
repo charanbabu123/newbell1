@@ -7,7 +7,6 @@ import 'package:http/http.dart' as http;
 import '../services/auth_service.dart';
 
 
-
 class PreviewReelsScreen1 extends StatefulWidget {
   const PreviewReelsScreen1({Key? key}) : super(key: key);
 
@@ -123,9 +122,14 @@ class _PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
         currentVideoIndex++;
         progressValues[currentVideoIndex] = 0.0;
       });
+    } else {
+      // Optional: Loop back to the first video
+      setState(() {
+        currentVideoIndex = 0;
+        progressValues[currentVideoIndex] = 0.0;
+      });
     }
   }
-
 
   void _updateProgress(int index, double progress) {
     setState(() {
@@ -292,6 +296,7 @@ class _PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
                   currentVideoIndex = index;
                 });
               },
+
             ),
           ),
 
