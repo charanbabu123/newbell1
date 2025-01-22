@@ -28,6 +28,8 @@ class UserProfileScreenState extends State<UserProfileScreen>
   num yoe = 0;
   String? userProfilePicture;
   List<VideoModel> videos = [];
+  bool videosComplete = false;
+  double profileCompletionPercentage = 0.0;
 
   num posts = 23;
   num followers = 500;
@@ -63,8 +65,13 @@ class UserProfileScreenState extends State<UserProfileScreen>
             },
           ));
 
+      // In the fetchUserProfile method, update the setState block:
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print('Full API Response: $data');
+        print('Profile Completion Percentage: ${data['profile_completion_percentage']}');
+        print('Videos Complete Status: ${data['videos_complete']}');
+
         setState(() {
           final user = data['user'];
           username = user['name'] ?? "";
@@ -76,10 +83,14 @@ class UserProfileScreenState extends State<UserProfileScreen>
           videos = (data['videos'] as List)
               .map((video) => VideoModel.fromJson(video))
               .toList();
+          // Add these new lines
+          videosComplete = user['videos_complete'] ?? false;
+          profileCompletionPercentage = (user['profile_completion_percentage'] ?? 0.0).toDouble();
 
           isLoading = false;
         });
-      } else {
+      }
+      else {
         throw Exception("Failed to fetch profile: ${response.statusCode}");
       }
     } catch (e) {
@@ -177,9 +188,14 @@ class UserProfileScreenState extends State<UserProfileScreen>
         yoe = updatedData['yoe'];
         if (updatedData['profile_picture'] != null) {
           userProfilePicture = updatedData['profile_picture'];
-          _profileImage = File(updatedData['profile_picture']); // Optional for local file handling
+          _profileImage = File(updatedData['profile_picture']);
         }
       });
+
+      // Check if we should refresh the profile
+      if (updatedData['shouldRefresh'] == true) {
+        await fetchUserProfile(); // Fetch fresh data from API
+      }
     }
   }
 
@@ -316,11 +332,66 @@ class UserProfileScreenState extends State<UserProfileScreen>
               ),
             ),
           ),
+          const SizedBox(height: 16),
+          // Progress Bar
+          Container(
+            width: double.infinity,
+            height: 20,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.pink),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: profileCompletionPercentage / 100,
+                backgroundColor: Colors.white,
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.pink),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Profile Completion: ${profileCompletionPercentage.toStringAsFixed(1)}%',
+            style: const TextStyle(
+              color: Colors.pink,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 16),
+          // Complete Profile Button
+          GestureDetector(
+            onTap: () {
+              if (videosComplete) {
+                _editProfile();
+              } else {
+                // Switch to the videos tab
+                _tabController?.animateTo(1); // Switch to the first tab (SwipeableVideoView)
+              }
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.pink,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  videosComplete ? "Complete Your Profile" : "Complete Your Videos",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -346,7 +417,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
                   SliverAppBar(
                     backgroundColor: Colors.pink,
                     expandedHeight:
-                        285.0, // Adjust this value based on your header content
+                        400.0, // Adjust this value based on your header content
                     floating: false,
                     pinned: true,
                     stretch: true,
@@ -408,6 +479,8 @@ class UserProfileScreenState extends State<UserProfileScreen>
     );
   }
 }
+
+
 
 Widget _buildStatColumn(String label, num count) {
   return Column(
@@ -623,6 +696,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (mounted) {
+          // Pop the current screen with the updated data
           Navigator.of(context).pop({
             'username': _usernameController.text,
             'bio': _bioController.text,
@@ -630,7 +704,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             'yoe': num.tryParse(_yoeController.text) ?? 0,
             'profile_picture': _profileImage != null
                 ? _profileImage!.path
-                : widget.profilePicture, // Use existing profile picture if none is uploaded
+                : widget.profilePicture,
+            'shouldRefresh': true, // Add this flag
           });
         }
       }
