@@ -309,29 +309,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
               fontSize: 18,
             ),
           ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: _editProfile,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.pink),
-              ),
-              child: const Center(
-                child: Text(
-                  "Edit profile",
-                  style: TextStyle(
-                    color: Colors.pink,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-          ),
+
           const SizedBox(height: 16),
           // Progress Bar
           Container(
@@ -358,6 +336,30 @@ class UserProfileScreenState extends State<UserProfileScreen>
               fontSize: 14,
             ),
           ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: _editProfile,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.pink),
+              ),
+              child: const Center(
+                child: Text(
+                  "Edit profile",
+                  style: TextStyle(
+                    color: Colors.pink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
           const SizedBox(height: 16),
           // Complete Profile Button
           GestureDetector(
@@ -692,7 +694,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       // Send request
       var response = await request.send();
       var responseData = await response.stream.bytesToString();
-      debugPrint('Response: $responseData');
+
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (mounted) {
