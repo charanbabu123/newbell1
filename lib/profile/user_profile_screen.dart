@@ -380,50 +380,50 @@ class UserProfileScreenState extends State<UserProfileScreen>
             ),
           ),
 
-          const SizedBox(height: 16),
-          // Complete Profile Button
-          GestureDetector(
-            onTap: () {
-              if (videosComplete) {
-                _editProfile();
-              } else {
-                // Switch to the videos tab
-                _tabController?.animateTo(1);
-                // Switch to the second tab
-
-                // Add a slight delay and scroll up
-                Future.delayed(const Duration(milliseconds: 300), () {
-                  if (_scrollController.hasClients) {
-                    _scrollController.animateTo(
-                      _scrollController.offset + 350, // Adjust the value as needed
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                });
-              }
-            },
-
-            child: Container
-              (
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.pink,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: Text(
-                  videosComplete ? "Complete Your Profile" : "Complete Your Videos",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // const SizedBox(height: 16),
+          // // Complete Profile Button
+          // GestureDetector(
+          //   onTap: () {
+          //     if (videosComplete) {
+          //       _editProfile();
+          //     } else {
+          //       // Switch to the videos tab
+          //       _tabController?.animateTo(1);
+          //       // Switch to the second tab
+          //
+          //       // Add a slight delay and scroll up
+          //       Future.delayed(const Duration(milliseconds: 300), () {
+          //         if (_scrollController.hasClients) {
+          //           _scrollController.animateTo(
+          //             _scrollController.offset + 350, // Adjust the value as needed
+          //             duration: const Duration(milliseconds: 300),
+          //             curve: Curves.easeInOut,
+          //           );
+          //         }
+          //       });
+          //     }
+          //   },
+          //
+          //   child: Container
+          //     (
+          //     width: double.infinity,
+          //     padding: const EdgeInsets.symmetric(vertical: 12),
+          //     decoration: BoxDecoration(
+          //       color: Colors.pink,
+          //       borderRadius: BorderRadius.circular(8),
+          //     ),
+          //     child: Center(
+          //       child: Text(
+          //         videosComplete ? "Complete Your Profile" : "Complete Your Videos",
+          //         style: const TextStyle(
+          //           color: Colors.white,
+          //           fontSize: 14,
+          //           fontWeight: FontWeight.w500,
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -454,7 +454,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
             SliverAppBar(
               backgroundColor: Colors.pink,
               expandedHeight:
-              400.0, // Adjust this value based on your header content
+              350.0, // Adjust this value based on your header content
               floating: false,
               pinned: true,
               stretch: true,
