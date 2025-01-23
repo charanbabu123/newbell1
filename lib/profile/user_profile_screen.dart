@@ -30,6 +30,8 @@ class UserProfileScreenState extends State<UserProfileScreen>
   List<VideoModel> videos = [];
   bool videosComplete = false;
   double profileCompletionPercentage = 0.0;
+  ScrollController _scrollController = ScrollController();
+
 
   num posts = 23;
   num followers = 500;
@@ -59,11 +61,11 @@ class UserProfileScreenState extends State<UserProfileScreen>
       setState(() => isLoading = true);
 
       final response = await _makeAuthenticatedRequest((token) => http.get(
-            Uri.parse(apiEndpoint),
-            headers: {
-              'Authorization': 'Bearer $token',
-            },
-          ));
+        Uri.parse(apiEndpoint),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      ));
 
       // In the fetchUserProfile method, update the setState block:
       if (response.statusCode == 200) {
@@ -156,7 +158,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
         if (mounted) {
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute(builder: (context) => const LoginPhoneScreen()),
-            (route) => false,
+                (route) => false,
           );
         }
         throw Exception("Session expired. Please login again.");
@@ -217,7 +219,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const LoginPhoneScreen()),
-      (route) => false,
+          (route) => false,
     );
   }
 
@@ -368,9 +370,21 @@ class UserProfileScreenState extends State<UserProfileScreen>
                 _editProfile();
               } else {
                 // Switch to the videos tab
-                _tabController?.animateTo(1); // Switch to the first tab (SwipeableVideoView)
+                _tabController?.animateTo(1); // Switch to the second tab
+
+                // Add a slight delay and scroll up
+                Future.delayed(const Duration(milliseconds: 300), () {
+                  if (_scrollController.hasClients) {
+                    _scrollController.animateTo(
+                      _scrollController.offset + 350, // Adjust the value as needed
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  }
+                });
               }
             },
+
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -400,84 +414,85 @@ class UserProfileScreenState extends State<UserProfileScreen>
       backgroundColor: Colors.pink[50],
       body: isLoggingOut
           ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: Colors.red),
-                  SizedBox(height: 16),
-                  Text(
-                    "Logging off...",
-                    style: TextStyle(color: Colors.pink, fontSize: 18),
-                  ),
-                ],
-              ),
-            )
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(color: Colors.red),
+            SizedBox(height: 16),
+            Text(
+              "Logging off...",
+              style: TextStyle(color: Colors.pink, fontSize: 18),
+            ),
+          ],
+        ),
+      )
           : NestedScrollView(
-              headerSliverBuilder:
-                  (BuildContext context, bool innerBoxIsScrolled) {
-                return <Widget>[
-                  SliverAppBar(
-                    backgroundColor: Colors.pink,
-                    expandedHeight:
-                        400.0, // Adjust this value based on your header content
-                    floating: false,
-                    pinned: true,
-                    stretch: true,
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: Container(
-                        color: Colors.pink[50],
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            const SizedBox(height: 60), // Space for the app bar
-                            _buildProfileHeader(),
-                          ],
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      innerBoxIsScrolled ? username : "",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    actions: [
-                      IconButton(
-                        icon: const Icon(Icons.menu, color: Colors.black),
-                        onPressed: _openMenuScreen,
-                      ),
+        controller: _scrollController,
+        headerSliverBuilder:
+            (BuildContext context, bool innerBoxIsScrolled) {
+          return <Widget>[
+            SliverAppBar(
+              backgroundColor: Colors.pink,
+              expandedHeight:
+              400.0, // Adjust this value based on your header content
+              floating: false,
+              pinned: true,
+              stretch: true,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  color: Colors.pink[50],
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      const SizedBox(height: 60), // Space for the app bar
+                      _buildProfileHeader(),
                     ],
                   ),
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _SliverAppBarDelegate(
-                      TabBar(
-                        controller: _tabController,
-                        indicatorColor: Colors.pink,
-                        tabs: const [
-                          Tab(
-                              icon: Icon(Icons.video_library,
-                                  color: Colors.pink)),
-                          Tab(icon: Icon(Icons.grid_on, color: Colors.pink)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ];
-              },
-              body: TabBarView(
-                controller: _tabController,
-                children: [
-                  SwipeableVideoView(videos: videos),
-                  const ReelUploaderScreen(
-                    showAppBar: false,
-                    showSkip: false,
-                  ),
-                ],
+                ),
+              ),
+              title: Text(
+                innerBoxIsScrolled ? username : "",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.menu, color: Colors.black),
+                  onPressed: _openMenuScreen,
+                ),
+              ],
+            ),
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _SliverAppBarDelegate(
+                TabBar(
+                  controller: _tabController,
+                  indicatorColor: Colors.pink,
+                  tabs: const [
+                    Tab(
+                        icon: Icon(Icons.video_library,
+                            color: Colors.pink)),
+                    Tab(icon: Icon(Icons.grid_on, color: Colors.pink)),
+                  ],
+                ),
               ),
             ),
+          ];
+        },
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            SwipeableVideoView(videos: videos),
+            const ReelUploaderScreen(
+              showAppBar: false,
+              showSkip: false,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -583,9 +598,9 @@ class EditProfileScreen extends StatefulWidget {
 
   const EditProfileScreen(
       {super.key,
-      required this.username,
-      required this.bio,
-      required this.city,
+        required this.username,
+        required this.bio,
+        required this.city,
         required this.yoe,
         this.profilePicture,});
 
@@ -1075,7 +1090,7 @@ class _SwipeableVideoViewState extends State<SwipeableVideoView> {
     super.initState();
     _pageController = PageController(
         viewportFraction:
-            0.6); // Adjust the viewport fraction to make the cards smaller
+        0.6); // Adjust the viewport fraction to make the cards smaller
   }
 
   @override
@@ -1101,7 +1116,7 @@ class _SwipeableVideoViewState extends State<SwipeableVideoView> {
         crossAxisSpacing: 0.5,
         mainAxisSpacing: 0.5,
         childAspectRatio:
-            9 / 16, // Adjust the aspect ratio to make it look like a reel card
+        9 / 16, // Adjust the aspect ratio to make it look like a reel card
       ),
       itemCount: widget.videos.length,
       itemBuilder: (context, index) {
@@ -1280,12 +1295,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
         color: Colors.black,
         child: _isInitialized && _controller != null
             ? AspectRatio(
-                aspectRatio: _controller!.value.aspectRatio,
-                child: VideoPlayer(_controller!),
-              )
+          aspectRatio: _controller!.value.aspectRatio,
+          child: VideoPlayer(_controller!),
+        )
             : const Center(
-                child: CircularProgressIndicator(color: Colors.white),
-              ),
+          child: CircularProgressIndicator(color: Colors.white),
+        ),
       ),
     );
   }
