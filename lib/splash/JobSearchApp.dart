@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 void main() {
-  runApp(const JobSearchApp());
+  runApp(const MyApp());
 }
 
-class JobSearchApp extends StatelessWidget {
-  const JobSearchApp({Key? key}) : super(key: key);
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: const Color(0xFF9FE870),
+        primarySwatch: Colors.green,
         scaffoldBackgroundColor: Colors.white,
       ),
       home: const JobSearchScreen(),
@@ -33,29 +34,13 @@ class JobSearchScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Logo
-                Row(
-                  children: [
-                    const Text(
-                      'be',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                    Text(
-                      'LL',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ],
+                SvgPicture.asset(
+                  'assets/bell_image.svg',  // Path to your SVG asset
+                  width: 30,  // Adjust the size if needed
+                  height: 30, // Adjust the size if needed
                 ),
-                const SizedBox(height: 24),
-                // Header
+                const SizedBox(height: 14),
+                // Main heading
                 const SizedBox(
                   width: double.infinity, // Makes the container take up the full width of the screen
                   child: Text(
@@ -67,161 +52,145 @@ class JobSearchScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 7),
-                const SizedBox(
-                  width: double.infinity, // Makes the container take up the full width of the screen
+
+                const SizedBox(height: 1),
+
+                // Job count
+                SizedBox(
+                  width: double.infinity, // Ensures the container spans the full width
                   child: Text(
                     '5 lakh+ jobs for you to explore',
-                    textAlign: TextAlign.center, // Centers the text within the container
-                    style: TextStyle(
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
-                // Jobs you may be interested in
-                const SizedBox(
-                  width: double.infinity, // Makes the container take up the full width of the screen
-                  child: Text(
-                    'Jobs you maybe intrested',
-                    textAlign: TextAlign.center, // Centers the text within the container
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
                     ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Horizontal scrolling job categories
-                const SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      JobCategoryChip(
-                        label: 'Digital Marketing (89)',
-
-                      ),
-                      JobCategoryChip(
-                        label: 'Product Management (43)',
-                      ),
-                      JobCategoryChip(
-                        label: 'Design(10)',
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Job cards
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: List.generate(
-                      3,
-                          (index) => const JobCard(
-                        title: 'Digital Marketing',
-                        company: 'Microsoft',
-                        location: 'Bangalore',
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Most popular jobs
-                const SizedBox(
-                  width: double.infinity, // Makes the container take up the full width of the screen
-                  child: Text(
-                    'Most Popular jobs',
-                    textAlign: TextAlign.center, // Centers the text within the container
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      PopularJobChip(
-                        icon: Icons.trending_up,
-                        label: 'Digital Marketing',
-                      ),
-                      SizedBox(width: 4),
-                      PopularJobChip(
-                        icon: Icons.computer,
-                        label: 'Software Developer',
-                      ),
-                    ],
                   ),
                 ),
 
                 const SizedBox(height: 24),
 
-                // Top companies section
-                const Text(
-                  'Top companies hiring now',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Interested jobs chips
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CompanyCategory(
-                      title: 'Edtech',
-                      subtitle: 'Top companies hiring',
+                    SizedBox(
+                      width: double.infinity, // Ensures the container spans the full width
+                      child: Text(
+                        'Jobs you maybe interested',
+                        textAlign: TextAlign.center, // Centers the text within the container
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                     ),
-                    CompanyCategory(
-                      title: 'Fintech',
-                      subtitle: 'Top companies hiring',
-                    ),
-                    CompanyCategory(
-                      title: 'Healthcare',
-                      subtitle: 'Top companies hiring',
+
+                    SizedBox(height: 10),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          JobChip(label: 'Digital Marketing (89)'),
+                          JobChip(label: 'Product Management (43)'),
+                          JobChip(label: 'Design (67)'),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 14),
 
-                // When can you start section
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3FFE9),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                // Job cards
+                const SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
                     children: [
-                      Text(
-                        'When can you start?',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      JobCard(
+                        company: 'Microsoft',
+                        role: 'Digital Marketing',
+                        location: 'Bangalore',
                       ),
-                      SizedBox(height: 16),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          TimeframeChip(label: 'Tomorrow'),
-                          TimeframeChip(label: '15-30 Days'),
-                          TimeframeChip(label: '1-3 Months'),
-                          TimeframeChip(label: '6 Months'),
-                        ],
+                      JobCard(
+                        company: 'Microsoft',
+                        role: 'Digital Marketing',
+                        location: 'Bangalore',
+                      ),
+                      JobCard(
+                        company: 'Microsoft',
+                        role: 'Digital Marketing',
+                        location: 'Bangalore',
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(height: 14),
+
+                // Popular jobs section
+                const SizedBox(
+                  width: double.infinity, // Ensures the container spans the full width
+                  child: Text(
+                    'Most popular jobs',
+                    textAlign: TextAlign.center, // Centers the text within the container
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+                const SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      PopularJobItem(icon: Icons.work, label: 'Digital Marketing'),
+                      PopularJobItem(
+                          icon: Icons.computer, label: 'Software Developer'),
+                      PopularJobItem(icon: Icons.design_services, label: 'Design'),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // Companies hiring section
+                const SizedBox(
+                  width: double.infinity, // Ensures the container takes full width
+                  child: Text(
+                    'Top companies hiring now',
+                    textAlign: TextAlign.center, // Centers the text inside the container
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+                const SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      CompanyCategory(
+                        category: 'Edtech',
+                        subtitle: 'Top companies hiring',
+                        colorIndex: 0,
+                      ),
+                      CompanyCategory(
+                        category: 'Fintech',
+                        subtitle: 'Top companies hiring',
+                        colorIndex: 1,
+                      ),
+                      CompanyCategory(
+                        category: 'Healthcare',
+                        subtitle: 'Top companies hiring',
+                        colorIndex: 2,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+                const QuestionnaireSection(),
               ],
             ),
           ),
@@ -231,15 +200,10 @@ class JobSearchScreen extends StatelessWidget {
   }
 }
 
-class JobCategoryChip extends StatelessWidget {
+class JobChip extends StatelessWidget {
   final String label;
-  final bool isSelected;
 
-  const JobCategoryChip({
-    Key? key,
-    required this.label,
-    this.isSelected = false,
-  }) : super(key: key);
+  const JobChip({Key? key, required this.label}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -248,26 +212,23 @@ class JobCategoryChip extends StatelessWidget {
       child: Chip(
         label: Text(
           label,
-          style: TextStyle(
-            color: isSelected ? Colors.black : Colors.grey,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
+          style: const TextStyle(color: Colors.black87),
         ),
-        backgroundColor: isSelected ? Theme.of(context).primaryColor : Colors.grey[200],
+        backgroundColor: Colors.white,
       ),
     );
   }
 }
 
 class JobCard extends StatelessWidget {
-  final String title;
   final String company;
+  final String role;
   final String location;
 
   const JobCard({
     Key? key,
-    required this.title,
     required this.company,
+    required this.role,
     required this.location,
   }) : super(key: key);
 
@@ -279,36 +240,46 @@ class JobCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+              color: Colors.green[400],
               borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.work,
+              color: Colors.white,
+              size: 24,
             ),
           ),
           const SizedBox(height: 12),
           Text(
-            title,
+            role,
             style: const TextStyle(
-              fontWeight: FontWeight.bold,
               fontSize: 16,
+              fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             company,
-            style: TextStyle(color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             location,
-            style: TextStyle(color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
           ),
         ],
       ),
@@ -316,11 +287,11 @@ class JobCard extends StatelessWidget {
   }
 }
 
-class PopularJobChip extends StatelessWidget {
+class PopularJobItem extends StatelessWidget {
   final IconData icon;
   final String label;
 
-  const PopularJobChip({
+  const PopularJobItem({
     Key? key,
     required this.icon,
     required this.label,
@@ -329,47 +300,70 @@ class PopularJobChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
+      margin: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.all(12),  // Added padding
+      decoration: BoxDecoration(  // Added decoration
         border: Border.all(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 20),
+          Icon(icon, color: Colors.grey[600]),
           const SizedBox(width: 8),
-          Text(label),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Icon(
+            Icons.chevron_right,
+            size: 20,
+            color: Colors.grey,
+          ),
         ],
       ),
     );
   }
 }
 
+
 class CompanyCategory extends StatelessWidget {
-  final String title;
+  final String category;
   final String subtitle;
+  final int colorIndex;
 
   const CompanyCategory({
     Key? key,
-    required this.title,
+    required this.category,
     required this.subtitle,
+    required this.colorIndex,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final colors = [
+      Colors.green,
+      Colors.blue,
+      Colors.orange,
+    ];
+
     return Container(
-      width: 100,
-      padding: const EdgeInsets.all(12),
+      width: 180,
+      margin: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
+            category,
             style: const TextStyle(
+              fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -377,20 +371,20 @@ class CompanyCategory extends StatelessWidget {
           Text(
             subtitle,
             style: TextStyle(
+              fontSize: 14,
               color: Colors.grey[600],
-              fontSize: 12,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Row(
             children: List.generate(
               4,
                   (index) => Container(
-                width: 20,
-                height: 20,
-                margin: const EdgeInsets.only(right: 4),
+                width: 24,
+                height: 24,
+                margin: const EdgeInsets.only(right: 11),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
+                  color: colors[colorIndex][300],
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
@@ -402,23 +396,200 @@ class CompanyCategory extends StatelessWidget {
   }
 }
 
-class TimeframeChip extends StatelessWidget {
+class TimeChip extends StatelessWidget {
   final String label;
 
-  const TimeframeChip({
-    Key? key,
-    required this.label,
-  }) : super(key: key);
+  const TimeChip({Key? key, required this.label}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
-        borderRadius: BorderRadius.circular(20),
+      margin: const EdgeInsets.only(right: 8),
+      child: Chip(
+        label: Text(
+          label,
+          style: const TextStyle(color: Colors.black87),
+        ),
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: Colors.grey),
+        ),
       ),
-      child: Text(label),
+    );
+  }
+}
+
+
+class QuestionnaireSection extends StatefulWidget {
+  const QuestionnaireSection({Key? key}) : super(key: key);
+
+  @override
+  _QuestionnaireSectionState createState() => _QuestionnaireSectionState();
+}
+
+class _QuestionnaireSectionState extends State<QuestionnaireSection> {
+  int currentQuestionIndex = 0;
+  String? selectedStartTime;
+  String? selectedExperience;
+  String desiredJob = '';
+  final PageController _pageController = PageController();
+  final TextEditingController jobController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDCF8C7),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      height: 130, // Add fixed height for PageView
+      child: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            currentQuestionIndex = index;
+          });
+        },
+        children: [
+          _buildStartTimeQuestion(),
+          _buildExperienceQuestion(),
+          _buildJobSearchQuestion(),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildStartTimeQuestion() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      key: const ValueKey('question1'),
+      children: [
+        const Text(
+          'When can you start?',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          children: [
+            _buildChoiceChip('Tomorrow', selectedStartTime),
+            _buildChoiceChip('1-3 month', selectedStartTime),
+            _buildChoiceChip('6 months', selectedStartTime),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExperienceQuestion() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      key: const ValueKey('question2'),
+      children: [
+        const Text(
+          'What is your experience level?',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 8,
+          children: [
+            _buildChoiceChip('Student', selectedExperience),
+            _buildChoiceChip('Beginner', selectedExperience),
+            _buildChoiceChip('Experienced', selectedExperience),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildJobSearchQuestion() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      key: const ValueKey('question3'),
+      children: [
+        const Text(
+          'What kind of job would you like?',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: jobController,
+                decoration: const InputDecoration(
+                  hintText: 'e.g. Sales Manager',
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    desiredJob = value;
+                  });
+                },
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.arrow_forward),
+              onPressed: desiredJob.isNotEmpty ? () {
+                // Handle final submission
+                print('Answers collected: Start: $selectedStartTime, Experience: $selectedExperience, Job: $desiredJob');
+              } : null,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildChoiceChip(String label, String? selectedValue) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selectedValue == label,
+      onSelected: (bool selected) {
+        setState(() {
+          if (currentQuestionIndex == 0) {
+            selectedStartTime = selected ? label : null;
+            if (selected) {
+              Future.delayed(const Duration(milliseconds: 300), () {
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              });
+            }
+          } else if (currentQuestionIndex == 1) {
+            selectedExperience = selected ? label : null;
+            if (selected) {
+              Future.delayed(const Duration(milliseconds: 300), () {
+                _pageController.nextPage(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              });
+            }
+          }
+        });
+      },
+      backgroundColor: Colors.white,
+      selectedColor: Colors.green,
+      labelStyle: TextStyle(
+        color: selectedValue == label ? Colors.white : Colors.black87,
+      ),
     );
   }
 }

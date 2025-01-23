@@ -1,4 +1,5 @@
 import 'package:bell_app1/splash/JobSearchApp.dart';
+import 'package:bell_app1/splash/spalsh1.dart';
 
 import '../../profile/user_profile_screen.dart';
 import '../../providers/video_section_provider.dart';

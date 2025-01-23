@@ -46,6 +46,7 @@ dependencies:
   shared_preferences: ^2.2.0
   provider: ^6.0.1
   chewie: ^1.7.5
+  flutter_svg:
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -78,6 +79,8 @@ flutter:
   assets:
     - assets/demo_logo.png
     - assets/img10.png
+    - assets/bell_image.svg
+    - assets/splash.gif
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -130,6 +130,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
                         ? Image.network(
                       profilePicUrl,
                       fit: BoxFit.cover,
+                        width: 32, // Adjust width to match the diameter of CircleAvatar
+                        height: 32,
                       errorBuilder: (context, error, stackTrace) {
                         return const Icon(
                           Icons.person,
