@@ -30,7 +30,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
   List<VideoModel> videos = [];
   bool videosComplete = false;
   double profileCompletionPercentage = 0.0;
-  ScrollController _scrollController = ScrollController();
+   ScrollController _scrollController = ScrollController();
 
 
   num posts = 23;
@@ -170,7 +170,8 @@ class UserProfileScreenState extends State<UserProfileScreen>
 
 
   void _editProfile() async {
-    final updatedData = await Navigator.of(context).push(
+    // Capture the result when navigating back from EditProfileScreen
+    final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => EditProfileScreen(
           username: username,
@@ -182,24 +183,41 @@ class UserProfileScreenState extends State<UserProfileScreen>
       ),
     );
 
-    if (updatedData != null) {
+    // Check if the result contains the tab-switch flag
+    if (result != null && result['shouldSwitchToVideosTab'] == true) {
+      _tabController?.animateTo(1);
+      // Add a slight delay and scroll up
+      Future.delayed(const Duration(milliseconds: 200), () {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.offset + 350, // Adjust the value as needed
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        }
+      });// Switch to the second tab
+    }
+
+    // Handle other updates (profile data, refreshing, etc.)
+    if (result != null) {
       setState(() {
-        username = updatedData['username'];
-        bio = updatedData['bio'];
-        city = updatedData['city'];
-        yoe = updatedData['yoe'];
-        if (updatedData['profile_picture'] != null) {
-          userProfilePicture = updatedData['profile_picture'];
-          _profileImage = File(updatedData['profile_picture']);
+        username = result['username'] ?? username;
+        bio = result['bio'] ?? bio;
+        city = result['city'] ?? city;
+        yoe = result['yoe'] ?? yoe;
+        if (result['profile_picture'] != null) {
+          userProfilePicture = result['profile_picture'];
+          _profileImage = File(result['profile_picture']);
         }
       });
 
-      // Check if we should refresh the profile
-      if (updatedData['shouldRefresh'] == true) {
-        await fetchUserProfile(); // Fetch fresh data from API
+      // Refresh profile data if requested
+      if (result['shouldRefresh'] == true) {
+        await fetchUserProfile();
       }
     }
   }
+
 
 
   void _handleLogout() async {
@@ -370,7 +388,8 @@ class UserProfileScreenState extends State<UserProfileScreen>
                 _editProfile();
               } else {
                 // Switch to the videos tab
-                _tabController?.animateTo(1); // Switch to the second tab
+                _tabController?.animateTo(1);
+                // Switch to the second tab
 
                 // Add a slight delay and scroll up
                 Future.delayed(const Duration(milliseconds: 300), () {
@@ -385,7 +404,8 @@ class UserProfileScreenState extends State<UserProfileScreen>
               }
             },
 
-            child: Container(
+            child: Container
+              (
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
@@ -614,7 +634,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late TextEditingController _bioController;
   late TextEditingController _yoeController;
   File? _profileImage;
-
+  bool videosComplete = false;
+  double profileCompletionPercentage = 0.0;
+  final ScrollController _scrollController = ScrollController();
+  TabController? _tabController;
   bool _isLoading = false;
 
   @override
@@ -890,28 +913,69 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               // Update button
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleSave,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.pink,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2,
+                child: Column(
+                  children: [
+                    // Update button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : _handleSave,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pink,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                            : const Text(
+                          "Update",
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
-                    )
-                        : const Text(
-                      "Update",
-                      style: TextStyle(color: Colors.white),
                     ),
-                  ),
+                    const SizedBox(height: 16), // Space between the buttons
+                    // Complete Your Videos button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (videosComplete==false) {
+                            // Navigate back and switch to the videos tab
+                            Navigator.of(context).pop({
+                              'shouldSwitchToVideosTab': true,
+                            });
+
+                            // Optional delay and scrolling
+                            Future.delayed(const Duration(milliseconds: 300), () {
+                              if (_tabController != null && _scrollController.hasClients) {
+                                _tabController?.animateTo(1);
+                                _scrollController.animateTo(
+                                  _scrollController.offset + 350,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            });
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: const BorderSide(color: Colors.pink), // Border styling
+                        ),
+                        child: Text(
+                          videosComplete ? "Complete Your Profile" : "Complete Your Videos",
+                          style: const TextStyle(color: Colors.pink),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
