@@ -438,28 +438,32 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFDCF8C7),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      height: 130, // Add fixed height for PageView
-      child: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            currentQuestionIndex = index;
-          });
-        },
-        children: [
-          _buildStartTimeQuestion(),
-          _buildExperienceQuestion(),
-          _buildJobSearchQuestion(),
-        ],
+    return SizedBox(
+      width: 160, // Occupies full screen width
+      child: Container(
+        padding: const EdgeInsets.all(16), // Content padding remains
+        decoration: BoxDecoration(
+          color: const Color(0xFFDCF8C7),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        height: 130, // Fixed height for the PageView
+        child: PageView(
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() {
+              currentQuestionIndex = index;
+            });
+          },
+          children: [
+            _buildStartTimeQuestion(),
+            _buildExperienceQuestion(),
+            _buildJobSearchQuestion(),
+          ],
+        ),
       ),
     );
   }
+
 
 
   Widget _buildStartTimeQuestion() {

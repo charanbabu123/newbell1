@@ -190,7 +190,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
       Future.delayed(const Duration(milliseconds: 200), () {
         if (_scrollController.hasClients) {
           _scrollController.animateTo(
-            _scrollController.offset + 350, // Adjust the value as needed
+            _scrollController.offset + 300, // Adjust the value as needed
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
           );
@@ -369,7 +369,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
               ),
               child: const Center(
                 child: Text(
-                  "Edit profile",
+                  "Complete Your Profile",
                   style: TextStyle(
                     color: Colors.pink,
                     fontSize: 14,
@@ -454,7 +454,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
             SliverAppBar(
               backgroundColor: Colors.pink,
               expandedHeight:
-              350.0, // Adjust this value based on your header content
+              355.0, // Adjust this value based on your header content
               floating: false,
               pinned: true,
               stretch: true,
@@ -916,6 +916,43 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: Column(
                   children: [
                     // Update button
+
+                    const SizedBox(height: 16), // Space between the buttons
+                    // Complete Your Videos button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (videosComplete==false) {
+                            // Navigate back and switch to the videos tab
+                            Navigator.of(context).pop({
+                              'shouldSwitchToVideosTab': true,
+                            });
+
+                            // Optional delay and scrolling
+                            Future.delayed(const Duration(milliseconds: 300), () {
+                              if (_tabController != null && _scrollController.hasClients) {
+                                _tabController?.animateTo(1);
+                                _scrollController.animateTo(
+                                  _scrollController.offset + 550,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              }
+                            });
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          side: const BorderSide(color: Colors.pink), // Border styling
+                        ),
+                        child: Text(
+                          videosComplete ? "Complete Your Profile" : "Complete Your Videos",
+                          style: const TextStyle(color: Colors.pink),
+                        ),
+                      ),
+                    ),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -936,42 +973,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             : const Text(
                           "Update",
                           style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16), // Space between the buttons
-                    // Complete Your Videos button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (videosComplete==false) {
-                            // Navigate back and switch to the videos tab
-                            Navigator.of(context).pop({
-                              'shouldSwitchToVideosTab': true,
-                            });
-
-                            // Optional delay and scrolling
-                            Future.delayed(const Duration(milliseconds: 300), () {
-                              if (_tabController != null && _scrollController.hasClients) {
-                                _tabController?.animateTo(1);
-                                _scrollController.animateTo(
-                                  _scrollController.offset + 350,
-                                  duration: const Duration(milliseconds: 300),
-                                  curve: Curves.easeInOut,
-                                );
-                              }
-                            });
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          side: const BorderSide(color: Colors.pink), // Border styling
-                        ),
-                        child: Text(
-                          videosComplete ? "Complete Your Profile" : "Complete Your Videos",
-                          style: const TextStyle(color: Colors.pink),
                         ),
                       ),
                     ),
