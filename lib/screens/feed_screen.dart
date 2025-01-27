@@ -78,13 +78,13 @@ class _FeedScreenState extends State<FeedScreen>
 
     try {
       final validToken = await _getValidToken();
-      // if (validToken == null) {
-      //   throw Exception('Unable to authenticate. Please login again.');
-      // }
+      if (validToken == null) {
+        throw Exception('Unable to authenticate. Please login again.');
+      }
 
       final response = await http.get(
         Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/feed/'),
-        // headers: {'Authorization': 'Bearer $validToken'},
+        headers: {'Authorization': 'Bearer $validToken'},
       );
       debugPrint('Status Code: ${response.statusCode}');
       debugPrint('Response Headers: ${response.headers}');
