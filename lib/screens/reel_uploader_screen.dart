@@ -314,7 +314,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
         File videoFile = File(result.files.single.path!);
 
         final VideoPlayerController tempController =
-        VideoPlayerController.file(videoFile);
+            VideoPlayerController.file(videoFile);
         await tempController.initialize();
         final int videoDuration = tempController.value.duration.inSeconds;
         tempController.dispose();
@@ -377,7 +377,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
 
         // Update UI after successful upload
         VideoPlayerController controller =
-        VideoPlayerController.file(compressedFile);
+            VideoPlayerController.file(compressedFile);
         await controller.initialize();
 
         if (mounted) {
@@ -407,7 +407,6 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
       }
     }
   }
-
 
   Future<void> uploadVideo(File videoFile, int index) async {
     final String? token = await AuthService.getAuthToken();
@@ -628,69 +627,84 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                const Icon(Icons.drag_handle, color: Colors.grey),
-                const SizedBox(width: 8),
-                Text(
-                  section.label,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                Center(
+                  child: Text(
+                    section.label,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
+
             if (section.videoFile != null &&
                 section.thumbnailController != null) ...[
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: AspectRatio(
-                      aspectRatio: 16 / 9,
-                      child: VideoPlayer(section.thumbnailController!),
+                  Padding(
+                    padding: const EdgeInsets.all(40), // Adjust the value to increase/decrease spacing
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: AspectRatio(
+                        aspectRatio: 3 / 4,
+                        child: VideoPlayer(section.thumbnailController!),
+                      ),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.play_circle_filled,
-                        size: 50, color: Colors.white),
-                    onPressed: () {},
+                  Positioned(
+                    bottom: 45, // Adjust the bottom position as needed
+                    right: 45, // Adjust the right position as needed
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5), // Black background with some opacity
+                        borderRadius: BorderRadius.circular(50), // Round the edges
+                      ),
+                      child: IconButton(
+                        onPressed: () => deleteVideo(index),
+                        icon: const Icon(Icons.delete, color: Colors.white), // Icon color white for contrast
+                      ),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: section.captions != null
                         ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (int i = 0; i < section.captions!.length; i++)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4.0),
-                            child: RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Caption ${i + 1}: ",
-                                    style: const TextStyle(color: Colors.pink), // Pink color for "Caption ${i + 1}:"
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (int i = 0; i < section.captions!.length; i++)
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 4.0),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: "Caption ${i + 1}: ",
+                                          style: const TextStyle(
+                                              color: Colors
+                                                  .pink), // Pink color for "Caption ${i + 1}:"
+                                        ),
+                                        TextSpan(
+                                          text: section.captions![i],
+                                          style: const TextStyle(
+                                              color: Colors
+                                                  .black), // Black color for the actual caption
+                                        ),
+                                      ],
+                                    ),
+                                    maxLines: 5,
+                                    overflow: TextOverflow
+                                        .ellipsis, // Adds ellipsis if text exceeds the limit
+                                    softWrap:
+                                        true, // Ensures text wraps if it exceeds one line
                                   ),
-                                  TextSpan(
-                                    text: section.captions![i],
-                                    style: const TextStyle(color: Colors.black), // Black color for the actual caption
-                                  ),
-                                ],
-                              ),
-                              maxLines: 5,
-                              overflow: TextOverflow.ellipsis, // Adds ellipsis if text exceeds the limit
-                              softWrap: true, // Ensures text wraps if it exceeds one line
-                            ),
-                          ),
+                                ),
 
                               const SizedBox(
                                   width: 60.0), // Adjust spacing here
@@ -808,7 +822,9 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
               TextField(
                 controller: caption1Controller,
                 decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty ? 'Caption 1 (${intervals[0]}) ' : 'Caption 1 ',
+                  labelText: intervals.isNotEmpty
+                      ? 'Caption 1 (${intervals[0]}) '
+                      : 'Caption 1 ',
                   errorText: section.errorMessage,
                   labelStyle: const TextStyle(color: Colors.pink),
                   enabledBorder: const UnderlineInputBorder(
@@ -824,13 +840,14 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
               TextField(
                 controller: caption2Controller,
                 decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty ? 'Caption 2 (${intervals[1]}) ' : 'Caption 2 ',
+                  labelText: intervals.isNotEmpty
+                      ? 'Caption 2 (${intervals[1]}) '
+                      : 'Caption 2 ',
                   errorText: section.errorMessage,
                   labelStyle: const TextStyle(color: Colors.pink),
                   enabledBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.pink),
                   ),
-
                   focusedBorder: const UnderlineInputBorder(
                     borderSide: BorderSide(color: Colors.pink),
                   ),
@@ -839,7 +856,9 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
               TextField(
                 controller: caption3Controller,
                 decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty ? 'Caption 3 (${intervals[2]}) ' : 'Caption 3 ',
+                  labelText: intervals.isNotEmpty
+                      ? 'Caption 3 (${intervals[2]}) '
+                      : 'Caption 3 ',
                   errorText: section.errorMessage,
                   labelStyle: const TextStyle(color: Colors.pink),
                   enabledBorder: const UnderlineInputBorder(
@@ -855,10 +874,12 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
           actions: [
             TextButton(
               onPressed: () async {
-                if (
-                    caption1Controller.text.length > 100 || // Change to character limit
-                    caption2Controller.text.length > 100 || // Change to character limit
-                    caption3Controller.text.length > 100) { // Change to character limit
+                if (caption1Controller.text.length >
+                        100 || // Change to character limit
+                    caption2Controller.text.length >
+                        100 || // Change to character limit
+                    caption3Controller.text.length > 100) {
+                  // Change to character limit
                   final captions = [
                     caption1Controller.text,
                     caption2Controller.text,
@@ -868,8 +889,8 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   Navigator.of(context).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text(
-                          'Each caption must be less than 100 characters'),
+                      content:
+                          Text('Each caption must be less than 100 characters'),
                       backgroundColor: Colors.red,
                     ),
                   );
@@ -935,18 +956,53 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
   Widget build(BuildContext context) {
     sections = Provider.of<VideoSectionsProvider>(context).sections;
     return Scaffold(
-      backgroundColor: Colors.pink[50],
+      backgroundColor: const Color.fromRGBO(250, 246, 240, 1),
       appBar: widget.showAppBar
           ? AppBar(
               automaticallyImplyLeading: false,
-              backgroundColor: Colors.pink,
-              leading: BackButton(
-                color: Colors.white, // Makes it invisible
-                onPressed: () => SystemNavigator.pop(),
+              backgroundColor: const Color.fromRGBO(250, 246, 240, 1),
+              title: Row(
+                mainAxisSize:
+                    MainAxisSize.min, // Keeps the Row as small as possible
+                children: [
+                  BackButton(
+                    color: Colors.black,
+                    onPressed: () => SystemNavigator.pop(),
+                  ),
+                  const SizedBox(
+                      width: 8), // Adjust spacing between icon and text
+                  const Text(
+                    "Create Your Video Resume",
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
-              title: const Text("Create Your Video Resume",
-                  style: TextStyle(color: Colors.white)),
-              centerTitle: true,
+              centerTitle: false, // Ensures the title stays on the left
+              titleSpacing: 0, // Moves the title further left
+              actions: [
+                if (widget
+                    .showSkip) // Only show skip button if showSkip is true
+                  TextButton(
+                    onPressed: skipToNext,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 15.0, top: 3.0), // Adjust right padding for spacing
+                      child: TextButton(
+                        onPressed: skipToNext,
+                        child: const Text(
+                          "Skip",
+                          style: TextStyle(
+                            color: Color.fromRGBO(17, 140, 126, 1),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             )
           : null,
       body: Column(
@@ -972,30 +1028,21 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                 ElevatedButton(
                   onPressed: allVideosUploaded ? reorderReels : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        allVideosUploaded ? Colors.pink : Colors.grey,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 15),
+                    backgroundColor: allVideosUploaded ? const Color(0xFFEBEBEB) : const Color(0xFFEFEFEF), // Matches the light grey background
+                    padding: const EdgeInsets.symmetric(horizontal: 98, vertical: 15), // Updated padding
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8), // Rounded corners
+                    ),
                   ),
-                  child: const Text(
-                    "Preview Your Reel",
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                  child: Text(
+                    "Preview Your Resume",
+                    style: TextStyle(
+                      color: allVideosUploaded ? const Color(0xFF1E1E1E) : const Color(0xFF8E8E8E), // Text color matches active/inactive state
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600, // Semi-bold to match design
+                    ),
                   ),
                 ),
-                const SizedBox(width: 20),
-                widget.showSkip
-                    ? TextButton(
-                        onPressed: skipToNext,
-                        child: const Text(
-                          "Skip",
-                          style: TextStyle(
-                            color: Colors.pink,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      )
-                    : const SizedBox(),
               ],
             ),
           ),
