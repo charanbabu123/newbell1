@@ -1,3 +1,4 @@
+import 'package:bell_app1/screens/static_feedscreen.dart';
 import 'package:bell_app1/splash/JobSearchApp.dart';
 import 'package:bell_app1/splash/spalsh1.dart';
 

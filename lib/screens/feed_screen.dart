@@ -115,9 +115,9 @@ class _FeedScreenState extends State<FeedScreen>
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          if (isLoading && feeds.isEmpty)
-            const Center(child: CircularProgressIndicator(color: Colors.white))
-          else
+          // if (isLoading && feeds.isEmpty)
+          //   const Center(child: CircularProgressIndicator(color: Colors.white))
+          // else
             PageView.builder(
               scrollDirection: Axis.vertical,
               controller: _pageController,

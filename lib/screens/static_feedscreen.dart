@@ -73,7 +73,7 @@ class _FeedScreen1State extends State<FeedScreen1>
 
   Future<void> _loadFeeds() async {
     if (isLoading) return;
-    setState(() => isLoading = true);
+    setState(() => isLoading = false);
 
     try {
      // final validToken = await _getValidToken();
@@ -115,9 +115,9 @@ class _FeedScreen1State extends State<FeedScreen1>
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          if (isLoading && feeds.isEmpty)
-            const Center(child: CircularProgressIndicator(color: Colors.white))
-          else
+          // if (isLoading && feeds.isEmpty)
+          //   const Center(child: CircularProgressIndicator(color: Colors.white))
+          // else
             PageView.builder(
               scrollDirection: Axis.vertical,
               controller: _pageController,

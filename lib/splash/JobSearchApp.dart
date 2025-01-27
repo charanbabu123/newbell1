@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -9,6 +11,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
+
 
   @override
   Widget build(BuildContext context) {
@@ -26,11 +29,13 @@ class MyApp extends StatelessWidget {
 class JobSearchScreen extends StatelessWidget {
   const JobSearchScreen({Key? key}) : super(key: key);
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
+          // controller: _scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -430,6 +435,7 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
   final TextEditingController jobController = TextEditingController();
   List<String> _suggestions = [];
   bool _isLoading = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -441,7 +447,7 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
           color: const Color(0xFFDCF8C7),
           borderRadius: BorderRadius.circular(15),
         ),
-        height: 130, // Fixed height for the PageView
+        height: 250, // Fixed height for the PageView
         child: PageView(
           controller: _pageController,
           onPageChanged: (index) {
@@ -529,6 +535,48 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
     );
   }
 
+
+  Future<void> _fetchSuggestions(String query) async {
+    if (query.isEmpty) {
+      setState(() {
+        _suggestions = [];
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await http.get(
+        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/autocomplete/?q=$query'),
+      );
+      debugPrint('Status Code: ${response.statusCode}');
+      debugPrint('Response Headers: ${response.headers}');
+      debugPrint('Response Body: ${response.body}');
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        setState(() {
+          _suggestions = List<String>.from(data['suggestions']);
+        });
+      } else {
+        setState(() {
+          _suggestions = [];
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _suggestions = [];
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+
   Widget _buildJobSearchQuestion() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -545,62 +593,106 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
         Row(
           children: [
             Expanded(
+              flex: 5,
               child: TextField(
                 controller: jobController,
-                decoration: const InputDecoration(
+                onTap: () {
+                  // Scroll down slightly to make room for suggestions
+                  _scrollController.animateTo(
+                    _scrollController.offset + 100, // Adjust the value as needed
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                  );
+                },
+                decoration: InputDecoration(
                   hintText: 'e.g. Sales Manager',
-                  border: OutlineInputBorder(
+                  border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(
-                      Radius.circular(15), // Makes the border rounded
+                      Radius.circular(15),
                     ),
                   ),
-                  enabledBorder: OutlineInputBorder(
+                  enabledBorder: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(
                       Radius.circular(15),
                     ),
                     borderSide: BorderSide(
-                      color: Colors.black, // Black color for the enabled border
+                      color: Colors.black,
                       width: 1.0,
                     ),
                   ),
-                  focusedBorder: OutlineInputBorder(
+                  focusedBorder: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(
                       Radius.circular(15),
                     ),
                     borderSide: BorderSide(
-                      color: Colors.black, // Black color for the focused border
-                      width: 1.5, // Slightly thicker border when focused
+                      color: Colors.black,
+                      width: 1.5,
                     ),
                   ),
                   filled: true,
-                  fillColor:Color(0xFFDCF8C7),
+                  fillColor: const Color(0xFFDCF8C7),
+                  suffixIcon: _isLoading
+                      ? const SizedBox(
+                    width: 5,
+                    height: 5,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 1,
+                    ),
+                  )
+                      : null,
                 ),
                 onChanged: (value) {
                   setState(() {
                     desiredJob = value;
                   });
+                  _fetchSuggestions(value);
                 },
               ),
             ),
+            const SizedBox(width: 8),
             IconButton(
               icon: const Icon(Icons.arrow_forward),
               onPressed: desiredJob.isNotEmpty
                   ? () {
-                // Print the answers
-                print('Answers collected: Start: $selectedStartTime, Experience: $selectedExperience, Job: $desiredJob');
-
-                // Navigate to FeedScreen1
+                print(
+                    'Answers collected: Start: $selectedStartTime, Experience: $selectedExperience, Job: $desiredJob');
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const FeedScreen1()), // Replace FeedScreen1 with your screen
+                  MaterialPageRoute(builder: (context) => const FeedScreen1()),
                 );
               }
-                  : null, // Disable the button if desiredJob is empty
+                  : null,
             ),
           ],
         ),
+        if (_suggestions.isNotEmpty)
+          Container(
+            constraints: const BoxConstraints(maxHeight: 150),
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: _suggestions.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(_suggestions[index]),
+                  onTap: () {
+                    jobController.text = _suggestions[index];
+                    setState(() {
+                      desiredJob = _suggestions[index];
+                      _suggestions = [];
+                    });
+                  },
+                );
+              },
+            ),
+          ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   Widget _buildChoiceChip(String label, String? selectedValue) {
