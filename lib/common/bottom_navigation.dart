@@ -29,7 +29,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
       }
 
       final response = await http.get(
-        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/profile/'),
+        Uri.parse(
+            'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/profile/'),
         headers: {
           'Authorization': 'Bearer $accessToken', // Include the access token
         },
@@ -43,7 +44,8 @@ class _BottomNavBarState extends State<BottomNavBar> {
         final data = jsonDecode(response.body);
         final user = data['user'];
         setState(() {
-          profilePicUrl = user['profile_picture'] ?? ''; // Set profile picture URL
+          profilePicUrl =
+              user['profile_picture'] ?? ''; // Set profile picture URL
         });
       } else {
         debugPrint('Failed to load profile picture: ${response.statusCode}');
@@ -53,112 +55,147 @@ class _BottomNavBarState extends State<BottomNavBar> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      height: 65, // Adjust the height to match LinkedIn's style
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return Material(
+        color: Colors.white,
+        child: SizedBox(
+          height: 65, // Adjust the height to match LinkedIn's style
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              IconButton(
-                padding: EdgeInsets.zero, // Remove default padding
-                icon: const Icon(Icons.home_filled, color: Colors.white, size: 26), // Adjust size to LinkedIn's icon size
-                onPressed: () {},
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                    splashColor: const Color(0xFFDCF8C7), // Green splash effect
+                    borderRadius: BorderRadius.circular(50), // Circular splash
+                    onTap: () {
+                      // No additional logic here, just the splash effect
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(
+                        Icons.home_outlined,
+                        color: Colors.black,
+                        size: 26, // Adjust size to LinkedIn's icon size
+                      ),
+                    ),
+                  ),
+                  Transform.translate(
+                    offset: const Offset(0, -7),
+                    child: const Text(
+                      'Home',
+                      style: TextStyle(color: Colors.black, fontSize: 12),
+                    ),
+                  ),
+                ],
               ),
-              Transform.translate(
-                offset: const Offset(0, -5), // Move the text 5 pixels upward
-                child: const Text(
-                  'Home',
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                    splashColor: const Color(0xFFDCF8C7), // Green splash effect
+                    borderRadius: BorderRadius.circular(50), // Circular splash
+                    onTap: () {
+                      // No additional logic here, just the splash effect
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(
+                        Icons.search,
+                        color: Colors.black,
+                        size: 26, // Adjust size to LinkedIn's icon size
+                      ),
+                    ),
+                  ),
+                  Transform.translate(
+                    offset: const Offset(0, -7),
+                    child: const Text(
+                      'Search',
+                      style: TextStyle(color: Colors.black, fontSize: 12),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                padding: EdgeInsets.zero, // Remove default padding
-                icon: const Icon(Icons.search, color: Colors.white, size: 26), // Adjust size
-                onPressed: () {},
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                    splashColor: const Color(0xFFDCF8C7), // Green splash effect
+                    borderRadius: BorderRadius.circular(50), // Circular splash
+                    onTap: () {
+                      // No additional logic here, just the splash effect
+                    },
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Icon(
+                        Icons.mail_outline_outlined,
+                        color: Colors.black,
+                        size: 26, // Adjust size to LinkedIn's icon size
+                      ),
+                    ),
+                  ),
+                  Transform.translate(
+                    offset: const Offset(0, -7),
+                    child: const Text(
+                      'Inbox',
+                      style: TextStyle(color: Colors.black, fontSize: 12),
+                    ),
+                  ),
+                ],
               ),
-              Transform.translate(
-                offset: const Offset(0, -5), // Move the text 5 pixels upward
-                child: const Text(
-                  'Search',
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ),
-            ],
-          ),
-
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                padding: EdgeInsets.zero, // Remove default padding
-                icon: const Icon(Icons.forward_to_inbox, color: Colors.white, size: 26), // Adjust size
-                onPressed: () {},
-              ),
-
-              Transform.translate(
-                offset: const Offset(0, -5), // Move the text 5 pixels upward
-                child: const Text(
-                  'Inbox',
-                  style: TextStyle(color: Colors.white, fontSize: 12),
-                ),
-              ),
-            ],
-          ),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushNamed('/profile');
-            },
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 16, // Adjust size for profile picture
-                  backgroundColor: Colors.white,
-                  child: ClipOval(
-                    child: profilePicUrl.isNotEmpty
-                        ? Image.network(
-                      profilePicUrl,
-                      fit: BoxFit.cover,
-                        width: 32, // Adjust width to match the diameter of CircleAvatar
-                        height: 32,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.person,
-                          color: Colors.grey,
-                        );
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pushNamed('/profile');
+                },
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    InkWell(
+                      splashColor: const Color(0xFFDCF8C7), // Green splash effect
+                      borderRadius: BorderRadius.circular(50), // Circular splash
+                      onTap: () {
+                        // No additional logic here, just the splash effect
                       },
-                    )
-                        : const Icon(
-                      Icons.person,
-                      color: Colors.grey,
-                    ), // Fallback for empty profilePicUrl
-                  ),
+                      child: CircleAvatar(
+                        radius: 16, // Adjust size for profile picture
+                        backgroundColor: Colors.white,
+                        child: ClipOval(
+                          child: profilePicUrl.isNotEmpty
+                              ? Image.network(
+                            profilePicUrl,
+                            fit: BoxFit.cover,
+                            width: 30, // Adjust width to match the diameter of CircleAvatar
+                            height: 30,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(
+                                Icons.person_outline_rounded,
+                                color: Colors.black,
+                              );
+                            },
+                          )
+                              : const Icon(
+                            Icons.person_outline_rounded,
+                            color: Colors.black,
+                          ), // Fallback for empty profilePicUrl
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 2), // Space between profile icon and text
+                    Transform.translate(
+                      offset: const Offset(0, -5), // Move the text 5 pixels upward
+                      child: const Text(
+                        'Profile',
+                        style: TextStyle(color: Colors.black, fontSize: 12),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4), // Space between profile icon and text
-                Transform.translate(
-                  offset: const Offset(0, -0), // Move the text 5 pixels upward
-                  child: const Text(
-                    'Profile',
-                    style: TextStyle(color: Colors.white, fontSize: 12),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        )
     );
   }
-
 }
