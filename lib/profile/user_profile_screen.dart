@@ -30,7 +30,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
   List<VideoModel> videos = [];
   bool videosComplete = false;
   double profileCompletionPercentage = 0.0;
-   ScrollController _scrollController = ScrollController();
+   final ScrollController _scrollController = ScrollController();
 
 
   num posts = 23;
@@ -282,7 +282,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
                         child: const CircleAvatar(
                           radius: 12,
                           backgroundColor: Colors.white,
-                          child: Icon(Icons.add, size: 16, color: Colors.green),
+                          // child: Icon(Icons.add, size: 16, color: Colors.green),
                         ),
                       ),
                     ),
@@ -527,27 +527,35 @@ class UserProfileScreenState extends State<UserProfileScreen>
       )
           : NestedScrollView(
         controller: _scrollController,
-        headerSliverBuilder:
-            (BuildContext context, bool innerBoxIsScrolled) {
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          // Calculate dynamic height based on available content
+          double calculatedHeight = 415.0; // Base height
+
+          // Reduce height if fields are empty
+          if (city.isEmpty) calculatedHeight -= 30.0;
+          if (bio.isEmpty) calculatedHeight -= 30.0;
+          if (yoe == 0) calculatedHeight -= 30.0;
+
+          // Set minimum height to prevent layout issues
+          double finalHeight = calculatedHeight.clamp(300.0, 400.0);
+
           return <Widget>[
             SliverAppBar(
               backgroundColor: const Color.fromRGBO(250, 246, 240, 1),
-              expandedHeight:
-              400.0, // Adjust this value based on your header content
+              expandedHeight: finalHeight, // Use dynamic height
               floating: false,
               pinned: true,
               stretch: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  color:const Color.fromRGBO(250, 246, 240, 1),
-              child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      const SizedBox(height: 60), // Space for the app bar
-                      _buildProfileHeader(),
-                    ],
-                  ),
-                ),
+              flexibleSpace: LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  return FlexibleSpaceBar(
+                    background: Container(
+                      color: const Color.fromRGBO(250, 246, 240, 1),
+                      padding: const EdgeInsets.only(top: 80),
+                      child: _buildProfileHeader(),
+                    ),
+                  );
+                },
               ),
               title: Text(
                 innerBoxIsScrolled ? username : "",
@@ -567,16 +575,34 @@ class UserProfileScreenState extends State<UserProfileScreen>
             SliverPersistentHeader(
               pinned: true,
               delegate: _SliverAppBarDelegate(
-                TabBar(
-                  controller: _tabController,
-                  indicatorColor: Colors.green,
-                  tabs: const [
-                    Tab(
-                        icon: Icon(Icons.video_library,
-                            color: Colors.green)),
-                    Tab(icon: Icon(Icons.grid_on, color: Colors.green)),
-                  ],
-                ),
+                  TabBar(
+                    controller: _tabController,
+                    indicatorColor: Colors.green,
+                    labelColor: Colors.green, // Selected tab color
+                    unselectedLabelColor: Colors.black, // Unselected tab color
+                    tabs: const [
+                      Tab(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.video_library), // Color will be controlled by IconTheme
+                            SizedBox(width: 10),
+                            Text("Reel"),
+                          ],
+                        ),
+                      ),
+                      Tab(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.grid_on), // Color will be controlled by IconTheme
+                            SizedBox(width: 10),
+                            Text("My Videos"),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
               ),
             ),
           ];
@@ -1235,7 +1261,7 @@ class _SwipeableVideoViewState extends State<SwipeableVideoView> {
     super.initState();
     _pageController = PageController(
         viewportFraction:
-        0.6); // Adjust the viewport fraction to make the cards smaller
+        0.8); // Adjust the viewport fraction to make the cards smaller
   }
 
   @override
@@ -1258,8 +1284,8 @@ class _SwipeableVideoViewState extends State<SwipeableVideoView> {
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2, // Number of videos per row
-        crossAxisSpacing: 1,
-        mainAxisSpacing: 1,
+        crossAxisSpacing: 2,
+        mainAxisSpacing: 2,
         childAspectRatio:
         9 / 16, // Adjust the aspect ratio to make it look like a reel card
       ),
