@@ -258,19 +258,21 @@ class UserProfileScreenState extends State<UserProfileScreen>
             children: [
               Stack(
                 children: [
-                  CircleAvatar(
-                    radius: 40,
-                    backgroundImage: _profileImage != null
-                        ? FileImage(_profileImage!)
-                        : (userProfilePicture != null && userProfilePicture!.startsWith('http')
-                        ? NetworkImage(userProfilePicture!)
-                        : null),
-                    child: (_profileImage == null &&
-                        (userProfilePicture == null || !userProfilePicture!.startsWith('http')))
-                        ? const Icon(Icons.person, size: 40, color: Colors.grey)
-                        : null,
+                  Padding(
+                    padding: const EdgeInsets.only(left: 9), // Adjust left padding as needed
+                    child: CircleAvatar(
+                      radius: 40,
+                      backgroundImage: _profileImage != null
+                          ? FileImage(_profileImage!)
+                          : (userProfilePicture != null && userProfilePicture!.startsWith('http')
+                          ? NetworkImage(userProfilePicture!)
+                          : null),
+                      child: (_profileImage == null &&
+                          (userProfilePicture == null || !userProfilePicture!.startsWith('http')))
+                          ? const Icon(Icons.person, size: 40, color: Colors.grey)
+                          : null,
+                    ),
                   ),
-
                   if (_profileImage == null && userProfilePicture == null)
                     Positioned(
                       bottom: 0,
@@ -280,7 +282,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
                         child: const CircleAvatar(
                           radius: 12,
                           backgroundColor: Colors.white,
-                          child: Icon(Icons.add, size: 16, color: Colors.pink),
+                          child: Icon(Icons.add, size: 16, color: Colors.green),
                         ),
                       ),
                     ),
@@ -299,86 +301,163 @@ class UserProfileScreenState extends State<UserProfileScreen>
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            " $username",
-            style: const TextStyle(
-              color: Colors.pink,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            " $city",
-            style: const TextStyle(
-              color: Colors.pink,
-              fontSize: 18,
-            ),
-          ),
-          // Text(
-          //   " ${yoe.toString()} YOE",
-          //   style: const TextStyle(
-          //     color: Colors.pink,
-          //     fontSize: 18,
-          //   ),
-          // ),
-          Text(
-            " $bio",
-            style: const TextStyle(
-              color: Colors.pink,
-              fontSize: 18,
-            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 12),
+              Text(
+                " $username",
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              if (city.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 9), // Padding for city
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.location_on_outlined,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        city,
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (city.isNotEmpty) const SizedBox(height: 8),
+
+              if (yoe > 0)
+                Padding(
+                  padding: const EdgeInsets.only(left: 9), // Padding for years of experience
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.work_outline_rounded,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        "$yoe+ Years of Experience",
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (yoe > 0) const SizedBox(height: 8),
+
+              if (bio.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(left: 9), // Padding for bio
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.person_outline_rounded,
+                        color: Colors.grey,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        bio,
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
 
-          const SizedBox(height: 16),
-          // Progress Bar
-          Container(
-            width: double.infinity,
-            height: 20,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.pink),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: LinearProgressIndicator(
-                value: profileCompletionPercentage / 100,
-                backgroundColor: Colors.white,
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.pink),
+
+          const SizedBox(height: 18),
+          Row(
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(left: 12), // Adjust left padding as needed
+                child: Text(
+                  'Your Profile Status',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(width: 100), // Reduced spacing between texts
+              Text(
+                '${profileCompletionPercentage.toStringAsFixed(1)}% Completed',
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Profile Completion: ${profileCompletionPercentage.toStringAsFixed(1)}%',
-            style: const TextStyle(
-              color: Colors.pink,
-              fontSize: 14,
+
+
+          const SizedBox(height: 12),
+          // Progress Bar
+          Padding(
+            padding: const EdgeInsets.only(left: 9), // Adjust the left padding as needed
+            child: Container(
+              width: 340,
+              height: 13,
+              decoration: BoxDecoration(
+                border: Border.all(color:  const Color(0xFFDCF8C7)),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(5),
+                child: LinearProgressIndicator(
+                  value: profileCompletionPercentage / 100,
+                  backgroundColor: const Color(0xFFDCF8C7),
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 12),
           GestureDetector(
             onTap: _editProfile,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.pink),
-              ),
-              child: const Center(
-                child: Text(
-                  "Complete Your Profile",
-                  style: TextStyle(
-                    color: Colors.pink,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+            child: Padding(  // <-- Add `child` here
+              padding: const EdgeInsets.only(left: 9), // Moves it slightly to the right
+              child: Container(
+                width: 340,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFDCF8C7),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFDCF8C7)),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Complete Your Profile",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
+
 
           // const SizedBox(height: 16),
           // // Complete Profile Button
@@ -431,13 +510,13 @@ class UserProfileScreenState extends State<UserProfileScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink[50],
+      backgroundColor: const Color.fromRGBO(250, 246, 240, 1),
       body: isLoggingOut
           ? const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: Colors.red),
+            CircularProgressIndicator(color: Colors.green),
             SizedBox(height: 16),
             Text(
               "Logging off...",
@@ -452,16 +531,16 @@ class UserProfileScreenState extends State<UserProfileScreen>
             (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
             SliverAppBar(
-              backgroundColor: Colors.pink,
+              backgroundColor: const Color.fromRGBO(250, 246, 240, 1),
               expandedHeight:
-              355.0, // Adjust this value based on your header content
+              400.0, // Adjust this value based on your header content
               floating: false,
               pinned: true,
               stretch: true,
               flexibleSpace: FlexibleSpaceBar(
                 background: Container(
-                  color: Colors.pink[50],
-                  child: Column(
+                  color:const Color.fromRGBO(250, 246, 240, 1),
+              child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       const SizedBox(height: 60), // Space for the app bar
@@ -490,12 +569,12 @@ class UserProfileScreenState extends State<UserProfileScreen>
               delegate: _SliverAppBarDelegate(
                 TabBar(
                   controller: _tabController,
-                  indicatorColor: Colors.pink,
+                  indicatorColor: Colors.green,
                   tabs: const [
                     Tab(
                         icon: Icon(Icons.video_library,
-                            color: Colors.pink)),
-                    Tab(icon: Icon(Icons.grid_on, color: Colors.pink)),
+                            color: Colors.green)),
+                    Tab(icon: Icon(Icons.grid_on, color: Colors.green)),
                   ],
                 ),
               ),
@@ -525,7 +604,7 @@ Widget _buildStatColumn(String label, num count) {
       Text(
         count.toString(),
         style: const TextStyle(
-          color: Colors.pink,
+          color: Colors.black,
           fontSize: 16,
           fontWeight: FontWeight.bold,
         ),
@@ -549,7 +628,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
-      color: Colors.pink[50],
+      color:const Color.fromRGBO(250, 246, 240, 1),
       child: _tabBar,
     );
   }
@@ -1178,9 +1257,9 @@ class _SwipeableVideoViewState extends State<SwipeableVideoView> {
 
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3, // Number of videos per row
-        crossAxisSpacing: 0.5,
-        mainAxisSpacing: 0.5,
+        crossAxisCount: 2, // Number of videos per row
+        crossAxisSpacing: 1,
+        mainAxisSpacing: 1,
         childAspectRatio:
         9 / 16, // Adjust the aspect ratio to make it look like a reel card
       ),
@@ -1191,12 +1270,12 @@ class _SwipeableVideoViewState extends State<SwipeableVideoView> {
           return const Center(
             child: Text(
               "Invalid video URL",
-              style: TextStyle(color: Colors.grey, fontSize: 16),
+              style: TextStyle(color: Colors.green, fontSize: 16),
             ),
           );
         }
         return Padding(
-          padding: const EdgeInsets.all(4.0), // Add padding around each card
+          padding: const EdgeInsets.all(12.0), // Add padding around each card
           child: AspectRatio(
             aspectRatio: 9 / 16, // Ensure 9:16 aspect ratio for each thumbnail
             child: Stack(
@@ -1270,7 +1349,7 @@ class _FullScreenVideoPlayerState extends State<FullScreenVideoPlayer> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink,
+      backgroundColor: const Color.fromRGBO(250, 246, 240, 1),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: GridView.builder(

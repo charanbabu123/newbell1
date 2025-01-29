@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const ReelUploaderScreen(),
+        '/': (context) => const LoginPhoneScreen(),
         '/tour': (context) => const ProductTourScreen(),
         '/login': (context) => const LoginPhoneScreen(),
         '/otp': (context) {

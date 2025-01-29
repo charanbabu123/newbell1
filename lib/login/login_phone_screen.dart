@@ -216,12 +216,32 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
                     ),
                     const SizedBox(height: 20),
                     GestureDetector(
+                     // without api call
+                      // onTap: isButtonEnabled && !isLoading
+                      //     ? () {
+                      //         if (_formKey.currentState!.validate()) {
+                      //           _requestOtp();
+                      //         }
+                      //       }
+                      //     : null,
                       onTap: isButtonEnabled && !isLoading
                           ? () {
-                              if (_formKey.currentState!.validate()) {
-                                _requestOtp();
-                              }
-                            }
+                        if (_formKey.currentState!.validate()) {
+                          // Add +91 to the phone number
+                          String phoneNumber = phoneController.text.trim();
+                          if (!phoneNumber.startsWith('+91')) {
+                            phoneNumber = '+91$phoneNumber';
+                          }
+
+                          // Navigate to the OTP screen directly with the updated phone number
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OtpScreen(phoneNumber: phoneNumber),
+                            ),
+                          );
+                        }
+                      }
                           : null,
                       child: Container(
                         width: double.infinity,

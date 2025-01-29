@@ -15,61 +15,83 @@ class _EmailScreenState extends State<EmailScreen> {
   final TextEditingController emailController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FocusNode _emailFocusNode = FocusNode();
-
+  bool hasText = false;
 
   @override
   void initState() {
     super.initState();
+    emailController.addListener(_handleTextChange); // Add this line
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_emailFocusNode);
     });
   }
 
+// Add this method
+  void _handleTextChange() {
+    setState(() {
+      final email = emailController.text;
+      // Regular expression for basic email validation
+      final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{3,}$');
+
+      // Check if the text is not empty and matches the email regex
+      hasText = email.isNotEmpty && emailRegex.hasMatch(email);
+    });
+  }
+
+
   @override
   void dispose() {
+    emailController.removeListener(_handleTextChange); // Add this line
     emailController.dispose();
-    _emailFocusNode.dispose();
+    emailController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F8F7),
-      appBar: AppBar(
-        title: const Text("Email"),
-        centerTitle: true,
-        elevation: 0,
-      ),
+
       body: Padding(
-        padding: const EdgeInsets.all(45.0),
+        padding: const EdgeInsets.only(top: 90.0, left: 45.0, right: 45.0, bottom: 45.0),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Container(
+                decoration: const BoxDecoration(
+                  color: Colors.green, // Green background
+                  shape: BoxShape.circle, // Make the background circular
+                ),
+                padding: const EdgeInsets.all(12.0), // Padding around the icon
+                child: const Center( // Center widget to center the icon
+                  child: Icon(
+                    Icons.person_outline_rounded, // Person icon
+                    color: Colors.white, // Icon color
+                    size: 30.0, // Icon size
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Center(
+              child : Text(
                 "What's your email?",
                 style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 26,
                     fontWeight: FontWeight.bold,
-                    color: Colors.pinkAccent),
+                    color: Colors.black),
               ),
-              const SizedBox(height: 15),
+        ),
+              const SizedBox(height: 30),
               TextFormField(
                 focusNode: _emailFocusNode,
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  labelText: "Email",
-                  labelStyle: const TextStyle(color: Colors.pinkAccent),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Colors.pinkAccent),
-                  ),
+                  hintText: "Enter Your Email", // Add the placeholder
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: const BorderSide(color: Colors.pink, width: 2),
+                    borderSide: const BorderSide(color: Colors.black, width: 1),
                   ),
                 ),
                 validator: (value) {
@@ -85,7 +107,7 @@ class _EmailScreenState extends State<EmailScreen> {
               ),
               const SizedBox(height: 30),
               GestureDetector(
-                onTap: () {
+                onTap: hasText ? () {  // Only add the onTap function if hasText is true
                   if (_formKey.currentState!.validate()) {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => ProfilePictureScreen(
@@ -95,19 +117,19 @@ class _EmailScreenState extends State<EmailScreen> {
                       ),
                     ));
                   }
-                },
+                } : null,  // Set to null when hasText is false to disable the button
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Colors.pink, Colors.pinkAccent],
-                    ),
+                    color: hasText
+                        ? Colors.green
+                        : const Color.fromRGBO(212, 202, 191, 1),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: const Text(
-                    "Next",
+                    "Continue",
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -116,7 +138,7 @@ class _EmailScreenState extends State<EmailScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 25),
               GestureDetector(
                 onTap: () {
                   if (_formKey.currentState!.validate()) {
@@ -134,15 +156,14 @@ class _EmailScreenState extends State<EmailScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Colors.pink, Colors.pinkAccent],
-                    ),
-                    borderRadius: BorderRadius.circular(15),
+                    color: Colors.white, // White background
+                    borderRadius: BorderRadius.circular(8), // Rounded corners
+                    border: Border.all(color: Colors.green, width: 1), // Green border
                   ),
                   child: const Text(
                     "Skip",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.green, // Green text
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),

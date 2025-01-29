@@ -43,44 +43,56 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F8F7),
-      appBar: AppBar(
-        title: const Text("profile Picture"),
-        centerTitle: true,
-        elevation: 0,
-      ),
       body: Padding(
-        padding: const EdgeInsets.all(45.0),
+        padding: const EdgeInsets.only(top: 65.0, left: 45.0, right: 45.0, bottom: 45.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Upload your profile picture",
-              style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.pinkAccent),
+            Container(
+              decoration: const BoxDecoration(
+                color: Colors.green, // Green background
+                shape: BoxShape.circle, // Make the background circular
+              ),
+              padding: const EdgeInsets.all(12.0), // Padding around the icon
+              child: const Center( // Center widget to center the icon
+                child: Icon(
+                  Icons.person_outline_rounded, // Person icon
+                  color: Colors.white, // Icon color
+                  size: 30.0, // Icon size
+                ),
+              ),
             ),
-            const SizedBox(height: 15),
+            const SizedBox(height: 10),
+            const Center(
+              child: Text(
+                "Upload your profile picture",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600, // Slightly lighter weight
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
             Center(
               child: Stack(
                 children: [
                   GestureDetector(
                     onTap: _pickImage,
                     child: CircleAvatar(
-                      backgroundColor: const Color(0xffffc0cb),
-                      radius: 50,
+                      backgroundColor: const Color(0xFFEEEEEE), // Light grey color from image
+                      radius: 60, // Make it larger
                       child: _profileImage == null
-                          ? const Icon(Icons.person,
-                              size: 40, color: Colors.black)
+                          ? const Icon(Icons.person_outline,
+                          size: 50, color: Colors.grey)
                           : ClipOval(
-                              child: Image.file(
-                                _profileImage!,
-                                fit: BoxFit.cover,
-                                width: 100.0,
-                                height: 100.0,
-                              ),
-                            ),
+                        child: Image.file(
+                          _profileImage!,
+                          fit: BoxFit.cover,
+                          width: 120.0,
+                          height: 120.0,
+                        ),
+                      ),
                     ),
                   ),
                   if (_profileImage == null)
@@ -92,13 +104,13 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: const BoxDecoration(
-                            color: Colors.pinkAccent,
+                            color: Color(0xFF4CAF50), // Match the green from top icon
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
-                            Icons.add_a_photo,
+                            Icons.photo_camera, // Changed to camera icon
                             color: Colors.white,
-                            size: 18,
+                            size: 20,
                           ),
                         ),
                       ),
@@ -129,7 +141,7 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 35),
             GestureDetector(
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
@@ -146,22 +158,20 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Colors.pink, Colors.pinkAccent],
-                  ),
-                  borderRadius: BorderRadius.circular(15),
+                  color: const Color(0xFF4CAF50), // Match the green color
+                  borderRadius: BorderRadius.circular(8),
                 ),
                 child: const Text(
                   "Next",
                   style: TextStyle(
                     color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             GestureDetector(
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
@@ -178,16 +188,18 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 15),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Colors.pink, Colors.pinkAccent],
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: const Color(0xFF4CAF50), // Green border
+                    width: 1,
                   ),
-                  borderRadius: BorderRadius.circular(15),
                 ),
                 child: const Text(
                   "Skip",
                   style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF4CAF50), // Green text
+                    fontWeight: FontWeight.w600,
                     fontSize: 16,
                   ),
                 ),
