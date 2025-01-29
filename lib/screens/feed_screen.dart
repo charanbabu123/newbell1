@@ -772,7 +772,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         // Progress bar
 
         Positioned(
-          bottom: 0,
+          bottom: 10,
           left: 0,
           right: 0,
           child: InstagramStoryProgressBar(
@@ -882,7 +882,7 @@ class InstagramStoryProgressBar extends StatelessWidget {
                       height: 4,
                       decoration: BoxDecoration(
                         color: index < currentIndex
-                            ? Colors.white
+                            ? Colors.green
                             : Colors.grey.withOpacity(0.5),
                         borderRadius: BorderRadius.circular(2),
                       ),
@@ -930,7 +930,7 @@ class _ProgressBar extends StatelessWidget {
             widthFactor: progress,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.green,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

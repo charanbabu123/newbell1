@@ -95,10 +95,10 @@ class _EmailScreenState extends State<EmailScreen> {
                   ),
                 ),
                 validator: (value) {
-                  // If the value is empty, pass the condition
-                  if (value!.isEmpty) {
+                  if (value == null || value.isEmpty) {
                     return null; // No error if the field is empty
-                  } else if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
                     return "Enter a valid email address"; // Error if not a valid email
                   }
                   return null; // No error if the email is valid

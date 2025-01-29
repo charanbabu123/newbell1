@@ -1,9 +1,11 @@
+import 'package:bell_app1/common/bottom_navigation_for_feed.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../common/bottom_navigation_for_feed.dart';
+
 import '../services/auth_service.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class FeedScreen1 extends StatefulWidget {
   const FeedScreen1({super.key});
@@ -73,17 +75,17 @@ class _FeedScreen1State extends State<FeedScreen1>
 
   Future<void> _loadFeeds() async {
     if (isLoading) return;
-    setState(() => isLoading = false);
+    setState(() => isLoading = true);
 
     try {
-     // final validToken = await _getValidToken();
+      final validToken = await _getValidToken();
       // if (validToken == null) {
       //   throw Exception('Unable to authenticate. Please login again.');
       // }
 
       final response = await http.get(
         Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/feed/'),
-       // headers: {'Authorization': 'Bearer $validToken'},
+        //headers: {'Authorization': 'Bearer $validToken'},
       );
       debugPrint('Status Code: ${response.statusCode}');
       debugPrint('Response Headers: ${response.headers}');
@@ -118,14 +120,14 @@ class _FeedScreen1State extends State<FeedScreen1>
           // if (isLoading && feeds.isEmpty)
           //   const Center(child: CircularProgressIndicator(color: Colors.white))
           // else
-            PageView.builder(
-              scrollDirection: Axis.vertical,
-              controller: _pageController,
-              itemCount: feeds.length,
-              itemBuilder: (context, index) {
-                return FullScreenFeedItem(feed: feeds[index]);
-              },
-            ),
+          PageView.builder(
+            scrollDirection: Axis.vertical,
+            controller: _pageController,
+            itemCount: feeds.length,
+            itemBuilder: (context, index) {
+              return FullScreenFeedItem(feed: feeds[index]);
+            },
+          ),
 
           // Overlay header
           Container(
@@ -343,7 +345,8 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         // Full screen video
         Padding(
           padding: const EdgeInsets.only(
-              top: 25.0, bottom: 0.0), // Adjust the top and bottom padding
+              top: 20.0, bottom: 0.0),
+          // Adjust the top and bottom padding
           child: PageView.builder(
             controller: _videoController,
             itemCount: widget.feed.videos.length,
@@ -372,8 +375,8 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
 
         // User info overlay
         Positioned(
-          left: 16,
-          bottom: 70,
+          left: 24,
+          bottom: 80,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,7 +384,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
               Row(
                 children: [
                   CircleAvatar(
-                    radius: 20,
+                    radius: 23,
                     backgroundImage:
                     NetworkImage(widget.feed.user.profilePictureUrl),
                   ),
@@ -393,7 +396,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                         widget.feed.user.name,
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 17,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -401,7 +404,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                         widget.feed.user.bio ?? '',
                         style: const TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: 14,
                           //fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -416,7 +419,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         // Static buttons like share, comment
         Positioned(
           right: 16,
-          bottom: 85,
+          bottom: 10,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -424,84 +427,99 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
               // Like Button
               Column(
                 children: [
-                  Stack(
-                    alignment: Alignment.center,
+                  Column(
+                    mainAxisSize: MainAxisSize.min, // Reduce spacing within the column
                     children: [
-                      Container(
-                        height: 45,
-                        width: 45,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.black.withOpacity(0.5),
-
-                        ),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.favorite_outline, color: Colors.white),
+                            iconSize: 27,
+                            onPressed: () {},
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.favorite, color: Colors.white),
-                        iconSize: 30,
-                        onPressed: () {},
+                      Transform.translate(
+                        offset: const Offset(0, -7), // Move the text up by 2 pixels
+                        child: const Text(
+                          "Like",
+                          style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 5),
-                  const Text("Like",
-                      style: TextStyle(color: Colors.white, fontSize: 12)),
                 ],
               ),
-              const SizedBox(height: 15), // Space between icons
+              const SizedBox(height: 8), // Space between icons
               // Comment Button
               Column(
                 children: [
                   Stack(
                     alignment: Alignment.center,
                     children: [
-                      Container(
-                        height: 45,
-                        width: 45,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.black.withOpacity(0.5),
-
-                        ),
-                      ),
                       IconButton(
-                        icon: const Icon(Icons.comment, color: Colors.white),
-                        iconSize: 30,
+                        icon: const Icon(Icons.mode_comment_outlined, color: Colors.white),
+                        iconSize: 27,
                         onPressed: () {},
                       ),
                     ],
                   ),
-                  const SizedBox(height: 5),
-                  const Text("Comment",
-                      style: TextStyle(color: Colors.white, fontSize: 12)),
+                  Transform.translate(
+                    offset: const Offset(0, -7), // Move the text up by 2 pixels
+                    child: const Text(
+                      "Comment",
+                      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 15), // Space between icons
+              const SizedBox(height: 8), // Space between icons
               // Share Button
               Column(
                 children: [
                   Stack(
                     alignment: Alignment.center,
                     children: [
-                      Container(
-                        height: 45,
-                        width: 45,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.black.withOpacity(0.3), // Makes the color semi-transparent
 
-                        ),
-                      ),
                       IconButton(
-                        icon: const Icon(Icons.share, color: Colors.white),
-                        iconSize: 30,
+                        icon: const Icon(Icons.share_outlined, color: Colors.white),
+                        iconSize: 27,
                         onPressed: () {},
                       ),
                     ],
                   ),
-                  const SizedBox(height: 5),
-                  const Text("Share",
-                      style: TextStyle(color: Colors.white, fontSize: 12)),
+                  Transform.translate(
+                    offset: const Offset(0, -7), // Move the text up by 2 pixels
+                    child: const Text(
+                      "Share",
+                      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8), // Space between icons
+              // Save Button
+              Column(
+                children: [
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+
+                      IconButton(
+                        icon: const Icon(Icons.bookmark_outline_outlined, color: Colors.white),
+                        iconSize: 27,
+                        onPressed: () {},
+                      ),
+                    ],
+                  ),
+                  Transform.translate(
+                    offset: const Offset(0, -7), // Move the text up by 2 pixels
+                    child: const Text(
+                      "Save",
+                      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -512,11 +530,13 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         Positioned(
           right: 143,
           left: 143,
-          bottom: 20,
+          // Adjust left position relative to screen width
+          bottom: MediaQuery.of(context).size.height * 0.024, // Adjust bottom position relative to screen height
           child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
             decoration: BoxDecoration(
-              color: Colors.pink.withOpacity(0.5),
+              color: const Color(0xFF118C7E),
+
 
               borderRadius: BorderRadius.circular(4),
             ),
@@ -524,10 +544,20 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
               widget.feed.videos[_currentVideoIndex].tag,
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 14,
+                fontSize: 15,
+                fontWeight: FontWeight.bold, // Added bold styling
               ),
               textAlign: TextAlign.center,
             ),
+          ),
+        ),
+        Positioned(
+          top: 38, // Distance from the top
+          left: 20, // Distance from the right
+          child: SvgPicture.asset(
+            'assets/bell_image.svg',
+            width: 30, // Decreased width
+            height: 30, // Decreased height
           ),
         ),
       ],
@@ -712,38 +742,38 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
         if (_currentCaption != null)
           Positioned(
-            bottom: 150,
-            left: 0, // Align the container to the left edge of the parent
-            right: 10, // Align the container to the right edge of the parent
-            child: Center(
-              // Center the container within the available space
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                    vertical: 0,
-                    horizontal: 5), // Adjust padding for the background
-                decoration: BoxDecoration(
-                  color: Colors.pink.withOpacity(0.5),
-
-                  borderRadius: BorderRadius.circular(10),
-                ),
+            bottom: MediaQuery.of(context).size.height * 0.17, // Adjust bottom position
+            left: MediaQuery.of(context).size.width * 0.065, // Keep the left position fixed
+            // right: MediaQuery.of(context).size.width * 0.25, // Adjust right position if necessary
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: 5, // Add consistent vertical padding
+                horizontal: 10, // Add consistent horizontal padding
+              ),
+              decoration: BoxDecoration(
+                color: const Color.fromRGBO(15, 32, 4, 0.9), // Background color with transparency
+                borderRadius: BorderRadius.circular(10), // Rounded corners
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft, // Force alignment to the left inside the container
                 child: Text(
-                  _formatCaption(
-                      _currentCaption!), // Format the caption to limit 5 words per line
-                  textAlign: TextAlign.center,
+                  _formatCaption(_currentCaption!),
+                  textAlign: TextAlign.left, // Ensure the text aligns to the left
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
-                    fontWeight: FontWeight.bold, // Ensures the text is bold
                   ),
+                  softWrap: true, // Ensures text wraps properly
                 ),
               ),
             ),
           ),
 
+
         // Progress bar
 
         Positioned(
-          bottom: 0,
+          bottom: 10,
           left: 0,
           right: 0,
           child: InstagramStoryProgressBar(
@@ -759,14 +789,29 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 }
 
 String _formatCaption(String caption) {
-  // Ensure the caption is split into chunks of 38 characters
+  // Split the caption into words
+  List<String> words = caption.split(' ');
   List<String> lines = [];
-  for (int i = 0; i < caption.length; i += 38) {
-    lines.add(caption.substring(i, i + 38 > caption.length ? caption.length : i + 38));
+  String currentLine = '';
+
+  for (String word in words) {
+    // Check if adding the word exceeds 38 characters
+    if ((currentLine + word).length <= 38) {
+      currentLine += (currentLine.isEmpty ? '' : ' ') + word;
+    } else {
+      lines.add(currentLine);
+      currentLine = word;
+    }
+  }
+  if (currentLine.isNotEmpty) {
+    lines.add(currentLine);
   }
   // Join the lines with line breaks
   return lines.join('\n');
 }
+
+
+
 
 Future<String?> _getValidToken() async {
   String? accessToken = await AuthService.getAuthToken();
@@ -838,7 +883,7 @@ class InstagramStoryProgressBar extends StatelessWidget {
                 height: 4,
                 decoration: BoxDecoration(
                   color: index < currentIndex
-                      ? Colors.white
+                      ? Colors.green
                       : Colors.grey.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(2),
                 ),
@@ -886,7 +931,7 @@ class _ProgressBar extends StatelessWidget {
             widthFactor: progress,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.green,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),

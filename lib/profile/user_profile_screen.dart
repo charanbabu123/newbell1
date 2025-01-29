@@ -273,19 +273,15 @@ class UserProfileScreenState extends State<UserProfileScreen>
                           : null,
                     ),
                   ),
-                  if (_profileImage == null && userProfilePicture == null)
-                    Positioned(
-                      bottom: 0,
-                      right: 0,
-                      child: GestureDetector(
-                        //onTap: _pickProfileImage,
-                        child: const CircleAvatar(
-                          radius: 12,
-                          backgroundColor: Colors.white,
-                          // child: Icon(Icons.add, size: 16, color: Colors.green),
-                        ),
-                      ),
-                    ),
+                  // if (_profileImage == null && userProfilePicture == null)
+                  //   Positioned(
+                  //     bottom: 0,
+                  //     right: 0,
+                  //     child: GestureDetector(
+                  //
+                  //
+                  //     ),
+                  //   ),
                 ],
               ),
               const SizedBox(width: 16),
@@ -833,12 +829,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
         request.files.add(multipartFile);
       }
-
       // Send request
       var response = await request.send();
-      var responseData = await response.stream.bytesToString();
-
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (mounted) {
           // Pop the current screen with the updated data

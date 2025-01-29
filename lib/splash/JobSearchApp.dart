@@ -30,172 +30,182 @@ class JobSearchScreen extends StatelessWidget {
   const JobSearchScreen({Key? key}) : super(key: key);
 
 
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          // controller: _scrollController,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                // controller: _scrollController,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SvgPicture.asset(
-                      'assets/bell_image.svg',
-                      width: 30,
-                      height: 30,
-                    ),
-                    const SizedBox(height: 20),
-                    const SizedBox(
-                      width: double.infinity,
-                      child: Text(
-                        'Find your dream job now',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    //const SizedBox(height: 1),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Text(
-                        '5 lakh+ jobs for you to explore',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey[600],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          width: double.infinity,
-                          child: Text(
-                            'Jobs you maybe interested',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SvgPicture.asset(
+                            'assets/bell_image.svg',
+                            width: 30,
+                            height: 30,
+                          ),
+                          const SizedBox(height: 20),
+                          const SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              'Find your dream job now',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: 10),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
+                          //const SizedBox(height: 1),
+                          SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              '5 lakh+ jobs for you to explore',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                          const Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              JobChip(label: 'Digital Marketing (89)'),
-                              JobChip(label: 'Product Management (43)'),
-                              JobChip(label: 'Design (67)'),
+                              SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  'Jobs you maybe interested',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    JobChip(label: 'Digital Marketing (89)'),
+                                    JobChip(label: 'Product Management (43)'),
+                                    JobChip(label: 'Design (67)'),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    const SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          JobCard(
-                            company: 'Microsoft',
-                            role: 'Digital Marketing',
-                            location: 'Bangalore',
+                          const SizedBox(height: 10),
+                          const SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                JobCard(
+                                  company: 'Microsoft',
+                                  role: 'Digital Marketing',
+                                  location: 'Bangalore',
+                                ),
+                                JobCard(
+                                  company: 'Microsoft',
+                                  role: 'Digital Marketing',
+                                  location: 'Bangalore',
+                                ),
+                                JobCard(
+                                  company: 'Microsoft',
+                                  role: 'Digital Marketing',
+                                  location: 'Bangalore',
+                                ),
+                              ],
+                            ),
                           ),
-                          JobCard(
-                            company: 'Microsoft',
-                            role: 'Digital Marketing',
-                            location: 'Bangalore',
+                          const SizedBox(height: 14),
+                          const SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              'Most popular jobs',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                          JobCard(
-                            company: 'Microsoft',
-                            role: 'Digital Marketing',
-                            location: 'Bangalore',
+                          const SizedBox(height: 14),
+                          const SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                PopularJobItem(
+                                    icon: Icons.work,
+                                    label: 'Digital Marketing'),
+                                PopularJobItem(
+                                    icon: Icons.computer,
+                                    label: 'Software Developer'),
+                                PopularJobItem(
+                                    icon: Icons.design_services,
+                                    label: 'Design'),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          const SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              'Top companies hiring now',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 14),
+                          const SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                CompanyCategory(
+                                  category: 'Edtech',
+                                  subtitle: 'Top companies hiring',
+                                  colorIndex: 0,
+                                ),
+                                CompanyCategory(
+                                  category: 'Fintech',
+                                  subtitle: 'Top companies hiring',
+                                  colorIndex: 1,
+                                ),
+                                CompanyCategory(
+                                  category: 'Healthcare',
+                                  subtitle: 'Top companies hiring',
+                                  colorIndex: 2,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 14),
-                    const SizedBox(
-                      width: double.infinity,
-                      child: Text(
-                        'Most popular jobs',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    const SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          PopularJobItem(icon: Icons.work,
-                              label: 'Digital Marketing'),
-                          PopularJobItem(icon: Icons.computer,
-                              label: 'Software Developer'),
-                          PopularJobItem(icon: Icons.design_services,
-                              label: 'Design'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    const SizedBox(
-                      width: double.infinity,
-                      child: Text(
-                        'Top companies hiring now',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    const SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: [
-                          CompanyCategory(
-                            category: 'Edtech',
-                            subtitle: 'Top companies hiring',
-                            colorIndex: 0,
-                          ),
-                          CompanyCategory(
-                            category: 'Fintech',
-                            subtitle: 'Top companies hiring',
-                            colorIndex: 1,
-                          ),
-                          CompanyCategory(
-                            category: 'Healthcare',
-                            subtitle: 'Top companies hiring',
-                            colorIndex: 2,
-                          ),
-                        ],
-                      ),
-                    ),
+                    const SizedBox(height: 2),
                   ],
                 ),
               ),
-              const SizedBox(height: 2),
-              const QuestionnaireSection(), // No padding applied here
-            ],
-          ),
+            ),
+            const QuestionnaireSection(), // Moved outside SingleChildScrollView
+          ],
         ),
       ),
     );
   }
+
 }
 
 class JobChip extends StatelessWidget {
@@ -436,20 +446,43 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
   List<String> _suggestions = [];
   bool _isLoading = false;
   final ScrollController _scrollController = ScrollController();
+  bool isTextFieldFocused = false;
+  final FocusNode searchFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    // Add listener to focus node
+    searchFocusNode.addListener(() {
+      setState(() {
+        isTextFieldFocused = searchFocusNode.hasFocus;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    searchFocusNode.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width, // Occupies full screen width
+      width: MediaQuery.of(context).size.width,
       child: Container(
-        padding: const EdgeInsets.all(10), // Content padding remains
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
           color: const Color(0xFFDCF8C7),
           borderRadius: BorderRadius.circular(15),
         ),
-        height: 250, // Fixed height for the PageView
+        // Height changes only when TextField is focused in question 3
+        height: (currentQuestionIndex == 2 && isTextFieldFocused) ? 300 : 125,
         child: PageView(
           controller: _pageController,
+          physics: const BouncingScrollPhysics(), // Enable swipe gestures
           onPageChanged: (index) {
             setState(() {
               currentQuestionIndex = index;
@@ -457,21 +490,21 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
           },
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 10, top: 10), // Moves slightly down and left
+              padding: const EdgeInsets.only(left: 10, top: 10),
               child: Align(
-                alignment: Alignment.centerLeft, // Aligns the content left and vertically centered
+                alignment: Alignment.centerLeft,
                 child: _buildStartTimeQuestion(),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 10, top: 10), // Moves slightly down and left
+              padding: const EdgeInsets.only(left: 10, top: 10),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: _buildExperienceQuestion(),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 10, top: 10), // Moves slightly down and left
+              padding: const EdgeInsets.only(left: 10, top: 10),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: _buildJobSearchQuestion(),
@@ -582,117 +615,137 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
       crossAxisAlignment: CrossAxisAlignment.start,
       key: const ValueKey('question3'),
       children: [
-        const Text(
-          'What kind of job would you like?',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              flex: 5,
-              child: TextField(
-                controller: jobController,
-                onTap: () {
-                  // Scroll down slightly to make room for suggestions
-                  _scrollController.animateTo(
-                    _scrollController.offset + 100, // Adjust the value as needed
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                  );
-                },
-                decoration: InputDecoration(
-                  hintText: 'e.g. Sales Manager',
-                  border: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(15),
-                    ),
-                  ),
-                  enabledBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(15),
-                    ),
-                    borderSide: BorderSide(
-                      color: Colors.black,
-                      width: 1.0,
-                    ),
-                  ),
-                  focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(15),
-                    ),
-                    borderSide: BorderSide(
-                      color: Colors.black,
-                      width: 1.5,
-                    ),
-                  ),
-                  filled: true,
-                  fillColor: const Color(0xFFDCF8C7),
-                  suffixIcon: _isLoading
-                      ? const SizedBox(
-                    width: 5,
-                    height: 5,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 1,
-                    ),
-                  )
-                      : null,
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    desiredJob = value;
-                  });
-                  _fetchSuggestions(value);
-                },
+        // Show question text only when TextField is not focused
+        if (!isTextFieldFocused)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: Text(
+              'What kind of job do you wish for?',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.arrow_forward),
-              onPressed: desiredJob.isNotEmpty
-                  ? () {
-                print(
-                    'Answers collected: Start: $selectedStartTime, Experience: $selectedExperience, Job: $desiredJob');
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FeedScreen1()),
-                );
-              }
-                  : null,
+          ),
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            // The search bar
+            Container(
+              margin: EdgeInsets.only(top: isTextFieldFocused ? 200 : 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: jobController,
+                      focusNode: searchFocusNode,
+                      decoration: InputDecoration(
+                        hintText: 'Sales',
+                        hintStyle: const TextStyle(color: Colors.grey),  // Add this line to change hint text color
+                        prefixIcon: const Icon(Icons.search, color: Colors.black),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          borderSide: const BorderSide(
+                            color: Colors.black,
+                            width: 1.0,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          borderSide: const BorderSide(
+                            color: Colors.black,
+                            width: 1.5,
+                          ),
+                        ),
+                        filled: true,
+                        fillColor: const Color(0xFFDCF8C7),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          desiredJob = value;
+                        });
+                        _fetchSuggestions(value);
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.teal,
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                      onPressed: desiredJob.isNotEmpty ? () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const FeedScreen1()),
+                        );
+                      } : null,
+                    ),
+                  ),
+                ],
+              ),
             ),
+            // Suggestions list above the search bar
+            if (_suggestions.isNotEmpty && isTextFieldFocused)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 48,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDCF8C7),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _suggestions.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            child: InkWell(
+                              onTap: () {
+                                jobController.text = _suggestions[index];
+                                setState(() {
+                                  desiredJob = _suggestions[index];
+                                  _suggestions = [];
+                                });
+                              },
+                              child: RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: _suggestions[index],
+                                      style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
-        if (_suggestions.isNotEmpty)
-          Container(
-            constraints: const BoxConstraints(maxHeight: 150),
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: _suggestions.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(_suggestions[index]),
-                  onTap: () {
-                    jobController.text = _suggestions[index];
-                    setState(() {
-                      desiredJob = _suggestions[index];
-                      _suggestions = [];
-                    });
-                  },
-                );
-              },
-            ),
-          ),
       ],
     );
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
   }
 
   Widget _buildChoiceChip(String label, String? selectedValue) {
