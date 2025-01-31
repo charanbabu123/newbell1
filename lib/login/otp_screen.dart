@@ -61,17 +61,32 @@ class _OtpScreenState extends State<OtpScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F8F7),
-      appBar: AppBar(title: const Text("Enter OTP")),
+      appBar: AppBar(title: const Text("")),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(36.0),
+          padding: const EdgeInsets.all(50.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Container(
+                decoration: const BoxDecoration(
+                  color: Colors.green, // Green background
+                  shape: BoxShape.circle, // Make the background circular
+                ),
+                padding: const EdgeInsets.all(12.0), // Padding around the icon
+                child: const Center( // Center widget to center the icon
+                  child: Icon(
+                    Icons.person_outline_rounded, // Person icon
+                    color: Colors.white, // Icon color
+                    size: 30.0, // Icon size
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
               const Text(
-                "Please Enter The One Time Password To Verify Your Account",
+                "Please Enter The OTP To Verify Your Account",
                 style: TextStyle(
-                    color: Colors.pink,
+                    color: Colors.green,
                     fontSize: 28,
                     fontWeight: FontWeight.bold),
               ),
@@ -96,11 +111,9 @@ class _OtpScreenState extends State<OtpScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: _isOtpComplete()
-                          ? [Colors.pinkAccent, Colors.pink]
-                          : [Colors.grey, Colors.grey],
-                    ),
+                    color: _isOtpComplete()
+                        ? Colors.green
+                        : const Color.fromRGBO(212, 202, 191, 1), // Solid color based on the condition
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: isLoading
@@ -234,7 +247,7 @@ class _OtpScreenState extends State<OtpScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.pinkAccent,
+        backgroundColor: Colors.green,
         duration: const Duration(seconds: 1),
       ),
     );
@@ -264,13 +277,13 @@ class _OtpScreenState extends State<OtpScreen> {
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           decoration: InputDecoration(
             enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Colors.pinkAccent),
+              borderSide: BorderSide(color: Colors.green),
             ),
             focusedBorder: UnderlineInputBorder(
               borderSide: BorderSide(
                 color: _controllers[index].text.isNotEmpty
-                    ? Colors.pink.shade800
-                    : Colors.pink,
+                    ? Colors.green.shade800
+                    : Colors.green,
                 width: 2.0,
               ),
             ),

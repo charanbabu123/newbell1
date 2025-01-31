@@ -133,7 +133,7 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.pinkAccent,
+        backgroundColor: Colors.green,
         duration: const Duration(seconds: 1),
       ),
     );
@@ -151,8 +151,8 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
             child: TextButton(
               onPressed: () {},
               style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.pinkAccent,
+                foregroundColor: Colors.green, // Text color set to green
+                backgroundColor: Colors.transparent, // No background color
                 textStyle: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -163,6 +163,7 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
               ),
               child: const Text("For Employees"),
             ),
+
           ),
           Center(
             child: Padding(
@@ -178,7 +179,7 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
                       style: TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
-                        color: Colors.pink,
+                        color: Colors.green,
                         wordSpacing: 2.0,
                       ),
                     ),
@@ -190,13 +191,11 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
                       autofocus: false,
                       decoration: const InputDecoration(
                         prefixText: "+91 ",
-                        labelText: "Phone Number",
-                        labelStyle: TextStyle(color: Colors.pink),
                         border: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.pinkAccent),
+                          borderSide: BorderSide(color: Colors.black),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.pink, width: 2),
+                          borderSide: BorderSide(color: Colors.black, width: 1),
                         ),
                       ),
                       validator: (value) {
@@ -248,13 +247,9 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          gradient: isButtonEnabled
-                              ? const LinearGradient(
-                                  colors: [Colors.pink, Colors.pinkAccent],
-                                )
-                              : const LinearGradient(
-                                  colors: [Colors.grey, Colors.grey],
-                                ),
+                          color: isButtonEnabled
+                              ? Colors.green
+                              : const Color.fromRGBO(212, 202, 191, 1),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: isLoading

@@ -736,11 +736,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                             style: TextStyle(color: Colors.pink),
                           ),
                         ),
-                      // Delete Button
-                      IconButton(
-                        onPressed: () => deleteVideo(index),
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                      ),
+
                     ],
                   ),
                 ],
@@ -791,146 +787,239 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
     );
   }
 
-  void _showCaptionDialog(VideoSection section, int index,
-      {required bool isEdit}) {
+  void _showCaptionDialog(VideoSection section, int index, {required bool isEdit}) {
     final provider = Provider.of<VideoSectionsProvider>(context, listen: false);
     final TextEditingController caption1Controller =
-        TextEditingController(text: section.captions?.elementAt(0) ?? '');
+    TextEditingController(text: section.captions?.elementAt(0) ?? '');
     final TextEditingController caption2Controller =
-        TextEditingController(text: section.captions?.elementAt(1) ?? '');
+    TextEditingController(text: section.captions?.elementAt(1) ?? '');
     final TextEditingController caption3Controller =
-        TextEditingController(text: section.captions?.elementAt(2) ?? '');
+    TextEditingController(text: section.captions?.elementAt(2) ?? '');
+
 
     if (isEdit && section.captions != null) {
       caption1Controller.text = section.captions![0];
       caption2Controller.text = section.captions![1];
       caption3Controller.text = section.captions![2];
     }
+
+    // Focus nodes to track keyboard state
+    final FocusNode focus1 = FocusNode();
+    final FocusNode focus2 = FocusNode();
+    final FocusNode focus3 = FocusNode();
+
+    // Get video duration in seconds
     final int videoDuration =
         section.thumbnailController?.value.duration.inSeconds ??
             60; // Default 60 seconds
     final List<String> intervals = _getCaptionIntervals(videoDuration, 3);
 
+    // Calculate intervals
+    final int interval = (videoDuration / 3).ceil();
+    final String interval1 = "0-${interval}s";
+    final String interval2 = "${interval + 1}-${interval * 2}s";
+    final String interval3 = "${(interval * 2) + 1}-${videoDuration}s";
+
+    bool isKeyboardVisible = false;
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(isEdit ? 'Edit Captions' : 'Add Captions'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: caption1Controller,
-                decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty
-                      ? 'Caption 1 (${intervals[0]}) '
-                      : 'Caption 1 ',
-                  errorText: section.errorMessage,
-                  labelStyle: const TextStyle(color: Colors.pink),
-                  enabledBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.pink),
+        return StatefulBuilder(
+          builder: (context, setState) {
+            // Add listeners to focus nodes
+            void updateKeyboardVisibility() {
+              setState(() {
+                isKeyboardVisible = focus1.hasFocus || focus2.hasFocus || focus3.hasFocus;
+              });
+            }
+
+            focus1.addListener(updateKeyboardVisibility);
+            focus2.addListener(updateKeyboardVisibility);
+            focus3.addListener(updateKeyboardVisibility);
+
+            Widget buildCaptionInput(String label, TextEditingController controller, FocusNode focusNode) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black87,
+                    ),
                   ),
-                  focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.pink),
+                  Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.black12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    margin: const EdgeInsets.only(top: 8, bottom: 16),
+                    child: TextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter caption',
+                        hintStyle: TextStyle(
+                          color: Colors.black38,
+                          fontSize: 16,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.all(12),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              insetPadding: EdgeInsets.zero,
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                margin: EdgeInsets.only(
+                  top: isKeyboardVisible
+                      ? MediaQuery.of(context).size.height * 0.15
+                      : MediaQuery.of(context).size.height * 0.35,
+                ),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(32),
+                    topRight: Radius.circular(32),
                   ),
                 ),
-                style: const TextStyle(
-                    fontSize: 14), // Adjust font size to fit within 3 rows
-              ),
-              TextField(
-                controller: caption2Controller,
-                decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty
-                      ? 'Caption 2 (${intervals[1]}) '
-                      : 'Caption 2 ',
-                  errorText: section.errorMessage,
-                  labelStyle: const TextStyle(color: Colors.pink),
-                  enabledBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.pink),
-                  ),
-                  focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.pink),
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Header
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Enter Caption',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => Navigator.of(context).pop(),
+                            child: const Icon(Icons.close, size: 24),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Caption inputs
+                    Flexible(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            buildCaptionInput('Caption 1 ($interval1)', caption1Controller, focus1),
+                            buildCaptionInput('Caption 2 ($interval2)', caption2Controller, focus2),
+                            buildCaptionInput('Caption 3 ($interval3)', caption3Controller, focus3),
+                            // Add extra padding at bottom when keyboard is visible
+                            if (isKeyboardVisible) const SizedBox(height: 100),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Submit button (only visible when keyboard is hidden)
+
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(24),
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            if (caption1Controller.text.length >
+                                100 || // Change to character limit
+                                caption2Controller.text.length >
+                                    100 || // Change to character limit
+                                caption3Controller.text.length > 100) {
+                              // Change to character limit
+                              final captions = [
+                                caption1Controller.text,
+                                caption2Controller.text,
+                                caption3Controller.text,
+                              ].where((caption) => caption.isNotEmpty).toList();
+                              provider.updateCaptions(index, captions);
+                              Navigator.of(context).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content:
+                                  Text('Each caption must be less than 100 characters'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                              return;
+                            }
+
+                            List<String> newCaptions = [
+                              caption1Controller.text,
+                              caption2Controller.text,
+                              caption3Controller.text,
+                            ];
+
+                            if (mounted) {
+                              setState(() {
+                                section.captions = newCaptions; // Directly update captions
+                              });
+                            }
+
+                            try {
+                              await uploadCaptions(newCaptions, section.videoId.toString());
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Captions added successfully'),
+                                    backgroundColor: Colors.green,
+                                  ),
+                                );
+                              }
+
+                              Navigator.of(context).pop();
+                            } catch (e) {
+                              if (mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Error updating captions: $e'),
+                                    backgroundColor: Colors.red,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFE5DED5),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          ),
+                          child: const Text(
+                            'Submit',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
               ),
-              TextField(
-                controller: caption3Controller,
-                decoration: InputDecoration(
-                  labelText: intervals.isNotEmpty
-                      ? 'Caption 3 (${intervals[2]}) '
-                      : 'Caption 3 ',
-                  errorText: section.errorMessage,
-                  labelStyle: const TextStyle(color: Colors.pink),
-                  enabledBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.pink),
-                  ),
-                  focusedBorder: const UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.pink),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                if (caption1Controller.text.length >
-                        100 || // Change to character limit
-                    caption2Controller.text.length >
-                        100 || // Change to character limit
-                    caption3Controller.text.length > 100) {
-                  // Change to character limit
-                  final captions = [
-                    caption1Controller.text,
-                    caption2Controller.text,
-                    caption3Controller.text,
-                  ].where((caption) => caption.isNotEmpty).toList();
-                  provider.updateCaptions(index, captions);
-                  Navigator.of(context).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content:
-                          Text('Each caption must be less than 100 characters'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                  return;
-                }
-
-                List<String> newCaptions = [
-                  caption1Controller.text,
-                  caption2Controller.text,
-                  caption3Controller.text,
-                ];
-
-                try {
-                  // Call API to upload captions only on first submission
-                  await uploadCaptions(newCaptions, section.videoId.toString());
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Captions added successfully'),
-                      backgroundColor: Colors.pink,
-                    ),
-                  );
-
-                  // Update local state
-                  setState(() {
-                    section.updateCaptions(newCaptions);
-                  });
-
-                  Navigator.of(context).pop();
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Error updating captions: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              },
-              child: const Text('Submit'),
-            ),
-          ],
+            );
+          },
         );
       },
     );

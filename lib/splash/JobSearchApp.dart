@@ -52,7 +52,7 @@ class JobSearchScreen extends StatelessWidget {
                             width: 30,
                             height: 30,
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 30),
                           const SizedBox(
                             width: double.infinity,
                             child: Text(
@@ -76,7 +76,7 @@ class JobSearchScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 23),
                           const Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -86,12 +86,12 @@ class JobSearchScreen extends StatelessWidget {
                                   'Jobs you maybe interested',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
+                                    fontSize: 19,
+                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              SizedBox(height: 7),
                               SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
@@ -112,34 +112,34 @@ class JobSearchScreen extends StatelessWidget {
                                 JobCard(
                                   company: 'Microsoft',
                                   role: 'Digital Marketing',
-                                  location: 'Bangalore',
+                                  //location: 'Bangalore',
                                 ),
                                 JobCard(
                                   company: 'Microsoft',
                                   role: 'Digital Marketing',
-                                  location: 'Bangalore',
+                                  //location: 'Bangalore',
                                 ),
                                 JobCard(
                                   company: 'Microsoft',
                                   role: 'Digital Marketing',
-                                  location: 'Bangalore',
+                                 // location: 'Bangalore',
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 20),
                           const SizedBox(
                             width: double.infinity,
                             child: Text(
                               'Most popular jobs',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 5),
                           const SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
@@ -156,19 +156,19 @@ class JobSearchScreen extends StatelessWidget {
                               ],
                             ),
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 20),
                           const SizedBox(
                             width: double.infinity,
                             child: Text(
                               'Top companies hiring now',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          const SizedBox(height: 14),
+                          const SizedBox(height: 5),
                           const SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: Row(
@@ -222,30 +222,33 @@ class JobChip extends StatelessWidget {
           label,
           style: const TextStyle(color: Colors.black87),
         ),
-        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18), // Adjust the radius as needed
+        ),
       ),
     );
   }
+
 }
 
 class JobCard extends StatelessWidget {
   final String company;
   final String role;
-  final String location;
+ // final String location;
 
   const JobCard({
     Key? key,
     required this.company,
     required this.role,
-    required this.location,
+    //required this.location,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 180,
-      margin: const EdgeInsets.only(right: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(8),
@@ -282,13 +285,13 @@ class JobCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            location,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-            ),
-          ),
+          // Text(
+          //   location,
+          //   style: TextStyle(
+          //     fontSize: 14,
+          //     color: Colors.grey[600],
+          //   ),
+          // ),
         ],
       ),
     );
@@ -471,15 +474,20 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: MediaQuery.of(context).size.width,
+      width: MediaQuery
+          .of(context)
+          .size
+          .width,
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(13),
         decoration: BoxDecoration(
           color: const Color(0xFFDCF8C7),
-          borderRadius: BorderRadius.circular(15),
+          borderRadius: BorderRadius.circular(20),
         ),
         // Height changes only when TextField is focused in question 3
-        height: (currentQuestionIndex == 2 && isTextFieldFocused) ? 300 : 125,
+        height: (currentQuestionIndex == 2 && isTextFieldFocused && _suggestions.isNotEmpty)
+            ? 125 + (_suggestions.length * 44) // Base height + (number of suggestions * height per suggestion)
+            : 125,
         child: PageView(
           controller: _pageController,
           physics: const BouncingScrollPhysics(), // Enable swipe gestures
@@ -490,21 +498,21 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
           },
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 10, top: 10),
+              padding: const EdgeInsets.only(left: 21, top: 8),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: _buildStartTimeQuestion(),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 10, top: 10),
+              padding: const EdgeInsets.only(left: 21, top: 8),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: _buildExperienceQuestion(),
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 10, top: 10),
+              padding: const EdgeInsets.only(left: 10, top: 8),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: _buildJobSearchQuestion(),
@@ -517,7 +525,6 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
   }
 
 
-
   Widget _buildStartTimeQuestion() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -526,8 +533,8 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
         const Text(
           'When can you start?',
           style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 12),
@@ -551,8 +558,8 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
         const Text(
           'What is your experience level?',
           style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 12),
@@ -583,7 +590,8 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
 
     try {
       final response = await http.get(
-        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/autocomplete/?q=$query'),
+        Uri.parse(
+            'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/autocomplete/?q=$query'),
       );
       debugPrint('Status Code: ${response.statusCode}');
       debugPrint('Response Headers: ${response.headers}');
@@ -632,7 +640,17 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
           children: [
             // The search bar
             Container(
-              margin: EdgeInsets.only(top: isTextFieldFocused ? 200 : 0),
+              margin: EdgeInsets.only(
+                top: (isTextFieldFocused && _suggestions.isNotEmpty)
+                    ? (_suggestions.length == 1
+                    ? 60
+                    : (_suggestions.length == 2
+                    ? 100  // Adjust the value as needed
+                    : (_suggestions.length == 3
+                    ? 150
+                    : 200)))
+                    : 0,
+              ),
               child: Row(
                 children: [
                   Expanded(
@@ -640,9 +658,11 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
                       controller: jobController,
                       focusNode: searchFocusNode,
                       decoration: InputDecoration(
-                        hintText: 'Sales',
-                        hintStyle: const TextStyle(color: Colors.grey),  // Add this line to change hint text color
-                        prefixIcon: const Icon(Icons.search, color: Colors.black),
+                        hintText: 'Sales Manager',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        // Add this line to change hint text color
+                        prefixIcon: const Icon(
+                            Icons.search, color: Colors.black),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
@@ -678,11 +698,13 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
                       borderRadius: BorderRadius.circular(25),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_forward, color: Colors.white),
+                      icon: const Icon(
+                          Icons.arrow_forward, color: Colors.white),
                       onPressed: desiredJob.isNotEmpty ? () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const FeedScreen1()),
+                          MaterialPageRoute(builder: (
+                              context) => const FeedScreen1()),
                         );
                       } : null,
                     ),
@@ -697,48 +719,40 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
                 left: 0,
                 right: 48,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                   decoration: BoxDecoration(
                     color: const Color(0xFFDCF8C7),
                     borderRadius: BorderRadius.circular(15),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _suggestions.length,
-                        itemBuilder: (context, index) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: InkWell(
-                              onTap: () {
-                                jobController.text = _suggestions[index];
-                                setState(() {
-                                  desiredJob = _suggestions[index];
-                                  _suggestions = [];
-                                });
-                              },
-                              child: RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: _suggestions[index],
-                                      style: const TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                  constraints: BoxConstraints(
+                    maxHeight: 50.0 * _suggestions.length, // Dynamically adjusts height
+                  ),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _suggestions.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: InkWell(
+                          onTap: () {
+                            jobController.text = _suggestions[index];
+                            setState(() {
+                              desiredJob = _suggestions[index];
+                              _suggestions = [];
+                            });
+                          },
+                          child: Text(
+                            _suggestions[index],
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
                             ),
-                          );
-                        },
-                      ),
-                    ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -751,7 +765,13 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
   Widget _buildChoiceChip(String label, String? selectedValue) {
     return ChoiceChip(
       label: Text(label),
+      labelPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+      // Padding remains consistent
       selected: selectedValue == label,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: Color(0xFF118C7E)), // Border color
+      ),
       onSelected: (bool selected) {
         setState(() {
           if (currentQuestionIndex == 0) {
@@ -777,10 +797,10 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
           }
         });
       },
-      backgroundColor: const Color(0xFFDCF8C7),
+      backgroundColor: const Color(0xFF118C7E),
       selectedColor: Colors.green,
       labelStyle: TextStyle(
-        color: selectedValue == label ? Colors.white : Colors.black87,
+        color: selectedValue == label ? Colors.white : Colors.white,
       ),
     );
   }

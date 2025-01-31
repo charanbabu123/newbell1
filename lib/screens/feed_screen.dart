@@ -141,12 +141,11 @@ class _FeedScreenState extends State<FeedScreen>
               ),
             ),
             padding:
-                const EdgeInsets.only(top: 46, left: 54, right: 10, bottom: 16),
+            const EdgeInsets.only(top: 70, left: 34, right: 109, bottom: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Spacer(), // Pushes content to the center
-
                 // Center Content
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -180,16 +179,11 @@ class _FeedScreenState extends State<FeedScreen>
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        // fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
                 ),
-
-                const Spacer(), // Pushes content to the center
-
-                // Search Icon
-                const Icon(Icons.search, color: Colors.white, size: 28),
               ],
             ),
           ),
@@ -418,7 +412,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         // Static buttons like share, comment
         Positioned(
           right: 16,
-          bottom: 10,
+          bottom: 20,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -530,7 +524,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
           right: 143,
           left: 143,
        // Adjust left position relative to screen width
-          bottom: MediaQuery.of(context).size.height * 0.024, // Adjust bottom position relative to screen height
+          bottom: MediaQuery.of(context).size.height * 0.034, // Adjust bottom position relative to screen height
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
             decoration: BoxDecoration(
@@ -773,8 +767,8 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
         Positioned(
           bottom: 10,
-          left: 0,
-          right: 0,
+          left: 20,
+          right: 20,
           child: InstagramStoryProgressBar(
             videos: widget.allVideos,
             currentController: _controller,
@@ -866,7 +860,7 @@ class InstagramStoryProgressBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 5.0),
       child: Row(
         children: List.generate(
           videos.length,
@@ -879,7 +873,7 @@ class InstagramStoryProgressBar extends StatelessWidget {
                       isActive: true,
                     )
                   : Container(
-                      height: 4,
+                      height: 5,
                       decoration: BoxDecoration(
                         color: index < currentIndex
                             ? Colors.green
@@ -919,7 +913,7 @@ class _ProgressBar extends StatelessWidget {
         }
 
         return Container(
-          height: 4,
+          height: 5,
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.5),
 

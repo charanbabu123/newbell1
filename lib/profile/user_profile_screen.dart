@@ -273,15 +273,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
                           : null,
                     ),
                   ),
-                  // if (_profileImage == null && userProfilePicture == null)
-                  //   Positioned(
-                  //     bottom: 0,
-                  //     right: 0,
-                  //     child: GestureDetector(
-                  //
-                  //
-                  //     ),
-                  //   ),
+
                 ],
               ),
               const SizedBox(width: 16),
@@ -865,18 +857,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink[50],
+      backgroundColor: const Color(0XFFFAF6F0),
       appBar: AppBar(
-        title: const Text("Edit profile", style: TextStyle(color: Colors.pink)),
-        backgroundColor: Colors.pink[50],
+        title: const Text(
+          "My Profile",
+          style: TextStyle(
+            color: Colors.black,
+             // Example of a built-in font
+          ),
+        ),
+        backgroundColor: const Color(0XFFFAF6F0),
         elevation: 0,
         iconTheme: const IconThemeData(
-          color: Colors.pink,
+          color: Colors.black,
         ),
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(25.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -885,7 +883,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 child: Stack(
                   children: [
                     CircleAvatar(
-                      radius: 50,
+                      radius: 55,
+                      backgroundColor: const Color(0xFFECE5DD), // Set background color
                       backgroundImage: _profileImage != null
                           ? FileImage(_profileImage!)
                           : (widget.profilePicture != null && widget.profilePicture!.startsWith('http')
@@ -893,9 +892,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           : null) as ImageProvider?,
                       child: (_profileImage == null &&
                           (widget.profilePicture == null || !widget.profilePicture!.startsWith('http')))
-                          ? const Icon(Icons.person, size: 50, color: Colors.grey)
+                          ? const Icon(Icons.person_outline_rounded, size: 60, color: Colors.black)
                           : null,
                     ),
+
 
                     Positioned(
                       bottom: 0,
@@ -903,17 +903,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       child: GestureDetector(
                         onTap: _pickProfileImage,
                         child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: Colors.pink,
+                          padding: const EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF24D366),
                             shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white, // White border color
+                              width: 2, // Border width
+                            ),
                           ),
                           child: const Icon(
-                            Icons.camera_alt,
+                            Icons.camera_alt_outlined,
                             color: Colors.white,
                             size: 20,
                           ),
                         ),
+
                       ),
                     ),
                   ],
@@ -929,14 +934,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: _usernameController,
-                style: const TextStyle(color: Colors.pink),
+                style: const TextStyle(color: Colors.black),
                 decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
+                  filled: false,
                   hintText: "Enter username",
                   hintStyle: const TextStyle(color: Colors.black),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(
+                      color: Colors.black, // Black border for focused state
+                      width: 1.0, // Slightly thicker border when focused
+                    ),
                   ),
                 ),
               ),
@@ -950,15 +961,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: _yoeController,
-                style: const TextStyle(color: Colors.pink),
+                style: const TextStyle(color: Colors.black),
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
+                  filled: false,
                   hintText: "Enter years of experience",
-                  hintStyle: const TextStyle(color: Colors.pink),
+                  hintStyle: const TextStyle(color: Colors.grey),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(
+                      color: Colors.black, // Black border for focused state
+                      width: 1.0, // Slightly thicker border when focused
+                    ),
                   ),
                 ),
               ),
@@ -972,14 +989,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: _cityController,
-                style: const TextStyle(color: Colors.pink),
+                style: const TextStyle(color: Colors.black),
                 decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
+                  filled: false,
                   hintText: "Enter city",
-                  hintStyle: const TextStyle(color: Colors.pink),
+                  hintStyle: const TextStyle(color: Colors.grey),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(
+                      color: Colors.black, // Black border for focused state
+                      width: 1.0, // Slightly thicker border when focused
+                    ),
                   ),
                 ),
               ),
@@ -993,18 +1016,29 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: _bioController,
-                style: const TextStyle(color: Colors.pink),
-                maxLines: 3,
+                style: const TextStyle(color: Colors.black),
+                maxLines: 2,
                 decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
+                  filled: false,
                   hintText: "Enter bio",
-                  hintStyle: const TextStyle(color: Colors.pink),
+                  hintStyle: const TextStyle(color: Colors.grey),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(
+                      color: Colors.black, // Black border color
+                      width: 1.0, // Border thickness
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: const BorderSide(
+                      color: Colors.black, // Black border for focused state
+                      width: 1.0, // Slightly thicker border when focused
+                    ),
                   ),
                 ),
               ),
+
               const SizedBox(height: 24),
 
               // Update button
@@ -1040,13 +1074,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
+                          backgroundColor: const Color(0xFF24D366),
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          side: const BorderSide(color: Colors.pink), // Border styling
+                          side: const BorderSide(color: Color(0xFF24D366)), // Border styling
                         ),
                         child: Text(
                           videosComplete ? "Complete Your Profile" : "Complete Your Videos",
-                          style: const TextStyle(color: Colors.pink),
+                          style: const TextStyle(color: Colors.white),
                         ),
                       ),
                     ),
@@ -1056,7 +1090,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading ? null : _handleSave,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.pink,
+                          backgroundColor: const Color(0xFF24D366),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
                         child: _isLoading
