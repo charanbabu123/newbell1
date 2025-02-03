@@ -60,11 +60,11 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF0F8F7),
-      appBar: AppBar(title: const Text("")),
+      // backgroundColor: Colors.white,
+      // appBar: AppBar(title: const Text("")),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(50.0),
+          padding: const EdgeInsets.fromLTRB(50, 90, 30, 40),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -113,37 +113,43 @@ class _OtpScreenState extends State<OtpScreen> {
                   decoration: BoxDecoration(
                     color: _isOtpComplete()
                         ? Colors.green
-                        : const Color.fromRGBO(212, 202, 191, 1), // Solid color based on the condition
+                        : const Color.fromRGBO(212, 202, 191, 1), // Solid color
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: isLoading
-                      ? const CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.0,
-                        )
-                      : isSuccess
-                          ? const Icon(
-                              Icons.check_circle,
-                              color: Colors.white,
-                              size: 30,
-                            )
-                          : isError
-                              ? const Icon(
-                                  Icons.close_rounded,
-                                  color: Colors.white,
-                                  size: 30,
-                                )
-                              : Text(
-                                  "Verify OTP",
-                                  style: TextStyle(
-                                    color: _isOtpComplete()
-                                        ? Colors.white
-                                        : Colors.black38,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                  child: SizedBox(
+                    height: 22, // Fixed height to prevent resizing
+                    child: isLoading
+                        ? const SizedBox(
+                      height: 20, // Reduce loader size
+                      width: 20,  // Reduce loader size
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 1.0, // Reduce thickness of loader
+                      ),
+                    )
+                        : isSuccess
+                        ? const Icon(
+                      Icons.check_circle,
+                      color: Colors.white,
+                      size: 24, // Adjusted icon size
+                    )
+                        : isError
+                        ? const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white,
+                      size: 24, // Adjusted icon size
+                    )
+                        : Text(
+                      "Verify OTP",
+                      style: TextStyle(
+                        color: _isOtpComplete() ? Colors.white : Colors.black38,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
               ),
+
             ],
           ),
         ),

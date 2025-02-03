@@ -215,21 +215,29 @@ class JobChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(right: 8),
-      child: Chip(
-        label: Text(
-          label,
-          style: const TextStyle(color: Colors.black87),
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18), // Adjust the radius as needed
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const FeedScreen1()),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(right: 8),
+        child: Chip(
+          label: Text(
+            label,
+            style: const TextStyle(color: Colors.black87),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
         ),
       ),
     );
   }
-
 }
+
 
 class JobCard extends StatelessWidget {
   final String company;
@@ -245,7 +253,14 @@ class JobCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const FeedScreen1()),
+      );
+    },
+    child : Container(
       width: 150,
       margin: const EdgeInsets.only(right: 12),
       padding: const EdgeInsets.all(6),
@@ -294,6 +309,7 @@ class JobCard extends StatelessWidget {
           // ),
         ],
       ),
+    ),
     );
   }
 }
@@ -310,7 +326,15 @@ class PopularJobItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const FeedScreen1()),
+      );
+    },
+
+    child : Container(
       margin: const EdgeInsets.only(right: 16),
       padding: const EdgeInsets.all(12),  // Added padding
       decoration: BoxDecoration(  // Added decoration
@@ -335,6 +359,7 @@ class PopularJobItem extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }
@@ -359,8 +384,14 @@ class CompanyCategory extends StatelessWidget {
       Colors.blue,
       Colors.orange,
     ];
-
-    return Container(
+    return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const FeedScreen1()),
+      );
+    },
+    child : Container(
       width: 180,
       margin: const EdgeInsets.only(right: 16),
       padding: const EdgeInsets.all(16),
@@ -403,6 +434,7 @@ class CompanyCategory extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }
@@ -772,7 +804,7 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
       // Padding remains consistent
       selected: selectedValue == label,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(1),
         side: const BorderSide(color: Color(0xFF118C7E)), // Border color
       ),
       onSelected: (bool selected) {

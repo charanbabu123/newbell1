@@ -30,7 +30,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
   List<VideoModel> videos = [];
   bool videosComplete = false;
   double profileCompletionPercentage = 0.0;
-   final ScrollController _scrollController = ScrollController();
+  final ScrollController _scrollController = ScrollController();
 
 
   num posts = 23;
@@ -379,9 +379,9 @@ class UserProfileScreenState extends State<UserProfileScreen>
                 child: Text(
                   'Your Profile Status',
                   style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400
+                      color: Colors.black,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400
                   ),
                 ),
               ),
@@ -563,34 +563,34 @@ class UserProfileScreenState extends State<UserProfileScreen>
             SliverPersistentHeader(
               pinned: true,
               delegate: _SliverAppBarDelegate(
-                  TabBar(
-                    controller: _tabController,
-                    indicatorColor: Colors.green,
-                    labelColor: Colors.green, // Selected tab color
-                    unselectedLabelColor: Colors.black, // Unselected tab color
-                    tabs: const [
-                      Tab(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.video_library), // Color will be controlled by IconTheme
-                            SizedBox(width: 10),
-                            Text("Reel"),
-                          ],
-                        ),
+                TabBar(
+                  controller: _tabController,
+                  indicatorColor: Colors.green,
+                  labelColor: Colors.green, // Selected tab color
+                  unselectedLabelColor: Colors.black, // Unselected tab color
+                  tabs: const [
+                    Tab(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.video_library), // Color will be controlled by IconTheme
+                          SizedBox(width: 10),
+                          Text("Reel"),
+                        ],
                       ),
-                      Tab(
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.grid_on), // Color will be controlled by IconTheme
-                            SizedBox(width: 10),
-                            Text("My Videos"),
-                          ],
-                        ),
+                    ),
+                    Tab(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.grid_on), // Color will be controlled by IconTheme
+                          SizedBox(width: 10),
+                          Text("My Videos"),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ];
@@ -864,7 +864,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           "My Profile",
           style: TextStyle(
             color: Colors.black,
-             // Example of a built-in font
+            // Example of a built-in font
           ),
         ),
         backgroundColor: const Color(0XFFFAF6F0),

@@ -1171,7 +1171,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                         child: const Text(
                           'Submit',
                           style: TextStyle(
-                            color: Colors.black,
+                            color: Colors.white,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
                           ),
@@ -1287,7 +1287,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                         : const Color(
                             0xFFEFEFEF), // Matches the light grey background
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 98, vertical: 15), // Updated padding
+                        horizontal: 90, vertical: 15), // Updated padding
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8), // Rounded corners
                     ),

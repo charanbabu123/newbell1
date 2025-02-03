@@ -60,7 +60,7 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Reel published successfully!'),
-            backgroundColor: Colors.pink,
+            backgroundColor: Colors.green,
           ),
         );
         Navigator.pushReplacementNamed(

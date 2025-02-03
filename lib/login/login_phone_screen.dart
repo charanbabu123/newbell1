@@ -146,23 +146,25 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
       body: Stack(
         children: [
           Positioned(
-            top: 20,
+            top: 22,
             right: 10,
-            child: TextButton(
-              onPressed: () {},
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.green, // Text color set to green
-                backgroundColor: Colors.transparent, // No background color
-                textStyle: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+              child: TextButton(
+                onPressed: () {},
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white, // Text color
+                  backgroundColor: Colors.green, // Button background color set to green
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12), // Padding for a better look
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
+                child: const Text("For Employees"),
               ),
-              child: const Text("For Employees"),
-            ),
+
 
           ),
           Center(

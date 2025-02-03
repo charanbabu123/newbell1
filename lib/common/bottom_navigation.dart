@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import '../services/auth_service.dart';
@@ -19,41 +22,50 @@ class _BottomNavBarState extends State<BottomNavBar> {
     super.initState();
     fetchProfilePic();
   }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    fetchProfilePic();
+  }
+
 
   Future<void> fetchProfilePic() async {
     try {
-      final accessToken = await AuthService.getAuthToken();
-      if (accessToken == null) {
-        debugPrint('Access token not found. Please log in.');
-        return;
-      }
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? savedImagePath = prefs.getString('profile_picture');
 
-      final response = await http.get(
-        Uri.parse(
-            'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/profile/'),
-        headers: {
-          'Authorization': 'Bearer $accessToken', // Include the access token
-        },
-      );
-
-      print('Status Code: ${response.statusCode}');
-      print('Response Headers: ${response.headers}');
-      print('Response Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final user = data['user'];
+      if (savedImagePath != null && savedImagePath.isNotEmpty) {
         setState(() {
-          profilePicUrl =
-              user['profile_picture'] ?? ''; // Set profile picture URL
+          profilePicUrl = savedImagePath;
         });
       } else {
-        debugPrint('Failed to load profile picture: ${response.statusCode}');
+        // If no local image is found, fetch from API
+        final accessToken = await AuthService.getAuthToken();
+        if (accessToken == null) return;
+
+        final response = await http.get(
+          Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/profile/'),
+          headers: {'Authorization': 'Bearer $accessToken'},
+        );
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final user = data['user'];
+          String fetchedProfilePic = user['profile_picture'] ?? '';
+
+          setState(() {
+            profilePicUrl = fetchedProfilePic;
+          });
+
+          // Save it locally for future use
+          await prefs.setString('profile_picture', fetchedProfilePic);
+        }
       }
     } catch (e) {
       debugPrint('Error fetching profile picture: $e');
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -163,24 +175,29 @@ class _BottomNavBarState extends State<BottomNavBar> {
                         backgroundColor: Colors.white,
                         child: ClipOval(
                           child: profilePicUrl.isNotEmpty
+                              ? (profilePicUrl.startsWith('http')
                               ? Image.network(
                             profilePicUrl,
                             fit: BoxFit.cover,
-                            width: 30, // Adjust width to match the diameter of CircleAvatar
+                            width: 30,
                             height: 30,
                             errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.person_outline_rounded,
-                                color: Colors.black,
-                              );
+                              return const Icon(Icons.person_outline_rounded, color: Colors.black);
                             },
                           )
-                              : const Icon(
-                            Icons.person_outline_rounded,
-                            color: Colors.black,
-                          ), // Fallback for empty profilePicUrl
+                              : Image.file(
+                            File(profilePicUrl),
+                            fit: BoxFit.cover,
+                            width: 30,
+                            height: 30,
+                            errorBuilder: (context, error, stackTrace) {
+                              return const Icon(Icons.person_outline_rounded, color: Colors.black);
+                            },
+                          ))
+                              : const Icon(Icons.person_outline_rounded, color: Colors.black), // Fallback
                         ),
                       ),
+
                     ),
                     const SizedBox(height: 2), // Space between profile icon and text
                     Transform.translate(
@@ -193,7 +210,6 @@ class _BottomNavBarState extends State<BottomNavBar> {
                   ],
                 ),
               ),
-
             ],
           ),
         )
