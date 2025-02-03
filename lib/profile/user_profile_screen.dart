@@ -508,7 +508,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
             SizedBox(height: 16),
             Text(
               "Logging off...",
-              style: TextStyle(color: Colors.pink, fontSize: 18),
+              style: TextStyle(color: Colors.green, fontSize: 18),
             ),
           ],
         ),
@@ -661,12 +661,13 @@ class MenuScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.pink[50],
+      backgroundColor: const Color(0xFFFAF6F0),
       appBar: AppBar(
-        backgroundColor: Colors.pink[50],
+        backgroundColor: const Color(0xFFFAF6F0),//background: #FAF6F0;
+
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -678,21 +679,21 @@ class MenuScreen extends StatelessWidget {
           ListTile(
             title: const Text(
               'Settings',
-              style: TextStyle(color: Colors.pink, fontSize: 16),
+              style: TextStyle(color: Colors.black, fontSize: 16),
             ),
             onTap: () {},
           ),
           ListTile(
             title: const Text(
               'Privacy',
-              style: TextStyle(color: Colors.pink, fontSize: 16),
+              style: TextStyle(color: Colors.black, fontSize: 16),
             ),
             onTap: () {},
           ),
           ListTile(
             title: const Text(
               'Log Out',
-              style: TextStyle(color: Colors.red, fontSize: 16),
+              style: TextStyle(color: Colors.black, fontSize: 16),
             ),
             onTap: onLogout,
           ),
@@ -892,7 +893,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           : null) as ImageProvider?,
                       child: (_profileImage == null &&
                           (widget.profilePicture == null || !widget.profilePicture!.startsWith('http')))
-                          ? const Icon(Icons.person_outline_rounded, size: 60, color: Colors.black)
+                          ? const Icon(Icons.person_outline_rounded, size: 60, color: Colors.black54)
                           : null,
                     ),
 
@@ -928,7 +929,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
               // Username field
               const Text(
-                "Username",
+                "Name",
                 style: TextStyle(color: Colors.black, fontSize: 14),
               ),
               const SizedBox(height: 8),
@@ -955,7 +956,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
               // YOE field
               const Text(
-                "Years of Experience",
+                "Experience",
                 style: TextStyle(color: Colors.black, fontSize: 14),
               ),
               const SizedBox(height: 8),

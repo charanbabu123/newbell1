@@ -130,10 +130,8 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
 
   Widget _buildProfileInfo() {
     return Positioned(
-      bottom: MediaQuery.of(context).padding.top + 40,
-    left: 16,
-    child: Container(
-     // Debug background
+      bottom:120,
+      left: 22,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -141,8 +139,11 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
             children: [
               CircleAvatar(
                 radius: 20,
-                backgroundColor: Colors.pink.shade100, // Light pink background
-                child: profileData != null && profileData?['profile_picture'] != null && profileData?['profile_picture'].isNotEmpty
+                backgroundColor: Colors.black,
+                // Light pink background
+                child: profileData != null &&
+                    profileData?['profile_picture'] != null &&
+                    profileData?['profile_picture'].isNotEmpty
                     ? ClipOval(
                   child: Image.network(
                     profileData?['profile_picture'],
@@ -151,9 +152,9 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
                     height: 40,
                     errorBuilder: (context, error, stackTrace) {
                       // Show icon if image fails to load
-                      return Icon(
+                      return const Icon(
                         Icons.person,
-                        color: Colors.pink.shade400,
+                        color: Colors.black,
                         size: 20,
                       );
                     },
@@ -166,7 +167,7 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
                               loadingProgress.expectedTotalBytes!
                               : null,
                           strokeWidth: 2.0,
-                          color: Colors.pink.shade400,
+                          color: Colors.green,
                         ),
                       );
                     },
@@ -175,18 +176,21 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
                     : Icon(
                   Icons.person,
                   color: Colors.pink.shade400,
-                  size: 20,
+                  size: 23,
                 ),
               ),
+
               const SizedBox(width: 8),
               Transform.translate(
-                offset: const Offset(4, -9), // 20 pixels right, 10 pixels down
+                offset: const Offset(4, -9),
+                // 20 pixels right, 10 pixels down
                 child: Text(
                   profileData?['name'] ?? '',
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold, // Added to make the font bold
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    // Added to make the font bold
                     shadows: [
                       Shadow(
                         blurRadius: 4.0,
@@ -219,7 +223,6 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
           ),
         ],
       ),
-    ),
     );
   }
 
@@ -285,7 +288,7 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
           Positioned(
             right: 143,
             left: 143,
-            bottom: 20,
+            bottom: 90,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -293,14 +296,14 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.pink.withOpacity(0.5),
+                    color: const Color(0xFF118C7E),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     videos[currentVideoIndex]['tag'] ?? '',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -312,30 +315,123 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
           // Static Like/Comment/Share Buttons
           Positioned(
             right: 16,
-            bottom: 85,
+            bottom: 80,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                buildStaticButton(Icons.favorite, "Like", () {}),
-                const SizedBox(height: 15),
-                buildStaticButton(Icons.comment, "Comment", () {}),
-                const SizedBox(height: 15),
-                buildStaticButton(Icons.share, "Share", () {}),
+                // Like Button
+                Column(
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.min, // Reduce spacing within the column
+                      children: [
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.favorite_outline, color: Colors.white),
+                              iconSize: 27,
+                              onPressed: () {},
+                            ),
+                          ],
+                        ),
+                        Transform.translate(
+                          offset: const Offset(0, -7), // Move the text up by 2 pixels
+                          child: const Text(
+                            "Like",
+                            style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8), // Space between icons
+                // Comment Button
+                Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.mode_comment_outlined, color: Colors.white),
+                          iconSize: 27,
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                    Transform.translate(
+                      offset: const Offset(0, -7), // Move the text up by 2 pixels
+                      child: const Text(
+                        "Comment",
+                        style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8), // Space between icons
+                // Share Button
+                Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+
+                        IconButton(
+                          icon: const Icon(Icons.share_outlined, color: Colors.white),
+                          iconSize: 27,
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                    Transform.translate(
+                      offset: const Offset(0, -7), // Move the text up by 2 pixels
+                      child: const Text(
+                        "Share",
+                        style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8), // Space between icons
+                // Save Button
+                Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+
+                        IconButton(
+                          icon: const Icon(Icons.bookmark_outline_outlined, color: Colors.white),
+                          iconSize: 27,
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                    Transform.translate(
+                      offset: const Offset(0, -7), // Move the text up by 2 pixels
+                      child: const Text(
+                        "Save",
+                        style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
 
           // Static Progress Bar
           Positioned(
-            bottom: 5,
-            left: 10,
-            right: 10,
+            bottom: 70,
+            left: 50,
+            right: 50,
             child: Row(
               children: List.generate(videos.length, (i) {
                 return Expanded(
                   child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    margin: const EdgeInsets.symmetric(horizontal: 5),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(2),
                       child: LinearProgressIndicator(
@@ -346,8 +442,8 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
                             : 0.0),
                         backgroundColor: Colors.grey.withOpacity(0.5),
                         valueColor:
-                        const AlwaysStoppedAnimation<Color>(Colors.white),
-                        minHeight: 3,
+                        const AlwaysStoppedAnimation<Color>(Colors.green),
+                        minHeight: 5,
                       ),
                     ),
                   ),
@@ -369,33 +465,43 @@ class PreviewReelsScreenState extends State<PreviewReelsScreen> {
               onPressed: () => Navigator.pop(context),
             ),
           ),
-        ],
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(
-            top: 25.0), // Adjust top padding to account for AppBar
-        child: FloatingActionButton.extended(
-          onPressed: isPublishing ? null : _publishReel,
-          label: isPublishing
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-              : const Text(
-                  'Publish Reel',
-                  style: TextStyle(color: Colors.white),
+          Positioned(
+            left: 30,
+            right: 30,
+            bottom: 10,
+            child: ElevatedButton(
+              onPressed: isPublishing ? null : _publishReel,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isPublishing ? const Color(0xFF24D366).withOpacity(0.7) : const Color(0xFF24D366),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-          icon: isPublishing
-              ? null
-              : const Icon(Icons.cloud_upload, color: Colors.white),
-          backgroundColor: isPublishing ? Colors.pink : Colors.pink,
-        ),
+              ),
+              child: isPublishing
+                  ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+                  : const Text(
+                'Publish Reel',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ],
+
+
       ),
+
     );
   }
 }
@@ -567,24 +673,28 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         ),
         if (currentCaption != null)
           Positioned(
-            bottom: 150,
-            left: 0, // Align the container to the left edge of the parent
-            right: 10, // Align the container to the right edge of the parent
-            child: Center( // Center the container within the available space
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5), // Adjust padding for the background
-                decoration: BoxDecoration(
-                  color: Colors.pink.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(10),
-                ),
+            bottom: MediaQuery.of(context).size.height * 0.25, // Adjust bottom position
+            left: MediaQuery.of(context).size.width * 0.065, // Keep the left position fixed
+            // right: MediaQuery.of(context).size.width * 0.25, // Adjust right position if necessary
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: 5, // Add consistent vertical padding
+                horizontal: 10, // Add consistent horizontal padding
+              ),
+              decoration: BoxDecoration(
+                color: const Color.fromRGBO(15, 32, 4, 0.9), // Background color with transparency
+                borderRadius: BorderRadius.circular(10), // Rounded corners
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft, // Force alignment to the left inside the container
                 child: Text(
-                  _formatCaption(currentCaption!), // Format the caption to limit 5 words per line
-                  textAlign: TextAlign.center,
+                  _formatCaption(currentCaption!),
+                  textAlign: TextAlign.left, // Ensure the text aligns to the left
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold, // Ensures the text is bold
+                    fontSize: 14,
                   ),
+                  softWrap: true, // Ensures text wraps properly
                 ),
               ),
             ),

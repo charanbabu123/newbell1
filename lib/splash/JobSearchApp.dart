@@ -59,7 +59,7 @@ class JobSearchScreen extends StatelessWidget {
                               'Find your dream job now',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 24,
+                                fontSize: 26,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -76,17 +76,17 @@ class JobSearchScreen extends StatelessWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 23),
+                          const SizedBox(height: 28),
                           const Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
                                 width: double.infinity,
                                 child: Text(
-                                  'Jobs you maybe interested',
+                                  'Jobs you maybe interested in',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    fontSize: 19,
+                                    fontSize: 20,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -246,9 +246,9 @@ class JobCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 180,
+      width: 150,
       margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
         borderRadius: BorderRadius.circular(8),
@@ -485,8 +485,8 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
           borderRadius: BorderRadius.circular(20),
         ),
         // Height changes only when TextField is focused in question 3
-        height: (currentQuestionIndex == 2 && isTextFieldFocused && _suggestions.isNotEmpty)
-            ? 125 + (_suggestions.length * 44) // Base height + (number of suggestions * height per suggestion)
+        height: (currentQuestionIndex == 2 && isTextFieldFocused)
+            ? 100 + (_suggestions.length * 44) // Base height + (number of suggestions * height per suggestion)
             : 125,
         child: PageView(
           controller: _pageController,
@@ -542,8 +542,8 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
           spacing: 8,
           children: [
             _buildChoiceChip('Tomorrow', selectedStartTime),
-            _buildChoiceChip('1-3 month', selectedStartTime),
-            _buildChoiceChip('6 months', selectedStartTime),
+            _buildChoiceChip('1-3 Month', selectedStartTime),
+            _buildChoiceChip('6 Months', selectedStartTime),
           ],
         ),
       ],
@@ -643,12 +643,14 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
               margin: EdgeInsets.only(
                 top: (isTextFieldFocused && _suggestions.isNotEmpty)
                     ? (_suggestions.length == 1
-                    ? 60
+                    ? 50
                     : (_suggestions.length == 2
-                    ? 100  // Adjust the value as needed
+                    ? 95  // Adjust the value as needed
                     : (_suggestions.length == 3
-                    ? 150
-                    : 200)))
+                    ? 140
+                    : (_suggestions.length == 4
+                    ? 180
+                    : 210))))
                     : 0,
               ),
               child: Row(
@@ -715,7 +717,8 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
             // Suggestions list above the search bar
             if (_suggestions.isNotEmpty && isTextFieldFocused)
               Positioned(
-                top: 0,
+                top: -10,
+                bottom:70,
                 left: 0,
                 right: 48,
                 child: Container(
@@ -799,6 +802,7 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
       },
       backgroundColor: const Color(0xFF118C7E),
       selectedColor: Colors.green,
+      showCheckmark: false, // Disables the tick mark
       labelStyle: TextStyle(
         color: selectedValue == label ? Colors.white : Colors.white,
       ),

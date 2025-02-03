@@ -156,7 +156,7 @@ class FullScreenCameraState extends State<FullScreenCamera> {
             right: 40,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.pink.withOpacity(0.5),
+                color: Colors.green.withOpacity(0.5),
 
                 shape: BoxShape.circle,
               ),
@@ -176,7 +176,7 @@ class FullScreenCameraState extends State<FullScreenCamera> {
               child: Container(
                 padding: const EdgeInsets.all(8.0),
                 decoration: BoxDecoration(
-                    color: Colors.pink[600],
+                    color: Colors.green,
                     borderRadius: BorderRadius.circular(5)),
                 child: Text(_formattedTime,
                     style: const TextStyle(color: Colors.white, fontSize: 18)),
@@ -196,14 +196,14 @@ class FullScreenCameraState extends State<FullScreenCamera> {
                     child: CircularProgressIndicator(
                       value: _isRecording ? _recordingProgress : 0.0,
                       strokeWidth: 6,
-                      color: Colors.pink[600],
+                      color: Colors.green,
                     ),
                   ),
                   GestureDetector(
                     onTap: _isRecording ? _stopRecording : _startRecording,
                     child: CircleAvatar(
                       radius: 45,
-                      backgroundColor: Colors.pink[600],
+                      backgroundColor: Colors.green,
                       child: _isRecording && !_canStopRecording
                           ? const Icon(Icons.lock, color: Colors.white)
                           : (_isRecording

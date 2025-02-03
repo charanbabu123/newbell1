@@ -15,6 +15,7 @@ import '../models/video_section.dart';
 import '../providers/video_section_provider.dart';
 import '../services/auth_service.dart';
 import 'full_screen_camera_screen.dart';
+import 'dart:math' as math;
 
 class ReelUploaderScreen extends StatefulWidget {
   const ReelUploaderScreen({
@@ -255,12 +256,12 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         debugPrint('Reels reordered successfully: $jsonResponse');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Reels reordered successfully.'),
-            backgroundColor: Colors.pink,
-          ),
-        );
+        // ScaffoldMessenger.of(context).showSnackBar(
+        //   // const SnackBar(
+        //   //  // content: Text('Reels reordered successfully.'),
+        //   //  // backgroundColor: Colors.pink,
+        //   // ),
+        // );
         // Navigate to the preview screen after reordering
         navigateToPreview();
       } else {
@@ -620,6 +621,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
     //bool isPreviousVideoUploaded = index == 0 || sections[index - 1].videoFile != null;
 
     return Card(
+      color: Colors.white, // Change to white
       elevation: 4,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
       child: Container(
@@ -627,25 +629,26 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-                Center(
-                  child: Text(
-                    section.label,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+            Center(
+              child: Text(
+                section.label,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-
+              ),
+            ),
             if (section.videoFile != null &&
                 section.thumbnailController != null) ...[
               Stack(
                 alignment: Alignment.center,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(40), // Adjust the value to increase/decrease spacing
+                    padding: const EdgeInsets.only(
+                        top: 15, bottom: 15, left: 70, right: 70),
+                    // Adjust the value to increase/decrease spacing
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(20),
                       child: AspectRatio(
                         aspectRatio: 3 / 4,
                         child: VideoPlayer(section.thumbnailController!),
@@ -653,92 +656,152 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                     ),
                   ),
                   Positioned(
-                    bottom: 45, // Adjust the bottom position as needed
-                    right: 45, // Adjust the right position as needed
+                    bottom: 15, // Adjust the bottom position as needed
+                    right: 75, // Adjust the right position as needed
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5), // Black background with some opacity
-                        borderRadius: BorderRadius.circular(50), // Round the edges
+                        color: Colors.black.withOpacity(
+                            0.5), // Black background with some opacity
+                        borderRadius:
+                            BorderRadius.circular(50), // Round the edges
                       ),
                       child: IconButton(
                         onPressed: () => deleteVideo(index),
-                        icon: const Icon(Icons.delete, color: Colors.white), // Icon color white for contrast
+                        icon: const Icon(Icons.delete,
+                            color:
+                                Colors.white), // Icon color white for contrast
                       ),
                     ),
                   ),
                 ],
               ),
-
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: section.captions != null
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              for (int i = 0; i < section.captions!.length; i++)
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 4.0),
-                                  child: RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: "Caption ${i + 1}: ",
-                                          style: const TextStyle(
-                                              color: Colors
-                                                  .pink), // Pink color for "Caption ${i + 1}:"
-                                        ),
-                                        TextSpan(
-                                          text: section.captions![i],
-                                          style: const TextStyle(
-                                              color: Colors
-                                                  .black), // Black color for the actual caption
-                                        ),
-                                      ],
-                                    ),
-                                    maxLines: 5,
-                                    overflow: TextOverflow
-                                        .ellipsis, // Adds ellipsis if text exceeds the limit
-                                    softWrap:
-                                        true, // Ensures text wraps if it exceeds one line
-                                  ),
-                                ),
 
-                              const SizedBox(
-                                  width: 60.0), // Adjust spacing here
-                            ],
-                          )
-                        : TextButton.icon(
+                  if (section.captions != null)
+                    Container(
+                      margin: const EdgeInsets.only(top: 0),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white, // Light beige background
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          for (int i = 0; i < section.captions!.length; i++)
+                            SizedBox(
+                              width:
+                                  300, // Set fixed width for each caption card
+                              child: Container(
+                                margin: const EdgeInsets.only(
+                                    bottom: 8), // Space between captions
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                      0xFFFAF6F0), // White background inside beige container
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Caption ${i + 1} (${_getCaptionTimeRange(i, section.thumbnailController?.value.duration.inSeconds ?? 60)})',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      section.captions![i],
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.black87,
+                                      ),
+                                      maxLines: 3, // Prevent overflow
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: 8), // Space before buttons
+                          Align(
+                            alignment: Alignment
+                                .bottomRight, // Align buttons to bottom-right
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                  right:
+                                      8), // Adds spacing from the right edge
+                              child: Row(
+                                mainAxisSize: MainAxisSize
+                                    .min, // Ensures row wraps around content
+                                mainAxisAlignment: MainAxisAlignment
+                                    .end, // Align icons to the right
+                                children: [
+                                  const SizedBox(
+                                      width: 185),
+                                  Container(
+                                    decoration: BoxDecoration(
+    color: const Color(0xFFDCF8C7), // Light green background
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(Icons.edit,
+                                          size: 20, color: Colors.black),
+                                      onPressed: () => _showCaptionDialog(
+                                          section, index,
+                                          isEdit: true),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                      width: 15), // Space between buttons
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFDCF8C7), // Light green background
+                                      borderRadius: BorderRadius.circular(15),
+                                    ),
+                                    child: IconButton(
+                                      icon: const Icon(Icons.delete,
+                                          size: 20, color: Colors.black),
+                                      onPressed: () {
+                                        setState(() {
+                                          section.captions = null;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  else
+                    SizedBox(
+                      width: 325,  // Take full width
+                      child: Column(  // Use Column instead of Row
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          TextButton.icon(
                             onPressed: () {
                               _showCaptionDialog(section, index, isEdit: false);
                             },
-                            icon: const Icon(Icons.add, color: Colors.pink),
+                            icon: const Icon(Icons.add, color: Colors.green),
                             label: const Text(
                               'Add Captions',
-                              style: TextStyle(color: Colors.pink),
+                              style: TextStyle(color: Colors.green),
                             ),
                           ),
-                  ),
-                  //const Spacer(),
-                  Column(
-                    children: [
-                      // Only show Edit Button if captions exist
-                      if (section.captions != null)
-                        TextButton.icon(
-                          onPressed: () {
-                            _showCaptionDialog(section, index, isEdit: true);
-                          },
-                          icon: const Icon(Icons.edit, color: Colors.pink),
-                          label: const Text(
-                            'Edit Captions',
-                            style: TextStyle(color: Colors.pink),
-                          ),
-                        ),
+                        ],
+                      ),
+                    ),
 
-                    ],
-                  ),
+                  //const Spacer(),
                 ],
               ),
             ] else if (section.isProcessing) ...[
@@ -750,35 +813,126 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
               LinearProgressIndicator(
                 value: section.uploadProgress,
                 backgroundColor: Colors.grey[200],
-                color: Colors.pink,
+                color: Colors.green,
               ),
               const SizedBox(height: 8),
               Text(
                 "Uploading... ${(section.uploadProgress * 100).toInt()}%",
-                style: const TextStyle(color: Colors.grey),
+                style: const TextStyle(color: Colors.green),
               ),
             ] else ...[
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton.icon(
-                      onPressed: () => pickVideo(index),
-                      icon: const Icon(Icons.upload_file, color: Colors.pink),
-                      label: const Text(
-                        "Upload Video",
-                        style: TextStyle(
-                          color: Colors.pink,
-                        ),
+              const SizedBox(height: 8),
+              Center(
+
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDCF8C7),
+                    //border: Border.all(color: const Color(0xFFDCF8C7), width: 1), // Green border
+                    borderRadius: BorderRadius.circular(20), // Rounded corners
+                  ),
+                  child: TextButton.icon(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.transparent,
+                        builder: (BuildContext context) {
+                          return Container(
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(20),
+                                topRight: Radius.circular(20),
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      pickVideo(index);
+                                    },
+                                    child: Container(
+                                      width: 120,
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFDCF8C7),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: const Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.upload_file,
+                                            color: Color(0xFF118C7E),),
+                                          SizedBox(height: 8),
+                                          Text(
+                                            'Upload Video',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                      _openCamera(index);
+                                    },
+                                    child: Container(
+                                      width: 120,
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFDCF8C7),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: const Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Icon(Icons.videocam,
+                                            color: Color(0xFF118C7E),//background: #118C7E;
+
+                                          ),
+                                          SizedBox(height: 8),
+                                          Text(
+                                            'Record Video',
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+
+                    icon: const Icon(Icons.upload_file, color: Color(0xFF118C7E),),
+                    label: const Text(
+                      "Upload Video",
+                      style: TextStyle(
+                        color: Colors.black,
                       ),
                     ),
-                  ),
-                  Expanded(
-                    flex: 2,
-                    child: CommonWidgets.recordVideoButton(
-                      onPressed: () => _openCamera(index),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12), // Button padding
                     ),
                   ),
-                ],
+                ),
               ),
             ],
           ],
@@ -787,15 +941,23 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
     );
   }
 
-  void _showCaptionDialog(VideoSection section, int index, {required bool isEdit}) {
+  String _getCaptionTimeRange(int captionIndex, int totalDuration) {
+    final int segmentDuration = (totalDuration / 3).ceil();
+    final int start = captionIndex * segmentDuration;
+    final int end =
+        math.min((captionIndex + 1) * segmentDuration, totalDuration);
+    return '${start}s-${end}s';
+  }
+
+  void _showCaptionDialog(VideoSection section, int index,
+      {required bool isEdit}) {
     final provider = Provider.of<VideoSectionsProvider>(context, listen: false);
     final TextEditingController caption1Controller =
-    TextEditingController(text: section.captions?.elementAt(0) ?? '');
+        TextEditingController(text: section.captions?.elementAt(0) ?? '');
     final TextEditingController caption2Controller =
-    TextEditingController(text: section.captions?.elementAt(1) ?? '');
+        TextEditingController(text: section.captions?.elementAt(1) ?? '');
     final TextEditingController caption3Controller =
-    TextEditingController(text: section.captions?.elementAt(2) ?? '');
-
+        TextEditingController(text: section.captions?.elementAt(2) ?? '');
 
     if (isEdit && section.captions != null) {
       caption1Controller.text = section.captions![0];
@@ -830,7 +992,8 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
             // Add listeners to focus nodes
             void updateKeyboardVisibility() {
               setState(() {
-                isKeyboardVisible = focus1.hasFocus || focus2.hasFocus || focus3.hasFocus;
+                isKeyboardVisible =
+                    focus1.hasFocus || focus2.hasFocus || focus3.hasFocus;
               });
             }
 
@@ -838,7 +1001,8 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
             focus2.addListener(updateKeyboardVisibility);
             focus3.addListener(updateKeyboardVisibility);
 
-            Widget buildCaptionInput(String label, TextEditingController controller, FocusNode focusNode) {
+            Widget buildCaptionInput(String label,
+                TextEditingController controller, FocusNode focusNode) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -852,7 +1016,10 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                     ),
                   ),
                   Container(
-                    height: 60,
+                    constraints: const BoxConstraints(
+                      minHeight: 60,
+                      maxHeight: 85, // Increased max height to accommodate two lines and counter
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.black12),
                       borderRadius: BorderRadius.circular(8),
@@ -861,7 +1028,8 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                     child: TextField(
                       controller: controller,
                       focusNode: focusNode,
-                      maxLines: 2,
+                      maxLines: 5,
+                      maxLength: 100,
                       decoration: const InputDecoration(
                         hintText: 'Enter caption',
                         hintStyle: TextStyle(
@@ -899,7 +1067,7 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   children: [
                     // Header
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                      padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -924,9 +1092,12 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            buildCaptionInput('Caption 1 ($interval1)', caption1Controller, focus1),
-                            buildCaptionInput('Caption 2 ($interval2)', caption2Controller, focus2),
-                            buildCaptionInput('Caption 3 ($interval3)', caption3Controller, focus3),
+                            buildCaptionInput('Caption 1 ($interval1)',
+                                caption1Controller, focus1),
+                            buildCaptionInput('Caption 2 ($interval2)',
+                                caption2Controller, focus2),
+                            buildCaptionInput('Caption 3 ($interval3)',
+                                caption3Controller, focus3),
                             // Add extra padding at bottom when keyboard is visible
                             if (isKeyboardVisible) const SizedBox(height: 100),
                           ],
@@ -935,86 +1106,78 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                     ),
                     // Submit button (only visible when keyboard is hidden)
 
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(24),
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            if (caption1Controller.text.length >
-                                100 || // Change to character limit
-                                caption2Controller.text.length >
-                                    100 || // Change to character limit
-                                caption3Controller.text.length > 100) {
-                              // Change to character limit
-                              final captions = [
-                                caption1Controller.text,
-                                caption2Controller.text,
-                                caption3Controller.text,
-                              ].where((caption) => caption.isNotEmpty).toList();
-                              provider.updateCaptions(index, captions);
-                              Navigator.of(context).pop();
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (caption1Controller.text.length > 100 ||
+                              caption2Controller.text.length > 100 ||
+                              caption3Controller.text.length > 100) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Each caption must be less than 100 characters'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
+
+                          List<String> newCaptions = [
+                            caption1Controller.text,
+                            caption2Controller.text,
+                            caption3Controller.text,
+                          ].where((caption) => caption.isNotEmpty).toList();
+
+                          try {
+                            await uploadCaptions(newCaptions, section.videoId.toString());
+
+                            // Update the local state
+                            setState(() {
+                              section.captions = newCaptions;
+                            });
+
+                            // Update the provider state
+                            provider.updateCaptions(index, newCaptions);
+
+                            if (mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content:
-                                  Text('Each caption must be less than 100 characters'),
+                                  content: Text('Captions added successfully'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            }
+
+                            Navigator.of(context).pop();
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Error updating captions: $e'),
                                   backgroundColor: Colors.red,
                                 ),
                               );
-                              return;
                             }
-
-                            List<String> newCaptions = [
-                              caption1Controller.text,
-                              caption2Controller.text,
-                              caption3Controller.text,
-                            ];
-
-                            if (mounted) {
-                              setState(() {
-                                section.captions = newCaptions; // Directly update captions
-                              });
-                            }
-
-                            try {
-                              await uploadCaptions(newCaptions, section.videoId.toString());
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Captions added successfully'),
-                                    backgroundColor: Colors.green,
-                                  ),
-                                );
-                              }
-
-                              Navigator.of(context).pop();
-                            } catch (e) {
-                              if (mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('Error updating captions: $e'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFE5DED5),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF24D366),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            'Submit',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        child: const Text(
+                          'Submit',
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
+                    ),
                   ],
                 ),
               ),
@@ -1077,7 +1240,9 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   TextButton(
                     onPressed: skipToNext,
                     child: Padding(
-                      padding: const EdgeInsets.only(right: 15.0, top: 3.0), // Adjust right padding for spacing
+                      padding: const EdgeInsets.only(
+                          right: 15.0,
+                          top: 3.0), // Adjust right padding for spacing
                       child: TextButton(
                         onPressed: skipToNext,
                         child: const Text(
@@ -1117,8 +1282,12 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                 ElevatedButton(
                   onPressed: allVideosUploaded ? reorderReels : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: allVideosUploaded ? const Color(0xFFEBEBEB) : const Color(0xFFEFEFEF), // Matches the light grey background
-                    padding: const EdgeInsets.symmetric(horizontal: 98, vertical: 15), // Updated padding
+                    backgroundColor: allVideosUploaded
+                        ? const Color(0xFFEBEBEB)
+                        : const Color(
+                            0xFFEFEFEF), // Matches the light grey background
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 98, vertical: 15), // Updated padding
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8), // Rounded corners
                     ),
@@ -1126,7 +1295,10 @@ class ReelUploaderScreenState extends State<ReelUploaderScreen> {
                   child: Text(
                     "Preview Your Resume",
                     style: TextStyle(
-                      color: allVideosUploaded ? const Color(0xFF1E1E1E) : const Color(0xFF8E8E8E), // Text color matches active/inactive state
+                      color: allVideosUploaded
+                          ? const Color(0xFF24D366)
+                          : const Color(
+                              0xFF8E8E8E), // Text color matches active/inactive state
                       fontSize: 16,
                       fontWeight: FontWeight.w600, // Semi-bold to match design
                     ),

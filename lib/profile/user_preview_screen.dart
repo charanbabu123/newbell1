@@ -144,99 +144,96 @@ class _PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
           .padding
           .top + 40,
       left: 16,
-      child: Container(
-        // Debug background
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.pink.shade100,
-                  // Light pink background
-                  child: profileData != null &&
-                      profileData?['profile_picture'] != null &&
-                      profileData?['profile_picture'].isNotEmpty
-                      ? ClipOval(
-                    child: Image.network(
-                      profileData?['profile_picture'],
-                      fit: BoxFit.cover,
-                      width: 40,
-                      height: 40,
-                      errorBuilder: (context, error, stackTrace) {
-                        // Show icon if image fails to load
-                        return Icon(
-                          Icons.person,
-                          color: Colors.pink.shade400,
-                          size: 20,
-                        );
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
-                                : null,
-                            strokeWidth: 2.0,
-                            color: Colors.pink.shade400,
-                          ),
-                        );
-                      },
-                    ),
-                  )
-                      : Icon(
-                    Icons.person,
-                    color: Colors.pink.shade400,
-                    size: 20,
-                  ),
-                ),
-
-                const SizedBox(width: 8),
-                Transform.translate(
-                  offset: const Offset(4, -9),
-                  // 20 pixels right, 10 pixels down
-                  child: Text(
-                    profileData?['name'] ?? '',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      // Added to make the font bold
-                      shadows: [
-                        Shadow(
-                          blurRadius: 4.0,
-                          color: Colors.black,
-                          offset: Offset(1.0, 1.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.black,
+                // Light pink background
+                child: profileData != null &&
+                    profileData?['profile_picture'] != null &&
+                    profileData?['profile_picture'].isNotEmpty
+                    ? ClipOval(
+                  child: Image.network(
+                    profileData?['profile_picture'],
+                    fit: BoxFit.cover,
+                    width: 40,
+                    height: 40,
+                    errorBuilder: (context, error, stackTrace) {
+                      // Show icon if image fails to load
+                      return const Icon(
+                        Icons.person,
+                        color: Colors.black,
+                        size: 20,
+                      );
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                              : null,
+                          strokeWidth: 2.0,
+                          color: Colors.green,
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Transform.translate(
-              offset: const Offset(50, -24), // 20 pixels right, 10 pixels down
-              child: Text(
-                profileData?['bio'] ?? '',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  shadows: [
-                    Shadow(
-                      blurRadius: 4.0,
-                      color: Colors.black,
-                      offset: Offset(1.0, 1.0),
-                    ),
-                  ],
+                )
+                    : Icon(
+                  Icons.person,
+                  color: Colors.pink.shade400,
+                  size: 23,
                 ),
               ),
+
+              const SizedBox(width: 8),
+              Transform.translate(
+                offset: const Offset(4, -9),
+                // 20 pixels right, 10 pixels down
+                child: Text(
+                  profileData?['name'] ?? '',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    // Added to make the font bold
+                    shadows: [
+                      Shadow(
+                        blurRadius: 4.0,
+                        color: Colors.black,
+                        offset: Offset(1.0, 1.0),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Transform.translate(
+            offset: const Offset(50, -24), // 20 pixels right, 10 pixels down
+            child: Text(
+              profileData?['bio'] ?? '',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 14,
+                shadows: [
+                  Shadow(
+                    blurRadius: 4.0,
+                    color: Colors.black,
+                    offset: Offset(1.0, 1.0),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -312,14 +309,14 @@ class _PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.pink.withOpacity(0.5),
+                    color: const Color(0xFF118C7E),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(
                     videos[currentVideoIndex]['tag'] ?? '',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 12,
+                      fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -331,25 +328,118 @@ class _PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
           // Static Like/Comment/Share Buttons
           Positioned(
             right: 16,
-            bottom: 85,
+            bottom: 20,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                buildStaticButton(Icons.favorite, "Like", () {}),
-                const SizedBox(height: 15),
-                buildStaticButton(Icons.comment, "Comment", () {}),
-                const SizedBox(height: 15),
-                buildStaticButton(Icons.share, "Share", () {}),
+                // Like Button
+                Column(
+                  children: [
+                    Column(
+                      mainAxisSize: MainAxisSize.min, // Reduce spacing within the column
+                      children: [
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.favorite_outline, color: Colors.white),
+                              iconSize: 27,
+                              onPressed: () {},
+                            ),
+                          ],
+                        ),
+                        Transform.translate(
+                          offset: const Offset(0, -7), // Move the text up by 2 pixels
+                          child: const Text(
+                            "Like",
+                            style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8), // Space between icons
+                // Comment Button
+                Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.mode_comment_outlined, color: Colors.white),
+                          iconSize: 27,
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                    Transform.translate(
+                      offset: const Offset(0, -7), // Move the text up by 2 pixels
+                      child: const Text(
+                        "Comment",
+                        style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8), // Space between icons
+                // Share Button
+                Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+
+                        IconButton(
+                          icon: const Icon(Icons.share_outlined, color: Colors.white),
+                          iconSize: 27,
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                    Transform.translate(
+                      offset: const Offset(0, -7), // Move the text up by 2 pixels
+                      child: const Text(
+                        "Share",
+                        style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8), // Space between icons
+                // Save Button
+                Column(
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+
+                        IconButton(
+                          icon: const Icon(Icons.bookmark_outline_outlined, color: Colors.white),
+                          iconSize: 27,
+                          onPressed: () {},
+                        ),
+                      ],
+                    ),
+                    Transform.translate(
+                      offset: const Offset(0, -7), // Move the text up by 2 pixels
+                      child: const Text(
+                        "Save",
+                        style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
 
           // Static Progress Bar
           Positioned(
-            bottom: 5,
-            left: 10,
-            right: 10,
+            bottom: 8,
+            left: 30,
+            right: 30,
             child: Row(
               children: List.generate(videos.length, (i) {
                 return Expanded(
@@ -365,8 +455,8 @@ class _PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
                             : 0.0),
                         backgroundColor: Colors.grey.withOpacity(0.5),
                         valueColor:
-                        const AlwaysStoppedAnimation<Color>(Colors.white),
-                        minHeight: 3,
+                        const AlwaysStoppedAnimation<Color>(Colors.green),
+                        minHeight: 5,
                       ),
                     ),
                   ),
@@ -394,36 +484,6 @@ class _PreviewReelsScreen1State extends State<PreviewReelsScreen1> {
   }
 
 // Utility for creating static buttons
-  Widget buildStaticButton(IconData icon, String label,
-      VoidCallback onPressed) {
-    return Column(
-      children: [
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              height: 45,
-              width: 45,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.black.withOpacity(0.3),
-              ),
-            ),
-            IconButton(
-              icon: Icon(icon, color: Colors.white),
-              iconSize: 30,
-              onPressed: onPressed,
-            ),
-          ],
-        ),
-        const SizedBox(height: 5),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white, fontSize: 12),
-        ),
-      ],
-    );
-  }
 }
 
 class VideoPlayerWidget extends StatefulWidget {
@@ -565,24 +625,28 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         ),
         if (currentCaption != null)
           Positioned(
-            bottom: 150,
-            left: 0, // Align the container to the left edge of the parent
-            right: 10, // Align the container to the right edge of the parent
-            child: Center( // Center the container within the available space
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 5), // Adjust padding for the background
-                decoration: BoxDecoration(
-                  color: Colors.pink.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(10),
-                ),
+            bottom: MediaQuery.of(context).size.height * 0.17, // Adjust bottom position
+            left: MediaQuery.of(context).size.width * 0.065, // Keep the left position fixed
+            // right: MediaQuery.of(context).size.width * 0.25, // Adjust right position if necessary
+            child: Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: 5, // Add consistent vertical padding
+                horizontal: 10, // Add consistent horizontal padding
+              ),
+              decoration: BoxDecoration(
+                color: const Color.fromRGBO(15, 32, 4, 0.9), // Background color with transparency
+                borderRadius: BorderRadius.circular(10), // Rounded corners
+              ),
+              child: Align(
+                alignment: Alignment.centerLeft, // Force alignment to the left inside the container
                 child: Text(
-                  _formatCaption(currentCaption!), // Format the caption to limit 5 words per line
-                  textAlign: TextAlign.center,
+                  _formatCaption(currentCaption!),
+                  textAlign: TextAlign.left, // Ensure the text aligns to the left
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold, // Ensures the text is bold
+                    fontSize: 14,
                   ),
+                  softWrap: true, // Ensures text wraps properly
                 ),
               ),
             ),
