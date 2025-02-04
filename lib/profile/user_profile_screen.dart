@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
+import '../common/shared_preferences_util.dart';
 import '../login/login_phone_screen.dart';
 import '../models/video_model.dart';
 import '../services/auth_service.dart';
@@ -48,8 +49,16 @@ class UserProfileScreenState extends State<UserProfileScreen>
     _tabController = TabController(length: 2, vsync: this);
     AuthService.refreshToken();
     fetchUserProfile();
+    _loadProfilePicture(); // Add this line
   }
-
+  Future<void> _loadProfilePicture() async {
+    final savedPath = await SharedPreferencesUtil.getProfilePicturePath();
+    if (savedPath != null) {
+      setState(() {
+        _profileImage = File(savedPath);
+      });
+    }
+  }
   @override
   void dispose() {
     _tabController?.dispose(); // Dispose the controller
@@ -200,18 +209,17 @@ class UserProfileScreenState extends State<UserProfileScreen>
 
     // Handle other updates (profile data, refreshing, etc.)
     if (result != null) {
+      final savedPath = await SharedPreferencesUtil.getProfilePicturePath();
       setState(() {
         username = result['username'] ?? username;
         bio = result['bio'] ?? bio;
         city = result['city'] ?? city;
         yoe = result['yoe'] ?? yoe;
-        if (result['profile_picture'] != null) {
-          userProfilePicture = result['profile_picture'];
-          _profileImage = File(result['profile_picture']);
+        if (savedPath != null) {
+          _profileImage = File(savedPath);
         }
       });
 
-      // Refresh profile data if requested
       if (result['shouldRefresh'] == true) {
         await fetchUserProfile();
       }
@@ -768,6 +776,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         final imageFile = File(pickedFile.path);
         // Verify the file exists before setting state
         if (await imageFile.exists()) {
+          await SharedPreferencesUtil.saveProfilePicturePath(imageFile.path);
           setState(() {
             _profileImage = imageFile;
           });
@@ -788,6 +797,73 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
+  // Future<void> _handleSave() async {
+  //   setState(() => _isLoading = true);
+  //
+  //   try {
+  //     final token = await AuthService.getAuthToken();
+  //     if (token == null) throw Exception('No auth token found');
+  //
+  //     // Create multipart request
+  //     var uri = Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/register/');
+  //     var request = http.MultipartRequest('POST', uri);
+  //
+  //     // Add authorization header
+  //     request.headers['Authorization'] = 'Bearer $token';
+  //
+  //     // Add text fields
+  //     request.fields['bio'] = _bioController.text;
+  //     request.fields['city'] = _cityController.text;
+  //     request.fields['yoe'] = _yoeController.text;
+  //     request.fields['name'] = _usernameController.text;
+  //
+  //     // Add profile image if selected
+  //     if (_profileImage != null) {
+  //       var profileImageStream = await http.ByteStream(_profileImage!.openRead());
+  //       var profileImageLength = await _profileImage!.length();
+  //
+  //       var multipartFile = http.MultipartFile(
+  //           'profile_picture',
+  //           profileImageStream,
+  //           profileImageLength,
+  //           filename: _profileImage!.path.split('/').last
+  //       );
+  //
+  //       request.files.add(multipartFile);
+  //     }
+  //     // Send request
+  //     var response = await request.send();
+  //     if (response.statusCode == 200 || response.statusCode == 201) {
+  //       if (mounted) {
+  //         // Pop the current screen with the updated data
+  //         Navigator.of(context).pop({
+  //           'username': _usernameController.text,
+  //           'bio': _bioController.text,
+  //           'city': _cityController.text,
+  //           'yoe': num.tryParse(_yoeController.text) ?? 0,
+  //           'profile_picture': _profileImage != null
+  //               ? _profileImage!.path
+  //               : widget.profilePicture,
+  //           'shouldRefresh': true, // Add this flag
+  //         });
+  //       }
+  //     }
+  //     else {
+  //       throw Exception('Failed to update profile: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Error updating profile: $e')),
+  //       );
+  //     }
+  //   } finally {
+  //     if (mounted) {
+  //       setState(() => _isLoading = false);
+  //     }
+  //   }
+  // }
+
   Future<void> _handleSave() async {
     setState(() => _isLoading = true);
 
@@ -795,20 +871,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final token = await AuthService.getAuthToken();
       if (token == null) throw Exception('No auth token found');
 
-      // Create multipart request
       var uri = Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/register/');
       var request = http.MultipartRequest('POST', uri);
 
-      // Add authorization header
       request.headers['Authorization'] = 'Bearer $token';
-
-      // Add text fields
       request.fields['bio'] = _bioController.text;
       request.fields['city'] = _cityController.text;
       request.fields['yoe'] = _yoeController.text;
       request.fields['name'] = _usernameController.text;
 
-      // Add profile image if selected
       if (_profileImage != null) {
         var profileImageStream = await http.ByteStream(_profileImage!.openRead());
         var profileImageLength = await _profileImage!.length();
@@ -821,12 +892,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         );
 
         request.files.add(multipartFile);
+
+        // Save the profile picture path to SharedPreferences
+        await SharedPreferencesUtil.saveProfilePicturePath(_profileImage!.path);
       }
-      // Send request
+
       var response = await request.send();
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (mounted) {
-          // Pop the current screen with the updated data
           Navigator.of(context).pop({
             'username': _usernameController.text,
             'bio': _bioController.text,
@@ -835,11 +908,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             'profile_picture': _profileImage != null
                 ? _profileImage!.path
                 : widget.profilePicture,
-            'shouldRefresh': true, // Add this flag
+            'shouldRefresh': true,
           });
         }
-      }
-      else {
+      } else {
         throw Exception('Failed to update profile: ${response.statusCode}');
       }
     } catch (e) {

@@ -134,11 +134,11 @@ class FullScreenCameraState extends State<FullScreenCamera> {
   @override
   Widget build(BuildContext context) {
     if (!_cameraController.value.isInitialized) {
-      return Scaffold(
+      return  Scaffold(
         backgroundColor: Colors.black,
         body: Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.pink[600]!),
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.green[700]!),
           ),
         ),
       );
@@ -155,8 +155,8 @@ class FullScreenCameraState extends State<FullScreenCamera> {
             bottom: 50,
             right: 40,
             child: Container(
-              decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.5),
+              decoration: const BoxDecoration(
+                color: Colors.green,
 
                 shape: BoxShape.circle,
               ),

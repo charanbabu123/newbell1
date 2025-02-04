@@ -251,6 +251,7 @@ class Video {
   final String? caption2;
   final String? caption3;
 
+
   Video({
     required this.id,
     required this.tag,
@@ -521,8 +522,8 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
 
         // Video tag overlay
         Positioned(
-          right: 143,
-          left: 143,
+          left: MediaQuery.of(context).size.width * 0.5 - 43,
+          right: MediaQuery.of(context).size.width * 0.5 - 52,
        // Adjust left position relative to screen width
           bottom: MediaQuery.of(context).size.height * 0.034, // Adjust bottom position relative to screen height
           child: Container(

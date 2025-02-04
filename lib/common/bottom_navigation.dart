@@ -1,14 +1,18 @@
 import 'dart:io';
 
+import 'package:bell_app1/common/shared_preferences_util.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 import '../services/auth_service.dart';
 
 class BottomNavBar extends StatefulWidget {
-  const BottomNavBar({super.key});
+
+  final VoidCallback? onProfileUpdated;
+
+  const BottomNavBar({super.key, this.onProfileUpdated});
+
 
   @override
   _BottomNavBarState createState() => _BottomNavBarState();
@@ -16,56 +20,56 @@ class BottomNavBar extends StatefulWidget {
 
 class _BottomNavBarState extends State<BottomNavBar> {
   String profilePicUrl = '';
+  File? _profileImage;
 
   @override
   void initState() {
     super.initState();
+    _loadProfilePicture();
     fetchProfilePic();
   }
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    fetchProfilePic();
+  Future<void> _loadProfilePicture() async {
+    final savedPath = await SharedPreferencesUtil.getProfilePicturePath();
+    if (savedPath != null) {
+      setState(() {
+        _profileImage = File(savedPath);
+      });
+    }
   }
-
-
   Future<void> fetchProfilePic() async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? savedImagePath = prefs.getString('profile_picture');
+      final accessToken = await AuthService.getAuthToken();
+      if (accessToken == null) {
+        debugPrint('Access token not found. Please log in.');
+        return;
+      }
 
-      if (savedImagePath != null && savedImagePath.isNotEmpty) {
+      final response = await http.get(
+        Uri.parse(
+            'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/profile/'),
+        headers: {
+          'Authorization': 'Bearer $accessToken', // Include the access token
+        },
+      );
+
+      print('Status Code: ${response.statusCode}');
+      print('Response Headers: ${response.headers}');
+      print('Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final user = data['user'];
         setState(() {
-          profilePicUrl = savedImagePath;
+          profilePicUrl =
+              user['profile_picture'] ?? ''; // Set profile picture URL
         });
       } else {
-        // If no local image is found, fetch from API
-        final accessToken = await AuthService.getAuthToken();
-        if (accessToken == null) return;
-
-        final response = await http.get(
-          Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/profile/'),
-          headers: {'Authorization': 'Bearer $accessToken'},
-        );
-
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          final user = data['user'];
-          String fetchedProfilePic = user['profile_picture'] ?? '';
-
-          setState(() {
-            profilePicUrl = fetchedProfilePic;
-          });
-
-          // Save it locally for future use
-          await prefs.setString('profile_picture', fetchedProfilePic);
-        }
+        debugPrint('Failed to load profile picture: ${response.statusCode}');
       }
     } catch (e) {
       debugPrint('Error fetching profile picture: $e');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -160,48 +164,52 @@ class _BottomNavBarState extends State<BottomNavBar> {
               GestureDetector(
                 onTap: () {
                   Navigator.of(context).pushNamed('/profile');
+                  _loadProfilePicture();
+                  if (widget.onProfileUpdated != null) {
+                    widget.onProfileUpdated!();
+                  }
                 },
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     InkWell(
-                      splashColor: const Color(0xFFDCF8C7), // Green splash effect
-                      borderRadius: BorderRadius.circular(50), // Circular splash
-                      onTap: () {
-                        // No additional logic here, just the splash effect
-                      },
+                      splashColor: const Color(0xFFDCF8C7),
+                      borderRadius: BorderRadius.circular(50),
+                      onTap: () {},
                       child: CircleAvatar(
-                        radius: 16, // Adjust size for profile picture
+                        radius: 16,
                         backgroundColor: Colors.white,
                         child: ClipOval(
-                          child: profilePicUrl.isNotEmpty
-                              ? (profilePicUrl.startsWith('http')
+                          child: _profileImage != null
+                              ? Image.file(
+                            _profileImage!,
+                            fit: BoxFit.cover,
+                            width: 30,
+                            height: 30,
+                          )
+                              : (profilePicUrl.isNotEmpty
                               ? Image.network(
                             profilePicUrl,
                             fit: BoxFit.cover,
                             width: 30,
                             height: 30,
                             errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.person_outline_rounded, color: Colors.black);
+                              return const Icon(
+                                Icons.person_outline_rounded,
+                                color: Colors.black,
+                              );
                             },
                           )
-                              : Image.file(
-                            File(profilePicUrl),
-                            fit: BoxFit.cover,
-                            width: 30,
-                            height: 30,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(Icons.person_outline_rounded, color: Colors.black);
-                            },
-                          ))
-                              : const Icon(Icons.person_outline_rounded, color: Colors.black), // Fallback
+                              : const Icon(
+                            Icons.person_outline_rounded,
+                            color: Colors.black,
+                          )),
                         ),
                       ),
-
                     ),
-                    const SizedBox(height: 2), // Space between profile icon and text
+                    const SizedBox(height: 2),
                     Transform.translate(
-                      offset: const Offset(0, -5), // Move the text 5 pixels upward
+                      offset: const Offset(0, -5),
                       child: const Text(
                         'Profile',
                         style: TextStyle(color: Colors.black, fontSize: 12),
@@ -212,7 +220,7 @@ class _BottomNavBarState extends State<BottomNavBar> {
               ),
             ],
           ),
-        )
+        ),
     );
   }
 }

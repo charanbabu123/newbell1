@@ -1,7 +1,6 @@
 import 'package:bell_app1/screens/static_feedscreen.dart';
 import 'package:bell_app1/splash/JobSearchApp.dart';
 import 'package:bell_app1/splash/spalsh1.dart';
-
 import '../../profile/user_profile_screen.dart';
 import '../../providers/video_section_provider.dart';
 import '../../screens/feed_screen.dart';
@@ -10,7 +9,6 @@ import '../../splash/splash.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:provider/provider.dart';
-
 import 'screens/reel_uploader_screen.dart';
 import 'screens/name.dart';
 import 'login/otp_screen.dart';

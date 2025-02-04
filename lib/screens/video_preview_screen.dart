@@ -326,7 +326,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
                 trackHeight: 2,
                 thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
                 overlayShape: RoundSliderOverlayShape(overlayRadius: 12),
-                activeTrackColor: Colors.white,
+                activeTrackColor: Colors.green,
                 inactiveTrackColor: Colors.white,
                 thumbColor: Colors.white,
               ),
