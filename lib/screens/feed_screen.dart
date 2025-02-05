@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../Widget/CommentBox.dart';
 import '../common/bottom_navigation.dart';
 import '../services/auth_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -119,14 +120,14 @@ class _FeedScreenState extends State<FeedScreen>
           // if (isLoading && feeds.isEmpty)
           //   const Center(child: CircularProgressIndicator(color: Colors.white))
           // else
-            PageView.builder(
-              scrollDirection: Axis.vertical,
-              controller: _pageController,
-              itemCount: feeds.length,
-              itemBuilder: (context, index) {
-                return FullScreenFeedItem(feed: feeds[index]);
-              },
-            ),
+          PageView.builder(
+            scrollDirection: Axis.vertical,
+            controller: _pageController,
+            itemCount: feeds.length,
+            itemBuilder: (context, index) {
+              return FullScreenFeedItem(feed: feeds[index]);
+            },
+          ),
 
           // Overlay header
           Container(
@@ -136,12 +137,12 @@ class _FeedScreenState extends State<FeedScreen>
                 end: Alignment.bottomCenter,
                 colors: [
                   Colors.grey.withOpacity(0.5), // Semi-transparent grey
-                  Colors.transparent,           // Fully transparent
+                  Colors.transparent, // Fully transparent
                 ],
               ),
             ),
-            padding:
-            const EdgeInsets.only(top: 70, left: 34, right: 109, bottom: 16),
+            padding: const EdgeInsets.only(
+                top: 70, left: 34, right: 109, bottom: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -250,7 +251,9 @@ class Video {
   final String? caption1;
   final String? caption2;
   final String? caption3;
-
+  bool isLiked; // Add this
+  int likeCount;
+  int? commentCount;
 
   Video({
     required this.id,
@@ -261,9 +264,14 @@ class Video {
     this.caption2,
     this.caption3,
     required this.duration,
+    this.isLiked = false, // Add this
+    this.likeCount = 0,
+    this.commentCount,
   });
 
   factory Video.fromJson(Map<String, dynamic> json) {
+    print('Raw comment_count: ${json['comment_count']}');
+    print('Raw comment_count: ${json['video_data']?['like_count']}');
     return Video(
       id: json['id'] ?? 0,
       duration: (json['duration'] ?? 0.0),
@@ -273,13 +281,15 @@ class Video {
       caption1: json['caption_1'],
       caption2: json['caption_2'],
       caption3: json['caption_3'],
+      isLiked: json['is_liked'] ?? false, // Add this
+      likeCount: json['video_data']?['like_count'] ?? 0,
+      commentCount: 0,
     );
   }
 }
 
 class FullScreenFeedItem extends StatefulWidget {
   final UserFeed feed;
-
 
   const FullScreenFeedItem({super.key, required this.feed});
 
@@ -331,6 +341,65 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
     }
   }
 
+  Future<void> _handleLike(int userId) async {
+    try {
+      final validToken = await _getValidToken();
+      if (validToken == null) {
+        throw Exception('Unable to authenticate. Please login again.');
+      }
+
+      final response = await http.post(
+        Uri.parse(
+            'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/like/$userId/'),
+        headers: {'Authorization': 'Bearer $validToken'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          widget.feed.videos[_currentVideoIndex].isLiked =
+              data['action'] == 'liked';
+          widget.feed.videos[_currentVideoIndex].likeCount =
+              data['total_likes'];
+        });
+      } else {
+        throw Exception('Failed to like/unlike');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+  }
+
+  String _formatLikeCount(int count) {
+    if (count < 1000) return count.toString();
+    if (count < 1000000) return '${(count / 1000).toStringAsFixed(1)}K';
+    return '${(count / 1000000).toStringAsFixed(1)}M';
+  }
+
+  Future<int> _fetchCommentCount(int userId) async {
+    try {
+      final token = await _getValidToken();
+      if (token == null) return 0;
+
+      final response = await http.get(
+        Uri.parse(
+            'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/comments/$userId/'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> comments = json.decode(response.body);
+        return comments.length;
+      }
+    } catch (e) {
+      print('Error fetching comment count: $e');
+    }
+    return 0;
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -338,8 +407,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
       children: [
         // Full screen video
         Padding(
-          padding: const EdgeInsets.only(
-              top: 20.0, bottom: 0.0),
+          padding: const EdgeInsets.only(top: 20.0, bottom: 0.0),
           // Adjust the top and bottom padding
           child: PageView.builder(
             controller: _videoController,
@@ -418,27 +486,32 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Like Button
               Column(
                 children: [
                   Column(
-                    mainAxisSize: MainAxisSize.min, // Reduce spacing within the column
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.favorite_outline, color: Colors.white),
-                            iconSize: 27,
-                            onPressed: () {},
-                          ),
-                        ],
+                      IconButton(
+                        icon: Icon(
+                          widget.feed.videos[_currentVideoIndex].isLiked
+                              ? Icons.favorite
+                              : Icons.favorite_outline,
+                          color: widget.feed.videos[_currentVideoIndex].isLiked
+                              ? Colors.red
+                              : Colors.white,
+                        ),
+                        iconSize: 27,
+                        onPressed: () => _handleLike(widget.feed.user.id),
                       ),
                       Transform.translate(
-                        offset: const Offset(0, -7), // Move the text up by 2 pixels
-                        child: const Text(
-                          "Like",
-                          style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                        offset: const Offset(0, -7),
+                        child: Text(
+                          _formatLikeCount(
+                              widget.feed.videos[_currentVideoIndex].likeCount),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
@@ -447,27 +520,47 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
               ),
               const SizedBox(height: 8), // Space between icons
               // Comment Button
+
               Column(
                 children: [
                   Stack(
                     alignment: Alignment.center,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.mode_comment_outlined, color: Colors.white),
+                        icon: const Icon(Icons.mode_comment_outlined,
+                            color: Colors.white),
                         iconSize: 27,
-                        onPressed: () {},
+                        onPressed: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) =>
+                                CommentBottomSheet(userId: widget.feed.user.id),
+                          );
+                        },
                       ),
                     ],
                   ),
                   Transform.translate(
-                    offset: const Offset(0, -7), // Move the text up by 2 pixels
-                    child: const Text(
-                      "Comment",
-                      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                    offset: const Offset(0, -7),
+                    child: FutureBuilder<int>(
+                      future: _fetchCommentCount(widget.feed.user.id),
+                      builder: (context, snapshot) {
+                        final count = snapshot.data ?? 0;
+                        return Text(
+                          _formatCount(count),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold),
+                        );
+                      },
                     ),
                   ),
                 ],
               ),
+
               const SizedBox(height: 8), // Space between icons
               // Share Button
               Column(
@@ -475,9 +568,9 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                   Stack(
                     alignment: Alignment.center,
                     children: [
-
                       IconButton(
-                        icon: const Icon(Icons.share_outlined, color: Colors.white),
+                        icon: const Icon(Icons.share_outlined,
+                            color: Colors.white),
                         iconSize: 27,
                         onPressed: () {},
                       ),
@@ -487,35 +580,17 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                     offset: const Offset(0, -7), // Move the text up by 2 pixels
                     child: const Text(
                       "Share",
-                      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 8), // Space between icons
               // Save Button
-              Column(
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-
-                      IconButton(
-                        icon: const Icon(Icons.bookmark_outline_outlined, color: Colors.white),
-                        iconSize: 27,
-                        onPressed: () {},
-                      ),
-                    ],
-                  ),
-                  Transform.translate(
-                    offset: const Offset(0, -7), // Move the text up by 2 pixels
-                    child: const Text(
-                      "Save",
-                      style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
+              _buildMoreOptionsButton(context),
             ],
           ),
         ),
@@ -524,14 +599,13 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         Positioned(
           left: MediaQuery.of(context).size.width * 0.5 - 43,
           right: MediaQuery.of(context).size.width * 0.5 - 52,
-       // Adjust left position relative to screen width
-          bottom: MediaQuery.of(context).size.height * 0.034, // Adjust bottom position relative to screen height
+          // Adjust left position relative to screen width
+          bottom: MediaQuery.of(context).size.height *
+              0.034, // Adjust bottom position relative to screen height
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
             decoration: BoxDecoration(
               color: const Color(0xFF118C7E),
-
-
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
@@ -546,17 +620,33 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
           ),
         ),
         Positioned(
-          top: 38, // Distance from the top
-          left: 20, // Distance from the right
+          top: 37, // Distance from the top
+          left: 21, // Distance from the right
           child: SvgPicture.asset(
             'assets/bell_image.svg',
-            width: 30, // Decreased width
-            height: 30, // Decreased height
+            width: 28, // Decreased width
+            height: 28, // Decreased height
           ),
         ),
+        const Positioned(
+          top: 38, // Distance from the top
+          right: 20, // Distance from the left
+          child: Icon(
+            Icons.search, // Search icon
+            size: 30, // Same size as the previous SVG
+            color: Colors.green, // You can change the color if needed
+          ),
+        ),
+
       ],
     );
   }
+}
+
+String _formatCount(int count) {
+  if (count < 1000) return count.toString();
+  if (count < 1000000) return '${(count / 1000).toStringAsFixed(1)}K';
+  return '${(count / 1000000).toStringAsFixed(1)}M';
 }
 
 class VideoPlayerWidget extends StatefulWidget {
@@ -579,7 +669,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   late VideoPlayerController _controller;
   bool _isInitialized = false;
   String? _currentCaption;
-
 
   @override
   void initState() {
@@ -736,23 +825,28 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
         if (_currentCaption != null)
           Positioned(
-            bottom: MediaQuery.of(context).size.height * 0.17, // Adjust bottom position
-            left: MediaQuery.of(context).size.width * 0.065, // Keep the left position fixed
-           // right: MediaQuery.of(context).size.width * 0.25, // Adjust right position if necessary
+            bottom: MediaQuery.of(context).size.height *
+                0.17, // Adjust bottom position
+            left: MediaQuery.of(context).size.width *
+                0.065, // Keep the left position fixed
+            // right: MediaQuery.of(context).size.width * 0.25, // Adjust right position if necessary
             child: Container(
               padding: const EdgeInsets.symmetric(
                 vertical: 5, // Add consistent vertical padding
                 horizontal: 10, // Add consistent horizontal padding
               ),
               decoration: BoxDecoration(
-                color: const Color.fromRGBO(15, 32, 4, 0.9), // Background color with transparency
+                color: const Color.fromRGBO(
+                    15, 32, 4, 0.9), // Background color with transparency
                 borderRadius: BorderRadius.circular(10), // Rounded corners
               ),
               child: Align(
-                alignment: Alignment.centerLeft, // Force alignment to the left inside the container
+                alignment: Alignment
+                    .centerLeft, // Force alignment to the left inside the container
                 child: Text(
                   _formatCaption(_currentCaption!),
-                  textAlign: TextAlign.left, // Ensure the text aligns to the left
+                  textAlign:
+                      TextAlign.left, // Ensure the text aligns to the left
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -762,7 +856,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
               ),
             ),
           ),
-
 
         // Progress bar
 
@@ -803,9 +896,6 @@ String _formatCaption(String caption) {
   // Join the lines with line breaks
   return lines.join('\n');
 }
-
-
-
 
 Future<String?> _getValidToken() async {
   String? accessToken = await AuthService.getAuthToken();
@@ -917,7 +1007,6 @@ class _ProgressBar extends StatelessWidget {
           height: 5,
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.5),
-
             borderRadius: BorderRadius.circular(2),
           ),
           child: FractionallySizedBox(
@@ -934,4 +1023,151 @@ class _ProgressBar extends StatelessWidget {
       },
     );
   }
+}
+
+
+
+class ReportDialog extends StatefulWidget {
+  // Add userId parameter
+
+  const ReportDialog({
+    super.key,
+
+  });
+
+  @override
+  State<ReportDialog> createState() => _ReportDialogState();
+}
+
+class _ReportDialogState extends State<ReportDialog> {
+  final List<String> questions = [
+    'Why are you reporting this content?',
+    'Does this content contain inappropriate material?',
+    'Is this content spam?',
+    'Does this content violate community guidelines?',
+    'Have you seen similar content from this user before?'
+  ];
+
+  final List<bool> answers = List.generate(5, (_) => false);
+
+  bool get isAnyOptionSelected => answers.contains(true);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Report Content',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...List.generate(
+              questions.length,
+                  (index) => CheckboxListTile(
+                title: Text(questions[index], style: const TextStyle(fontSize: 14)),
+                value: answers[index],
+                onChanged: (bool? value) {
+                  setState(() {
+                    answers[index] = value ?? false;
+                  });
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                // Adjust opacity based on whether an option is selected
+                backgroundColor: isAnyOptionSelected ? Colors.red : Colors.red.withOpacity(0.5),
+              ),
+              onPressed: isAnyOptionSelected
+                  ? () {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Report submitted successfully'),
+                  ),
+                );
+              }
+                  : null, // Button is disabled when no option is selected
+              child: const Text('Submit Report'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Replace the bookmark button with this implementation in _FullScreenFeedItemState
+Widget _buildMoreOptionsButton(BuildContext context) {
+  return Column(
+    children: [
+      Stack(
+        alignment: Alignment.center,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            iconSize: 27,
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                builder: (context) => Container(
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF282828),
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const SizedBox(height: 8),
+                      Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.grey[600],
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.bookmark_outline, color: Colors.white),
+                        title: const Text('Save', style: TextStyle(color: Colors.white)),
+                        onTap: () {
+                          Navigator.pop(context);
+                          // Implement save functionality
+                        },
+                      ),
+
+                      ListTile(
+                        leading: const Icon(Icons.report_outlined, color: Colors.red),
+                        title: const Text('Report...', style: TextStyle(color: Colors.red)),
+                        onTap: () {
+                          Navigator.pop(context);
+                          showDialog(
+                            context: context,
+                            builder: (context) => const ReportDialog(),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+
+    ],
+  );
 }

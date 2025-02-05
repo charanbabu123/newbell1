@@ -555,6 +555,15 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
             height: 30, // Decreased height
           ),
         ),
+        const Positioned(
+          top: 38, // Distance from the top
+          right: 20, // Distance from the left
+          child: Icon(
+            Icons.search, // Search icon
+            size: 30, // Same size as the previous SVG
+            color: Colors.green, // You can change the color if needed
+          ),
+        ),
       ],
     );
   }
