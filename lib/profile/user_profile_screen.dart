@@ -675,7 +675,7 @@ class MenuScreen extends StatelessWidget {
 
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: const Icon(Icons.arrow_back, color: Colors.green),
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -687,21 +687,28 @@ class MenuScreen extends StatelessWidget {
           ListTile(
             title: const Text(
               'Settings',
-              style: TextStyle(color: Colors.black, fontSize: 16),
+              style: TextStyle(color: Colors.green, fontSize: 16),
+            ),
+            onTap: () {},
+          ),
+          ListTile(
+            title: const Text(
+              'Saved',
+              style: TextStyle(color: Colors.green, fontSize: 16),
             ),
             onTap: () {},
           ),
           ListTile(
             title: const Text(
               'Privacy',
-              style: TextStyle(color: Colors.black, fontSize: 16),
+              style: TextStyle(color: Colors.green, fontSize: 16),
             ),
             onTap: () {},
           ),
           ListTile(
             title: const Text(
               'Log Out',
-              style: TextStyle(color: Colors.black, fontSize: 16),
+              style: TextStyle(color: Colors.green, fontSize: 16),
             ),
             onTap: onLogout,
           ),

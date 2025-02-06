@@ -43,8 +43,10 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.only(top: 65.0, left: 45.0, right: 45.0, bottom: 45.0),
+      body: Stack( // Wrap with Stack to allow overlapping widgets
+          children: [
+       Padding(
+        padding: const EdgeInsets.only(top: 120.0, left: 45.0, right: 45.0, bottom: 45.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -62,7 +64,7 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 15),
             const Center(
               child: Text(
                 "Upload your profile picture",
@@ -73,7 +75,7 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 25),
             Center(
               child: Stack(
                 children: [
@@ -141,7 +143,7 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 35),
+            const SizedBox(height: 40),
             GestureDetector(
               onTap: () {
                 Navigator.of(context).push(MaterialPageRoute(
@@ -171,42 +173,36 @@ class _ProfilePictureScreenState extends State<ProfilePictureScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => ExperienceScreen(
-                    name: widget.name,
-                    city: widget.city,
-                    email: widget.email,
-                    profileImage: _profileImage,
-                  ),
-                ));
-              },
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: const Color(0xFF4CAF50), // Green border
-                    width: 1,
-                  ),
-                ),
+          ],
+        ),
+    ),
+
+            const SizedBox(height: 25),
+            Positioned(
+              top: 50.0, // Adjust this value to position vertically
+              right: 20.0, // Adjust this value to position horizontally
+              child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => ExperienceScreen(
+                      name: widget.name,
+                      city: widget.city,
+                      email: widget.email,
+                      profileImage: _profileImage,
+                    ),
+                  ));
+                },
                 child: const Text(
                   "Skip",
                   style: TextStyle(
-                    color: Color(0xFF4CAF50), // Green text
-                    fontWeight: FontWeight.w600,
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
               ),
             ),
           ],
-        ),
       ),
     );
   }

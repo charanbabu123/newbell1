@@ -10,6 +10,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
 
+
   @override
   State<FeedScreen> createState() => _FeedScreenState();
 }
@@ -23,6 +24,7 @@ class _FeedScreenState extends State<FeedScreen>
   //final int _currentPageIndex = 0;
   late TabController _tabController;
   final Map<int, VideoPlayerController> _controllers = {};
+
 
   @override
   void initState() {
@@ -198,13 +200,15 @@ class _FeedScreenState extends State<FeedScreen>
 class UserFeed {
   final User user;
   final List<Video> videos;
+  final int likeCount;
 
-  UserFeed({required this.user, required this.videos});
+  UserFeed({required this.user, required this.videos,required this.likeCount});
 
   factory UserFeed.fromJson(Map<String, dynamic> json) {
     return UserFeed(
       user: User.fromJson(json['user']),
       videos: (json['videos'] as List).map((v) => Video.fromJson(v)).toList(),
+      likeCount: json['video_data']?['like_count'] ?? 0,  // Add this
     );
   }
 }
@@ -271,7 +275,7 @@ class Video {
 
   factory Video.fromJson(Map<String, dynamic> json) {
     print('Raw comment_count: ${json['comment_count']}');
-    print('Raw comment_count: ${json['video_data']?['like_count']}');
+    print('Raw video_data: ${json['video_data']}');
     return Video(
       id: json['id'] ?? 0,
       duration: (json['duration'] ?? 0.0),
@@ -282,7 +286,7 @@ class Video {
       caption2: json['caption_2'],
       caption3: json['caption_3'],
       isLiked: json['is_liked'] ?? false, // Add this
-      likeCount: json['video_data']?['like_count'] ?? 0,
+      likeCount: 0,
       commentCount: 0,
     );
   }
@@ -290,6 +294,7 @@ class Video {
 
 class FullScreenFeedItem extends StatefulWidget {
   final UserFeed feed;
+
 
   const FullScreenFeedItem({super.key, required this.feed});
 
@@ -301,11 +306,16 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
   final PageController _videoController = PageController();
   final Map<int, VideoPlayerController> _controllers = {};
   int _currentVideoIndex = 0;
+  bool isSaved = false;
+
 
   @override
   void initState() {
     super.initState();
     _initializeControllers();
+    for (var video in widget.feed.videos) {
+      video.likeCount = widget.feed.likeCount;
+    }
   }
 
   void pauseAllVideos() {
@@ -338,6 +348,53 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
           VideoPlayerController.networkUrl(Uri.parse(video.videoUrl));
       _controllers[i] = controller;
       controller.initialize();
+    }
+  }
+
+  Future<void> _handleSaveUser() async {
+    try {
+      final validToken = await _getValidToken();
+      if (validToken == null) {
+        throw Exception('Unable to authenticate. Please login again.');
+      }
+
+      final response = await http.post(
+        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/users/${widget.feed.user.id}/save/'),
+        headers: {
+          'Authorization': 'Bearer $validToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final String message = data['message'];
+        final String action = data['action'];
+
+        if (mounted) {
+          setState(() {
+            isSaved = action == 'saved';
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(action == 'saved' ? 'Video saved successfully' : 'Video unsaved successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        throw Exception('Failed to save/unsave user');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -399,7 +456,6 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
     return 0;
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -438,7 +494,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         // User info overlay
         Positioned(
           left: 24,
-          bottom: 80,
+          bottom: 40,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -534,7 +590,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                           showModalBottomSheet(
                             context: context,
                             isScrollControlled: true,
-                            backgroundColor: Colors.transparent,
+                            backgroundColor: Colors.white,
                             builder: (context) =>
                                 CommentBottomSheet(userId: widget.feed.user.id),
                           );
@@ -590,18 +646,20 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
               ),
               const SizedBox(height: 8), // Space between icons
               // Save Button
-              _buildMoreOptionsButton(context),
+              // In the build method where you use _buildMoreOptionsButton
+              _buildMoreOptionsButton(context, _handleSaveUser, isSaved, widget.feed.user.id),
             ],
           ),
         ),
 
         // Video tag overlay
         Positioned(
-          left: MediaQuery.of(context).size.width * 0.5 - 43,
-          right: MediaQuery.of(context).size.width * 0.5 - 52,
+          //left: MediaQuery.of(context).size.width * 0.5 - 43,
+          left: MediaQuery.of(context).size.width *
+              0.07,
           // Adjust left position relative to screen width
           bottom: MediaQuery.of(context).size.height *
-              0.034, // Adjust bottom position relative to screen height
+              0.23, // Adjust bottom position relative to screen height
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
             decoration: BoxDecoration(
@@ -826,7 +884,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
         if (_currentCaption != null)
           Positioned(
             bottom: MediaQuery.of(context).size.height *
-                0.17, // Adjust bottom position
+                0.13, // Adjust bottom position
             left: MediaQuery.of(context).size.width *
                 0.065, // Keep the left position fixed
             // right: MediaQuery.of(context).size.width * 0.25, // Adjust right position if necessary
@@ -1027,13 +1085,26 @@ class _ProgressBar extends StatelessWidget {
 
 
 
+
 class ReportDialog extends StatefulWidget {
-  // Add userId parameter
+  final int userId; // Add userId parameter
 
   const ReportDialog({
-    super.key,
+    Key? key,
+    required this.userId,
+  }) : super(key: key);
 
-  });
+  static void show(BuildContext context, int userId) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => ReportDialog(userId: userId),
+    );
+  }
 
   @override
   State<ReportDialog> createState() => _ReportDialogState();
@@ -1041,67 +1112,214 @@ class ReportDialog extends StatefulWidget {
 
 class _ReportDialogState extends State<ReportDialog> {
   final List<String> questions = [
-    'Why are you reporting this content?',
-    'Does this content contain inappropriate material?',
-    'Is this content spam?',
-    'Does this content violate community guidelines?',
-    'Have you seen similar content from this user before?'
+    'I just don\'t like it',
+    'Bullying or unwanted contact',
+    'Suicide, self-injury or eating disorders',
+    'Violence, hate or exploitation',
+    'Selling or promoting restricted items',
+    'Nudity or sexual activity',
+    'Scam, fraud or spam',
+    'False information',
   ];
 
-  final List<bool> answers = List.generate(5, (_) => false);
+  int? selectedIndex;
+  bool isSubmitting = false;
 
-  bool get isAnyOptionSelected => answers.contains(true);
+  Future<void> _submitReport() async {
+    if (selectedIndex == null) return;
+
+    setState(() {
+      isSubmitting = true;
+    });
+
+    try {
+      final validToken = await _getValidToken();
+      if (validToken == null) {
+        throw Exception('Unable to authenticate. Please login again.');
+      }
+
+      final response = await http.post(
+        Uri.parse(
+          'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/user/${widget.userId}/hide-and-report/',
+        ),
+        headers: {
+          'Authorization': 'Bearer $validToken',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'reason': questions[selectedIndex!],
+        }),
+      );
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        // Close the report dialog
+        Navigator.pop(context);
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Report submitted successfully',
+              style: TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Notify the parent widget to refresh the feed
+        // This will remove the reported user's content immediately
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const FeedScreen()),
+        );
+      } else {
+        throw Exception('Failed to submit report');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error submitting report: ${e.toString()}',
+            style: const TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isSubmitting = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Report Content',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+    return Material(
+      color: const Color(0xFFFAF6F0),
+      child: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
-            const SizedBox(height: 16),
-            ...List.generate(
-              questions.length,
-                  (index) => CheckboxListTile(
-                title: Text(questions[index], style: const TextStyle(fontSize: 14)),
-                value: answers[index],
-                onChanged: (bool? value) {
-                  setState(() {
-                    answers[index] = value ?? false;
-                  });
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                // Adjust opacity based on whether an option is selected
-                backgroundColor: isAnyOptionSelected ? Colors.red : Colors.red.withOpacity(0.5),
-              ),
-              onPressed: isAnyOptionSelected
-                  ? () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Report submitted successfully'),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 8),
+                // Top indicator bar
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[600],
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                );
-              }
-                  : null, // Button is disabled when no option is selected
-              child: const Text('Submit Report'),
+                ),
+                const SizedBox(height: 16),
+                const Center(
+                  child: Text(
+                    'Report',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Text(
+                    'Why are you reporting this post?',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                  child: Text(
+                    'Your report is anonymous. If someone is in immediate danger, call the local emergency services - don\'t wait.',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                ...List.generate(
+                  questions.length,
+                      (index) => InkWell(
+                    onTap: () {
+                      setState(() {
+                        selectedIndex = selectedIndex == index ? null : index;
+                      });
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      color: selectedIndex == index
+                          ? Colors.green.withOpacity(0.1)
+                          : Colors.transparent,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              questions[index],
+                              style: TextStyle(
+                                color: Colors.green,
+                                fontSize: 16,
+                                fontWeight: selectedIndex == index
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                          ),
+                          if (selectedIndex == index)
+                            const Icon(Icons.check, color: Colors.green),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Submit button
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: ElevatedButton(
+                    onPressed: selectedIndex != null && !isSubmitting
+                        ? _submitReport
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      disabledBackgroundColor: Colors.grey,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(
+                      isSubmitting ? 'Submitting...' : 'Submit Report',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -1109,7 +1327,12 @@ class _ReportDialogState extends State<ReportDialog> {
 }
 
 // Replace the bookmark button with this implementation in _FullScreenFeedItemState
-Widget _buildMoreOptionsButton(BuildContext context) {
+Widget _buildMoreOptionsButton(
+    BuildContext context,
+    Future<void> Function() handleSaveUser,
+    bool isSaved,
+    int userId,  // Add userId parameter
+    ) {
   return Column(
     children: [
       Stack(
@@ -1121,10 +1344,10 @@ Widget _buildMoreOptionsButton(BuildContext context) {
             onPressed: () {
               showModalBottomSheet(
                 context: context,
-                backgroundColor: Colors.transparent,
+                backgroundColor: Colors.white,
                 builder: (context) => Container(
                   decoration: const BoxDecoration(
-                    color: Color(0xFF282828),
+                    color: Color(0xFFFAF6F0),
                     borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
                   ),
                   child: Column(
@@ -1139,26 +1362,86 @@ Widget _buildMoreOptionsButton(BuildContext context) {
                           borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                      ListTile(
-                        leading: const Icon(Icons.bookmark_outline, color: Colors.white),
-                        title: const Text('Save', style: TextStyle(color: Colors.white)),
-                        onTap: () {
-                          Navigator.pop(context);
-                          // Implement save functionality
-                        },
+                      const SizedBox(height: 15),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          // Save button with circular container
+                          GestureDetector(
+                            onTap: () async {
+                              Navigator.pop(context);
+                              await handleSaveUser();
+                            },
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 35,
+                                  height: 35,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.green,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    isSaved ? Icons.bookmark : Icons.bookmark_border_rounded,
+                                    color: Colors.green,
+                                    size: 15,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  isSaved ? 'Unsave' : 'Save',
+                                  style: const TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          // Report button with circular container
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context);
+                              ReportDialog.show(context, userId);  // Pass userId here
+                            },
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 35,
+                                  height: 35,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: Colors.green,
+                                      width: 1.5,
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.report_outlined,
+                                    color: Colors.green,
+                                    size: 15,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Report',
+                                  style: TextStyle(
+                                    color: Colors.green,
+                                    fontSize: 12,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-
-                      ListTile(
-                        leading: const Icon(Icons.report_outlined, color: Colors.red),
-                        title: const Text('Report...', style: TextStyle(color: Colors.red)),
-                        onTap: () {
-                          Navigator.pop(context);
-                          showDialog(
-                            context: context,
-                            builder: (context) => const ReportDialog(),
-                          );
-                        },
-                      ),
+                      const SizedBox(height: 15),
                     ],
                   ),
                 ),
@@ -1167,7 +1450,6 @@ Widget _buildMoreOptionsButton(BuildContext context) {
           ),
         ],
       ),
-
     ],
   );
 }
