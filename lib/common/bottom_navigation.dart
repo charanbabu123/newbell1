@@ -71,6 +71,16 @@ class _BottomNavBarState extends State<BottomNavBar> {
     }
   }
 
+
+  void _navigateToProfile() {
+    Navigator.of(context).pushNamed('/profile');
+    _loadProfilePicture();
+    if (widget.onProfileUpdated != null) {
+      widget.onProfileUpdated!();
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -161,64 +171,61 @@ class _BottomNavBarState extends State<BottomNavBar> {
                   ),
                 ],
               ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushNamed('/profile');
-                  _loadProfilePicture();
-                  if (widget.onProfileUpdated != null) {
-                    widget.onProfileUpdated!();
-                  }
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    InkWell(
-                      splashColor: const Color(0xFFDCF8C7),
-                      borderRadius: BorderRadius.circular(50),
-                      onTap: () {},
-                      child: CircleAvatar(
-                        radius: 16,
-                        backgroundColor: Colors.white,
-                        child: ClipOval(
-                          child: _profileImage != null
-                              ? Image.file(
-                            _profileImage!,
-                            fit: BoxFit.cover,
-                            width: 30,
-                            height: 30,
-                          )
-                              : (profilePicUrl.isNotEmpty
-                              ? Image.network(
-                            profilePicUrl,
-                            fit: BoxFit.cover,
-                            width: 30,
-                            height: 30,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.person_outline_rounded,
-                                color: Colors.black,
-                              );
-                            },
-                          )
-                              : const Icon(
-                            Icons.person_outline_rounded,
-                            color: Colors.black,
-                          )),
-                        ),
+            GestureDetector(
+              onTap: _navigateToProfile, // Common navigation function
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                    splashColor: const Color(0xFFDCF8C7),
+                    borderRadius: BorderRadius.circular(50),
+                    onTap: _navigateToProfile, // Call same function
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Colors.white,
+                      child: ClipOval(
+                        child: _profileImage != null
+                            ? Image.file(
+                          _profileImage!,
+                          fit: BoxFit.cover,
+                          width: 30,
+                          height: 30,
+                        )
+                            : (profilePicUrl.isNotEmpty
+                            ? Image.network(
+                          profilePicUrl,
+                          fit: BoxFit.cover,
+                          width: 30,
+                          height: 30,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                              Icons.person_outline_rounded,
+                              color: Colors.black,
+                            );
+                          },
+                        )
+                            : const Icon(
+                          Icons.person_outline_rounded,
+                          color: Colors.black,
+                        )),
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    Transform.translate(
-                      offset: const Offset(0, -5),
+                  ),
+                  const SizedBox(height: 2),
+                  Transform.translate(
+                    offset: const Offset(0, -5),
+                    child: InkWell(
+                      onTap: _navigateToProfile, // Call same function for text
                       child: const Text(
                         'Profile',
                         style: TextStyle(color: Colors.black, fontSize: 12),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
+      ],
           ),
         ),
     );

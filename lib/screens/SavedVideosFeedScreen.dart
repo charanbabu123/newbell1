@@ -7,15 +7,15 @@ import '../common/bottom_navigation.dart';
 import '../services/auth_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class FeedScreen extends StatefulWidget {
-  const FeedScreen({super.key});
+class profilefeedscreen extends StatefulWidget {
+  const profilefeedscreen({super.key, required userId});
   static final Set<int> reportedUserIds = <int>{};
 
   @override
-  State<FeedScreen> createState() => _FeedScreenState();
+  State<profilefeedscreen> createState() => _profilefeedscreenState();
 }
 
-class _FeedScreenState extends State<FeedScreen>
+class _profilefeedscreenState extends State<profilefeedscreen>
     with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   List<UserFeed> feeds = [];
   bool isLoading = false;
@@ -26,7 +26,7 @@ class _FeedScreenState extends State<FeedScreen>
   final Map<int, VideoPlayerController> _controllers = {};
   List<UserFeed> get filteredFeeds {
     return feeds.where((feed) =>
-    !FeedScreen.reportedUserIds.contains(feed.user.id)
+    !profilefeedscreen.reportedUserIds.contains(feed.user.id)
     ).toList();
   }
 
@@ -100,7 +100,7 @@ class _FeedScreenState extends State<FeedScreen>
       }
 
       final response = await http.get(
-        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/feed/'),
+        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/saved-videos/'),
         headers: {'Authorization': 'Bearer $validToken'},
       );
       debugPrint('Status Code: ${response.statusCode}');
@@ -141,14 +141,14 @@ class _FeedScreenState extends State<FeedScreen>
               ),
             )
           else
-          PageView.builder(
-            scrollDirection: Axis.vertical,
-            controller: _pageController,
-            itemCount: filteredFeeds.length,
-            itemBuilder: (context, index) {
-              return FullScreenFeedItem(feed: filteredFeeds[index]);
-            },
-          ),
+            PageView.builder(
+              scrollDirection: Axis.vertical,
+              controller: _pageController,
+              itemCount: filteredFeeds.length,
+              itemBuilder: (context, index) {
+                return FullScreenFeedItem(feed: filteredFeeds[index]);
+              },
+            ),
 
           // Overlay header
           Container(
@@ -376,7 +376,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
     for (int i = 0; i < widget.feed.videos.length; i++) {
       final video = widget.feed.videos[i];
       final controller =
-          VideoPlayerController.networkUrl(Uri.parse(video.videoUrl));
+      VideoPlayerController.networkUrl(Uri.parse(video.videoUrl));
       _controllers[i] = controller;
       controller.initialize();
     }
@@ -520,7 +520,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
       children: [
         // Full screen video
         Padding(
-          padding: const EdgeInsets.only(top: 10.0, bottom: 0.0),
+          padding: const EdgeInsets.only(top: 20.0, bottom: 0.0),
           // Adjust the top and bottom padding
           child: PageView.builder(
             controller: _videoController,
@@ -562,7 +562,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                   CircleAvatar(
                     radius: 23,
                     backgroundImage:
-                        NetworkImage(widget.feed.user.profilePictureUrl),
+                    NetworkImage(widget.feed.user.profilePictureUrl),
                   ),
                   const SizedBox(width: 12),
                   Column(
@@ -796,7 +796,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     _initializeVideo();
     _controller.addListener(() {
       setState(
-          () {}); // This will rebuild the widget when video position changes
+              () {}); // This will rebuild the widget when video position changes
     });
   }
   void _showLikeAnimation() {
@@ -833,7 +833,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
         // Register controller with parent
         final parentState =
-            context.findAncestorStateOfType<_FullScreenFeedItemState>();
+        context.findAncestorStateOfType<_FullScreenFeedItemState>();
         if (parentState != null) {
           parentState._registerController(widget.video.id, _controller);
         }
@@ -845,7 +845,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   void _onVideoEnd() {
     final parentState =
-        context.findAncestorStateOfType<_FullScreenFeedItemState>();
+    context.findAncestorStateOfType<_FullScreenFeedItemState>();
     if (parentState != null) {
       // Determine the next video index
       final nextVideoIndex = parentState._currentVideoIndex + 1;
@@ -966,7 +966,6 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           ),
         ),
 
-
         if (_currentCaption != null)
           Positioned(
             bottom: MediaQuery.of(context).size.height *
@@ -990,7 +989,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                 child: Text(
                   _formatCaption(_currentCaption!),
                   textAlign:
-                      TextAlign.left, // Ensure the text aligns to the left
+                  TextAlign.left, // Ensure the text aligns to the left
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -1011,7 +1010,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             videos: widget.allVideos,
             currentController: _controller,
             currentIndex:
-                widget.currentIndex, // Use the index passed from parent
+            widget.currentIndex, // Use the index passed from parent
           ),
         ),
       ],
@@ -1099,23 +1098,23 @@ class InstagramStoryProgressBar extends StatelessWidget {
       child: Row(
         children: List.generate(
           videos.length,
-          (index) => Expanded(
+              (index) => Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5.0),
+              padding: const EdgeInsets.symmetric(horizontal: 2.0),
               child: index == currentIndex
                   ? _ProgressBar(
-                      controller: currentController,
-                      isActive: true,
-                    )
+                controller: currentController,
+                isActive: true,
+              )
                   : Container(
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: index < currentIndex
-                            ? Colors.green
-                            : Colors.grey.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+                height: 5,
+                decoration: BoxDecoration(
+                  color: index < currentIndex
+                      ? Colors.green
+                      : Colors.grey.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
             ),
           ),
         ),
@@ -1213,104 +1212,104 @@ class _ReportDialogState extends State<ReportDialog> {
   int? selectedIndex;
   bool isSubmitting = false;
 
-  Future<void> _submitReport() async {
-    print('🔵 _submitReport started');
-
-    try {
-      print('🔵 Fetching valid token...');
-      final validToken = await _getValidToken();
-      if (validToken == null) {
-        print('❌ Token retrieval failed. Prompting re-login.');
-        throw Exception('Unable to authenticate. Please login again.');
-      }
-
-      final url = Uri.parse(
-        'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/user/${widget.userId}/hide-and-report/',
-      );
-      print('🔵 API URL: $url');
-
-      final body = json.encode({
-        'reason': questions[selectedIndex!],
-      });
-      print('🔵 Request Body: $body');
-
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $validToken',
-          'Content-Type': 'application/json',
-        },
-        body: body,
-      );
-
-      print('🟡 HTTP Response Status: ${response.statusCode}');
-      print('🟡 HTTP Response Body: ${response.body}');
-
-      if (!mounted) {
-        print('⚠️ Widget is unmounted. Exiting function.');
-        return;
-      }
-
-      if (response.statusCode == 201) {
-        print('✅ Report submitted successfully.');
-
-        FeedScreen.reportedUserIds.add(widget.userId);
-        print('🟢 Added ${widget.userId} to reportedUserIds.');
-
-        final feedState = context.findAncestorStateOfType<_FeedScreenState>();
-        if (feedState != null && feedState.mounted) {
-          print('🔵 Disposing all videos before removing feed.');
-          feedState._disposeAllVideos();
-
-          feedState.setState(() {
-            feedState.feeds.removeWhere((feed) => feed.user.id == widget.userId);
-          });
-          print('🟢 Removed feed for user ${widget.userId}');
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Video reported successfully', style: TextStyle(color: Colors.white)),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 2),
-          ),
-        );
-        print('✅ Snackbar displayed');
-
-        Future.delayed(const Duration(milliseconds: 400), () {
-          print('🔵 Navigating back to FeedScreen...');
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const FeedScreen()),
-          );
-        });
-      } else {
-        print('❌ Failed to submit report. HTTP Status: ${response.statusCode}');
-        throw Exception('Failed to submit report');
-      }
-    } catch (e) {
-      print('❌ Exception: $e');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Error submitting report: ${e.toString()}',
-            style: const TextStyle(color: Colors.white),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          isSubmitting = false;
-        });
-        print('🔵 isSubmitting set to false');
-      }
-    }
-
-    print('🔵 _submitReport finished');
-  }
+  // Future<void> _submitReport() async {
+  //   print('🔵 _submitReport started');
+  //
+  //   try {
+  //     print('🔵 Fetching valid token...');
+  //     final validToken = await _getValidToken();
+  //     if (validToken == null) {
+  //       print('❌ Token retrieval failed. Prompting re-login.');
+  //       throw Exception('Unable to authenticate. Please login again.');
+  //     }
+  //
+  //     final url = Uri.parse(
+  //       'https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/user/${widget.userId}/hide-and-report/',
+  //     );
+  //     print('🔵 API URL: $url');
+  //
+  //     final body = json.encode({
+  //       'reason': questions[selectedIndex!],
+  //     });
+  //     print('🔵 Request Body: $body');
+  //
+  //     final response = await http.post(
+  //       url,
+  //       headers: {
+  //         'Authorization': 'Bearer $validToken',
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: body,
+  //     );
+  //
+  //     print('🟡 HTTP Response Status: ${response.statusCode}');
+  //     print('🟡 HTTP Response Body: ${response.body}');
+  //
+  //     if (!mounted) {
+  //       print('⚠️ Widget is unmounted. Exiting function.');
+  //       return;
+  //     }
+  //
+  //     if (response.statusCode == 201) {
+  //       print('✅ Report submitted successfully.');
+  //
+  //       profilefeedscreen.reportedUserIds.add(widget.userId);
+  //       print('🟢 Added ${widget.userId} to reportedUserIds.');
+  //
+  //       final feedState = context.findAncestorStateOfType<_profilefeedscreenState>();
+  //       if (feedState != null && feedState.mounted) {
+  //         print('🔵 Disposing all videos before removing feed.');
+  //         feedState._disposeAllVideos();
+  //
+  //         feedState.setState(() {
+  //           feedState.feeds.removeWhere((feed) => feed.user.id == widget.userId);
+  //         });
+  //         print('🟢 Removed feed for user ${widget.userId}');
+  //       }
+  //
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         const SnackBar(
+  //           content: Text('Video reported successfully', style: TextStyle(color: Colors.white)),
+  //           backgroundColor: Colors.green,
+  //           duration: Duration(seconds: 2),
+  //         ),
+  //       );
+  //       print('✅ Snackbar displayed');
+  //
+  //       Future.delayed(const Duration(milliseconds: 400), () {
+  //         print('🔵 Navigating back to profilefeedscreen...');
+  //         Navigator.pushReplacement(
+  //           context,
+  //           MaterialPageRoute(builder: (context) => const profilefeedscreen()),
+  //         );
+  //       });
+  //     } else {
+  //       print('❌ Failed to submit report. HTTP Status: ${response.statusCode}');
+  //       throw Exception('Failed to submit report');
+  //     }
+  //   } catch (e) {
+  //     print('❌ Exception: $e');
+  //     if (!mounted) return;
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text(
+  //           'Error submitting report: ${e.toString()}',
+  //           style: const TextStyle(color: Colors.white),
+  //         ),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   } finally {
+  //     if (mounted) {
+  //       setState(() {
+  //         isSubmitting = false;
+  //       });
+  //       print('🔵 isSubmitting set to false');
+  //     }
+  //   }
+  //
+  //   print('🔵 _submitReport finished');
+  // }
 
 
   @override
@@ -1411,23 +1410,23 @@ class _ReportDialogState extends State<ReportDialog> {
                 // Submit button
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  child: ElevatedButton(
-                    onPressed:_submitReport ,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      disabledBackgroundColor: Colors.grey,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: Text(
-                      isSubmitting ? 'Submitting...' : 'Submit Report',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
+                  // child: ElevatedButton(
+                  //   onPressed:_submitReport ,
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Colors.green,
+                  //     disabledBackgroundColor: Colors.grey,
+                  //     padding: const EdgeInsets.symmetric(vertical: 12),
+                  //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  //   ),
+                  //   child: Text(
+                  //     isSubmitting ? 'Submitting...' : 'Submit Report',
+                  //     style: const TextStyle(
+                  //       color: Colors.white,
+                  //       fontSize: 16,
+                  //       fontWeight: FontWeight.w600,
+                  //     ),
+                  //   ),
+                  // ),
 
                 ),
               ],

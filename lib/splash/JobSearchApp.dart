@@ -33,57 +33,107 @@ class JobSearchScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(  // Changed Column to Stack
           children: [
-            Expanded(
-              child: SingleChildScrollView(
-                // controller: _scrollController,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/bell_image.svg',
-                            width: 30,
-                            height: 30,
-                          ),
-                          const SizedBox(height: 30),
-                          const SizedBox(
-                            width: double.infinity,
-                            child: Text(
-                              'Find your dream job now',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          //const SizedBox(height: 1),
-                          SizedBox(
-                            width: double.infinity,
-                            child: Text(
-                              '5 lakh+ jobs for you to explore',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 28),
-                          const Column(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    // controller: _scrollController,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              SvgPicture.asset(
+                                'assets/bell_image.svg',
+                                width: 30,
+                                height: 30,
+                              ),
+                              const SizedBox(height: 30),
+                              const SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  'Find your dream job now',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              //const SizedBox(height: 1),
                               SizedBox(
                                 width: double.infinity,
                                 child: Text(
-                                  'Jobs you maybe interested in',
+                                  '5 lakh+ jobs for you to explore',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 28),
+                              const Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: Text(
+                                      'Jobs you maybe interested in',
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 7),
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: [
+                                        JobChip(label: 'Digital Marketing (89)'),
+                                        JobChip(label: 'Product Management (43)'),
+                                        JobChip(label: 'Design (67)'),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              const SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    JobCard(
+                                      company: 'Microsoft',
+                                      role: 'Digital Marketing',
+                                      //location: 'Bangalore',
+                                    ),
+                                    JobCard(
+                                      company: 'Microsoft',
+                                      role: 'Digital Marketing',
+                                      //location: 'Bangalore',
+                                    ),
+                                    JobCard(
+                                      company: 'Microsoft',
+                                      role: 'Digital Marketing',
+                                      // location: 'Bangalore',
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              const SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  'Most popular jobs',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontSize: 20,
@@ -91,115 +141,78 @@ class JobSearchScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 7),
-                              SingleChildScrollView(
+                              const SizedBox(height: 5),
+                              const SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,
                                 child: Row(
                                   children: [
-                                    JobChip(label: 'Digital Marketing (89)'),
-                                    JobChip(label: 'Product Management (43)'),
-                                    JobChip(label: 'Design (67)'),
+                                    PopularJobItem(
+                                        icon: Icons.work,
+                                        label: 'Digital Marketing'),
+                                    PopularJobItem(
+                                        icon: Icons.computer,
+                                        label: 'Software Developer'),
+                                    PopularJobItem(
+                                        icon: Icons.design_services,
+                                        label: 'Design'),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              const SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  'Top companies hiring now',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              const SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    CompanyCategory(
+                                      category: 'Edtech',
+                                      subtitle: 'Top companies hiring',
+                                      colorIndex: 0,
+                                    ),
+                                    CompanyCategory(
+                                      category: 'Fintech',
+                                      subtitle: 'Top companies hiring',
+                                      colorIndex: 1,
+                                    ),
+                                    CompanyCategory(
+                                      category: 'Healthcare',
+                                      subtitle: 'Top companies hiring',
+                                      colorIndex: 2,
+                                    ),
                                   ],
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 10),
-                          const SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                JobCard(
-                                  company: 'Microsoft',
-                                  role: 'Digital Marketing',
-                                  //location: 'Bangalore',
-                                ),
-                                JobCard(
-                                  company: 'Microsoft',
-                                  role: 'Digital Marketing',
-                                  //location: 'Bangalore',
-                                ),
-                                JobCard(
-                                  company: 'Microsoft',
-                                  role: 'Digital Marketing',
-                                 // location: 'Bangalore',
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          const SizedBox(
-                            width: double.infinity,
-                            child: Text(
-                              'Most popular jobs',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          const SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                PopularJobItem(
-                                    icon: Icons.work,
-                                    label: 'Digital Marketing'),
-                                PopularJobItem(
-                                    icon: Icons.computer,
-                                    label: 'Software Developer'),
-                                PopularJobItem(
-                                    icon: Icons.design_services,
-                                    label: 'Design'),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          const SizedBox(
-                            width: double.infinity,
-                            child: Text(
-                              'Top companies hiring now',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          const SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                CompanyCategory(
-                                  category: 'Edtech',
-                                  subtitle: 'Top companies hiring',
-                                  colorIndex: 0,
-                                ),
-                                CompanyCategory(
-                                  category: 'Fintech',
-                                  subtitle: 'Top companies hiring',
-                                  colorIndex: 1,
-                                ),
-                                CompanyCategory(
-                                  category: 'Healthcare',
-                                  subtitle: 'Top companies hiring',
-                                  colorIndex: 2,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 2),
+                      ],
                     ),
-                    const SizedBox(height: 2),
-                  ],
+                  ),
                 ),
+                const QuestionnaireSection(), // Moved outside SingleChildScrollView
+              ],
+            ),
+            const Positioned(  // Added search icon
+              top: 16,
+              right: 16,
+              child: Icon(
+                Icons.search,
+                size: 30,
+                color: Colors.green,
               ),
             ),
-            const QuestionnaireSection(), // Moved outside SingleChildScrollView
           ],
         ),
       ),

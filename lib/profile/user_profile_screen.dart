@@ -9,6 +9,7 @@ import 'package:video_player/video_player.dart';
 import '../common/shared_preferences_util.dart';
 import '../login/login_phone_screen.dart';
 import '../models/video_model.dart';
+import '../screens/SavedVideosScreen.dart';
 import '../services/auth_service.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -696,7 +697,12 @@ class MenuScreen extends StatelessWidget {
               'Saved',
               style: TextStyle(color: Colors.green, fontSize: 16),
             ),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SavedVideosScreen()),
+              );
+            },
           ),
           ListTile(
             title: const Text(

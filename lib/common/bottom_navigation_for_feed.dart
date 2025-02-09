@@ -55,6 +55,10 @@ class _BottomNavBar1State extends State<BottomNavBar1> {
     }
   }
 
+  void _navigateToLogin() {
+    Navigator.of(context).pushNamed('/login');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -145,40 +149,39 @@ class _BottomNavBar1State extends State<BottomNavBar1> {
                   ),
                 ],
               ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushNamed('/login');
-                },
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    InkWell(
-                      splashColor: const Color(0xFFDCF8C7), // Green splash effect
-                      borderRadius: BorderRadius.circular(50), // Circular splash
-                      onTap: () {
-                        // No additional logic here, just the splash effect
-                      },
-                      child: const CircleAvatar(
-                        radius: 16, // Adjust size for profile picture
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.person_outline_rounded,
-                          color: Colors.black,
-                        ),
+            GestureDetector(
+              onTap: _navigateToLogin, // Common navigation function
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  InkWell(
+                    splashColor: const Color(0xFFDCF8C7), // Green splash effect
+                    borderRadius: BorderRadius.circular(50), // Circular splash
+                    onTap: _navigateToLogin, // Call same function
+                    child: const CircleAvatar(
+                      radius: 16, // Adjust size for profile picture
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.person_outline_rounded,
+                        color: Colors.black,
                       ),
                     ),
-                    const SizedBox(height: 2), // Space between profile icon and text
-                    Transform.translate(
-                      offset: const Offset(0, -5), // Move the text 5 pixels upward
+                  ),
+                  const SizedBox(height: 2), // Space between profile icon and text
+                  Transform.translate(
+                    offset: const Offset(0, -5), // Move the text 5 pixels upward
+                    child: InkWell(
+                      onTap: _navigateToLogin, // Call same function for text
                       child: const Text(
                         'Profile',
                         style: TextStyle(color: Colors.black, fontSize: 12),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
+      ],
           ),
         )
     );

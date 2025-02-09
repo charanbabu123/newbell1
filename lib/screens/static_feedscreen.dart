@@ -142,7 +142,7 @@ class _FeedScreen1State extends State<FeedScreen1>
               ),
             ),
             padding:
-            const EdgeInsets.only(top: 70, left: 34, right: 109, bottom: 16),
+            const EdgeInsets.only(top: 52, left: 34, right: 109, bottom: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -331,6 +331,27 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
     }
   }
 
+  double _getTagBottomPosition(String? caption) {
+    if (caption == null) {
+      return MediaQuery.of(context).size.height * 0.13;
+    }
+
+    // Count the number of lines in the formatted caption
+    List<String> lines = _formatCaption(caption).split('\n');
+    int lineCount = lines.length;
+
+    switch (lineCount) {
+      case 1:
+        return MediaQuery.of(context).size.height * 0.15;
+      case 2:
+        return MediaQuery.of(context).size.height * 0.22;
+      case 3:
+        return MediaQuery.of(context).size.height * 0.23;
+      default:
+        return MediaQuery.of(context).size.height * 0.23; // For 3+ lines
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -370,7 +391,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         // User info overlay
         Positioned(
           left: 24,
-          bottom: 80,
+          bottom: 40,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -522,11 +543,11 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
 
         // Video tag overlay
         Positioned(
-          left: MediaQuery.of(context).size.width * 0.5 - 43,
-          right: MediaQuery.of(context).size.width * 0.5 - 52,// Assuming 200px width
-
+          left: MediaQuery.of(context).size.width *
+              0.07,
           // Adjust left position relative to screen width
-          bottom: MediaQuery.of(context).size.height * 0.034, // Adjust bottom position relative to screen height
+          bottom: _getTagBottomPosition(widget.feed.videos[_currentVideoIndex].caption1),// Assuming 200px width
+          // Adjust bottom position relative to screen height
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
             decoration: BoxDecoration(
@@ -722,19 +743,17 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Padding(
-          padding: const EdgeInsets.only(
-              top: 50), // Adjust the top padding as needed
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                _controller.value.isPlaying
-                    ? _controller.pause()
-                    : _controller.play();
-              });
-            },
+        GestureDetector(
+          onTap: () {
+            setState(() {
+              _controller.value.isPlaying
+                  ? _controller.pause()
+                  : _controller.play();
+            });
+          },
+          child: SizedBox.expand( // Make it take full screen
             child: FittedBox(
-              fit: BoxFit.contain,
+              fit: BoxFit.cover, // Ensure it covers the screen
               child: SizedBox(
                 width: _controller.value.size.width,
                 height: _controller.value.size.height,
@@ -744,10 +763,13 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
           ),
         ),
 
+
         if (_currentCaption != null)
           Positioned(
-            bottom: MediaQuery.of(context).size.height * 0.17, // Adjust bottom position
-            left: MediaQuery.of(context).size.width * 0.065, // Keep the left position fixed
+            bottom: MediaQuery.of(context).size.height *
+                0.13, // Adjust bottom position
+            left: MediaQuery.of(context).size.width *
+                0.065, // Keep the left position fixed
             // right: MediaQuery.of(context).size.width * 0.25, // Adjust right position if necessary
             child: Container(
               padding: const EdgeInsets.symmetric(
