@@ -418,7 +418,7 @@ class CompanyCategory extends StatelessWidget {
           Text(
             category,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 17,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -817,8 +817,8 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
       // Padding remains consistent
       selected: selectedValue == label,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(1),
-        side: const BorderSide(color: Color(0xFF118C7E)), // Border color
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: Color(0xFF000000)), // Border color
       ),
       onSelected: (bool selected) {
         setState(() {
@@ -845,11 +845,11 @@ class _QuestionnaireSectionState extends State<QuestionnaireSection> {
           }
         });
       },
-      backgroundColor: const Color(0xFF118C7E),
+      backgroundColor: const Color(0xFFDCF8C7),
       selectedColor: Colors.green,
       showCheckmark: false, // Disables the tick mark
       labelStyle: TextStyle(
-        color: selectedValue == label ? Colors.white : Colors.white,
+        color: selectedValue == label ? Colors.white : Colors.black,
       ),
     );
   }

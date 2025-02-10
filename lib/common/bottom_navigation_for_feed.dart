@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../login/login_phone_screen.dart';
 import '../services/auth_service.dart';
 
 class BottomNavBar1 extends StatefulWidget {
@@ -72,10 +73,13 @@ class _BottomNavBar1State extends State<BottomNavBar1> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   InkWell(
-                    splashColor: const Color(0xFFDCF8C7), // Green splash effect
+                    //splashColor: const Color(0xFFDCF8C7), // Green splash effect
                     borderRadius: BorderRadius.circular(50), // Circular splash
                     onTap: () {
-                      // No additional logic here, just the splash effect
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const LoginPhoneScreen()),
+                      );
                     },
                     child: const Padding(
                       padding: EdgeInsets.all(8.0),
@@ -88,10 +92,15 @@ class _BottomNavBar1State extends State<BottomNavBar1> {
                   ),
                   Transform.translate(
                     offset: const Offset(0, -7),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/login');
+                      },
                     child: const Text(
                       'Home',
                       style: TextStyle(color: Colors.black, fontSize: 12),
                     ),
+                  ),
                   ),
                 ],
               ),
@@ -99,11 +108,14 @@ class _BottomNavBar1State extends State<BottomNavBar1> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   InkWell(
-                    splashColor: const Color(0xFFDCF8C7), // Green splash effect
+                    //splashColor: const Color(0xFFDCF8C7), // Green splash effect
                     borderRadius: BorderRadius.circular(50), // Circular splash
-                    onTap: () {
-                      // No additional logic here, just the splash effect
-                    },
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPhoneScreen()),
+              );
+            },
                     child: const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Icon(
@@ -115,10 +127,15 @@ class _BottomNavBar1State extends State<BottomNavBar1> {
                   ),
                   Transform.translate(
                     offset: const Offset(0, -7),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/login');
+                      },
                     child: const Text(
                       'Search',
                       style: TextStyle(color: Colors.black, fontSize: 12),
                     ),
+                  ),
                   ),
                 ],
               ),
@@ -126,10 +143,13 @@ class _BottomNavBar1State extends State<BottomNavBar1> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   InkWell(
-                    splashColor: const Color(0xFFDCF8C7), // Green splash effect
+                    //splashColor: const Color(0xFFDCF8C7), // Green splash effect
                     borderRadius: BorderRadius.circular(50), // Circular splash
                     onTap: () {
-                      // No additional logic here, just the splash effect
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginPhoneScreen()),
+                      );
                     },
                     child: const Padding(
                       padding: EdgeInsets.all(8.0),
@@ -142,10 +162,15 @@ class _BottomNavBar1State extends State<BottomNavBar1> {
                   ),
                   Transform.translate(
                     offset: const Offset(0, -7),
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, '/login');
+                      },
                     child: const Text(
                       'Inbox',
                       style: TextStyle(color: Colors.black, fontSize: 12),
                     ),
+                  ),
                   ),
                 ],
               ),

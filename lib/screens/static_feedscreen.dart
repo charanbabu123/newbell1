@@ -4,6 +4,7 @@ import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../login/login_phone_screen.dart';
 import '../services/auth_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -392,44 +393,48 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         Positioned(
           left: 24,
           bottom: 40,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 23,
-                    backgroundImage:
-                    NetworkImage(widget.feed.user.profilePictureUrl),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.feed.user.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
+          child: GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, '/login'); // Ensure the route is defined
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 23,
+                      backgroundImage: NetworkImage(widget.feed.user.profilePictureUrl),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.feed.user.name,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        widget.feed.user.bio ?? '',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          //fontWeight: FontWeight.bold,
+                        Text(
+                          widget.feed.user.bio ?? '',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
+
 
         // Static buttons like share, comment
         Positioned(
@@ -451,7 +456,12 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                           IconButton(
                             icon: const Icon(Icons.favorite_outline, color: Colors.white),
                             iconSize: 27,
-                            onPressed: () {},
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => LoginPhoneScreen()),
+                                );
+                              }
                           ),
                         ],
                       ),
@@ -476,7 +486,12 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                       IconButton(
                         icon: const Icon(Icons.mode_comment_outlined, color: Colors.white),
                         iconSize: 27,
-                        onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => LoginPhoneScreen()),
+                            );
+                          }
                       ),
                     ],
                   ),
@@ -500,7 +515,12 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                       IconButton(
                         icon: const Icon(Icons.share_outlined, color: Colors.white),
                         iconSize: 27,
-                        onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => LoginPhoneScreen()),
+                            );
+                          }
                       ),
                     ],
                   ),
@@ -524,7 +544,12 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                       IconButton(
                         icon: const Icon(Icons.bookmark_outline_outlined, color: Colors.white),
                         iconSize: 27,
-                        onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => LoginPhoneScreen()),
+                            );
+                          }
                       ),
                     ],
                   ),
@@ -533,6 +558,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                     child: const Text(
                       "Save",
                       style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold),
+
                     ),
                   ),
                 ],
@@ -543,30 +569,31 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
 
         // Video tag overlay
         Positioned(
-          left: MediaQuery.of(context).size.width *
-              0.07,
-          // Adjust left position relative to screen width
-          bottom: _getTagBottomPosition(widget.feed.videos[_currentVideoIndex].caption1),// Assuming 200px width
-          // Adjust bottom position relative to screen height
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-            decoration: BoxDecoration(
-              color: const Color(0xFF118C7E),
-
-
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Text(
-              widget.feed.videos[_currentVideoIndex].tag,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 15,
-                fontWeight: FontWeight.bold, // Added bold styling
+          left: MediaQuery.of(context).size.width * 0.07,
+          bottom: _getTagBottomPosition(widget.feed.videos[_currentVideoIndex].caption1),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.pushNamed(context, '/login'); // Ensure you have this route defined
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF118C7E),
+                borderRadius: BorderRadius.circular(4),
               ),
-              textAlign: TextAlign.center,
+              child: Text(
+                widget.feed.videos[_currentVideoIndex].tag,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
         ),
+
         Positioned(
           top: 38, // Distance from the top
           left: 30, // Distance from the right
