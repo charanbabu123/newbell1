@@ -241,8 +241,17 @@ class UserProfileScreenState extends State<UserProfileScreen>
     });
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('User logged off successfully')),
+      const SnackBar(
+        content: Text(
+          'User logged off successfully',
+          style: TextStyle(color: Colors.white), // White text
+        ),
+        backgroundColor: Colors.green, // Green background
+        behavior: SnackBarBehavior.floating, // Optional: makes it float above UI
+        duration: Duration(seconds:1 ), // Optional: controls display time
+      ),
     );
+
 
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => const LoginPhoneScreen()),
@@ -507,7 +516,8 @@ class UserProfileScreenState extends State<UserProfileScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(250, 246, 240, 1),
+      backgroundColor: const Color(0xFFFAF6F0),
+
       body: isLoggingOut
           ? const Center(
         child: Column(
@@ -538,7 +548,7 @@ class UserProfileScreenState extends State<UserProfileScreen>
 
           return <Widget>[
             SliverAppBar(
-              backgroundColor: const Color.fromRGBO(250, 246, 240, 1),
+              backgroundColor: const Color(0xFFFAF6F0),
               expandedHeight: finalHeight, // Use dynamic height
               floating: false,
               pinned: true,
@@ -547,20 +557,12 @@ class UserProfileScreenState extends State<UserProfileScreen>
                 builder: (BuildContext context, BoxConstraints constraints) {
                   return FlexibleSpaceBar(
                     background: Container(
-                      color: const Color.fromRGBO(250, 246, 240, 1),
+                      //color: const Color.fromRGBO(250, 246, 240, 1),
                       padding: const EdgeInsets.only(top: 80),
                       child: _buildProfileHeader(),
                     ),
                   );
                 },
-              ),
-              title: Text(
-                innerBoxIsScrolled ? username : "",
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
               ),
               actions: [
                 IconButton(

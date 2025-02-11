@@ -71,7 +71,7 @@ class _VideoPreviewScreenState extends State<VideoPreviewScreen> {
       final int videoDuration = tempController.value.duration.inSeconds;
       tempController.dispose();
 
-      if (videoDuration < 10) {
+      if (videoDuration <= 10) {
         // Show a SnackBar message if the video duration is less than 10 seconds
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(

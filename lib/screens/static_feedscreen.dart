@@ -292,6 +292,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
   final PageController _videoController = PageController();
   final Map<int, VideoPlayerController> _controllers = {};
   int _currentVideoIndex = 0;
+  String? _currentCaption;
 
   @override
   void initState() {
@@ -306,6 +307,17 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
       }
     }
   }
+
+  void _disposeAllVideos() {
+    for (var controller in _controllers.values) {
+      if (controller.value.isInitialized) {
+        controller.dispose();
+      }
+    }
+    _controllers.clear();
+  }
+
+
 
   void _registerController(int index, VideoPlayerController controller) {
     _controllers[index] = controller;
@@ -332,24 +344,47 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
     }
   }
 
-  double _getTagBottomPosition(String? caption) {
-    if (caption == null) {
-      return MediaQuery.of(context).size.height * 0.13;
+  double _getTagBottomPosition(String? caption1, String? caption2, String? caption3) {
+    // Get the current caption based on video position
+    String? currentCaption;
+    if (_controllers.containsKey(_currentVideoIndex)) {
+      final controller = _controllers[_currentVideoIndex]!;
+      if (controller.value.isInitialized) {
+        final position = controller.value.position.inSeconds;
+        final totalDuration = controller.value.duration.inSeconds;
+
+        if (totalDuration > 0) {
+          final segment = totalDuration ~/ 3;
+
+          if (position < segment) {
+            currentCaption = caption1;
+          } else if (position < 2 * segment) {
+            currentCaption = caption2;
+          } else {
+            currentCaption = caption3;
+          }
+        }
+      }
+    }
+
+    if (currentCaption == null) {
+      return MediaQuery.of(context).size.height * 0.13;  // Base position when no caption
     }
 
     // Count the number of lines in the formatted caption
-    List<String> lines = _formatCaption(caption).split('\n');
+    List<String> lines = _formatCaption(currentCaption).split('\n');
     int lineCount = lines.length;
 
+    // Adjusted position values for different line counts
     switch (lineCount) {
       case 1:
-        return MediaQuery.of(context).size.height * 0.15;
+        return MediaQuery.of(context).size.height * 0.18;  // Moved up for single line
       case 2:
-        return MediaQuery.of(context).size.height * 0.22;
+        return MediaQuery.of(context).size.height * 0.20;  // Distinct position for two lines
       case 3:
-        return MediaQuery.of(context).size.height * 0.23;
+        return MediaQuery.of(context).size.height * 0.23;  // Kept the same for three lines
       default:
-        return MediaQuery.of(context).size.height * 0.23; // For 3+ lines
+        return MediaQuery.of(context).size.height * 0.23;  // For more than three lines
     }
   }
 
@@ -457,11 +492,13 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                             icon: const Icon(Icons.favorite_outline, color: Colors.white),
                             iconSize: 27,
                               onPressed: () {
+                                pauseAllVideos();
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(builder: (context) => LoginPhoneScreen()),
                                 );
                               }
+
                           ),
                         ],
                       ),
@@ -570,7 +607,11 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         // Video tag overlay
         Positioned(
           left: MediaQuery.of(context).size.width * 0.07,
-          bottom: _getTagBottomPosition(widget.feed.videos[_currentVideoIndex].caption1),
+          bottom: _getTagBottomPosition(
+              widget.feed.videos[_currentVideoIndex].caption1,
+              widget.feed.videos[_currentVideoIndex].caption2,
+              widget.feed.videos[_currentVideoIndex].caption3,
+          ),
           child: GestureDetector(
             onTap: () {
               Navigator.pushNamed(context, '/login'); // Ensure you have this route defined

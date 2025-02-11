@@ -1,7 +1,11 @@
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../services/auth_service.dart';
 import 'JobSearchApp.dart';
 
 class SplashScreen1 extends StatefulWidget {
@@ -15,6 +19,8 @@ class _SplashScreenState extends State<SplashScreen1> {
   @override
   void initState() {
     super.initState();
+    _checkAuthStatus();
+
     // Navigate to main screen after 9 seconds
     Future.delayed(const Duration(seconds: 10), () {
       Navigator.pushReplacement(
@@ -22,6 +28,40 @@ class _SplashScreenState extends State<SplashScreen1> {
         MaterialPageRoute(builder: (context) => const JobSearchScreen()),
       );
     });
+  }
+
+
+  Future<void> _checkAuthStatus() async {
+    bool shouldStayLoggedIn = false;
+
+    // First check if we have an access token
+    final hasAccessToken = await AuthService.isLoggedIn();
+
+    if (hasAccessToken) {
+      // We have an access token, try to use it
+      shouldStayLoggedIn = true;
+    }
+
+    if (mounted) {
+      Timer(const Duration(seconds: 4), () async {
+        final prefs = await SharedPreferences.getInstance();
+
+        final bool userExists = prefs.getBool("userExists") ?? false;
+        debugPrint('User exists: $userExists');
+        //Routing
+        if (!userExists) {
+          if (mounted) Navigator.of(context).pushReplacementNamed('/job');
+        } else {
+          if (shouldStayLoggedIn) {
+            if (mounted) Navigator.of(context).pushReplacementNamed('/feed');
+          } else {
+            // Clear any old tokens if refresh failed
+            AuthService.logout();
+            if (mounted) Navigator.of(context).pushReplacementNamed('/login');
+          }
+        }
+      });
+    }
   }
 
   @override

@@ -75,7 +75,7 @@ class _SavedVideosScreenState extends State<SavedVideosScreen> {
           ? const Center(
         child: Text(
           "No saved videos found",
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.green),
         ),
       )
           : Padding(

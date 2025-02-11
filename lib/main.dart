@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const JobSearchScreen(),
+        '/': (context) => const SplashScreen1(),
         '/tour': (context) => const ProductTourScreen(),
         '/login': (context) => const LoginPhoneScreen(),
         '/otp': (context) {
@@ -53,6 +53,7 @@ class MyApp extends StatelessWidget {
               as Map<String, dynamic>;
           return OtpScreen(phoneNumber: args['phoneNumber']);
         },
+        '/job': (context) => const JobSearchScreen(),
         '/details': (context) => const NameScreen(),
         '/reel': (context) => const ReelUploaderScreen(),
         '/feed': (context) => const FeedScreen(),
