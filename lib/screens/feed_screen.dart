@@ -163,11 +163,21 @@ class _FeedScreenState extends State<FeedScreen>
               ),
             ),
             padding: const EdgeInsets.only(
-                top: 52, left: 34, right: 109, bottom: 16),
+                top: 45, left: 25, right: 32, bottom: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Spacer(), // Pushes content to the center
+                Positioned(
+                  // top: 37, // Distance from the top
+                  // left: 30, // Distance from the left
+                  child: SvgPicture.asset(
+                    'assets/bell_image.svg',
+                    width: 28, // Decreased width
+                    height: 28, // Decreased height
+                  ),
+                ),
+
+                // const Spacer(), // Pushes content to the center
                 // Center Content
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -206,6 +216,15 @@ class _FeedScreenState extends State<FeedScreen>
                     ),
                   ],
                 ),
+            const Positioned(
+              // top: 38, // Distance from the top
+              right: 30, // Distance from the right
+              child: Icon(
+                Icons.search, // Search icon
+                size: 30, // Same size as the previous SVG
+                color: Colors.green, // You can change the color if needed
+              ),
+            ),
               ],
             ),
           ),
@@ -734,25 +753,35 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
             ),
           ),
         ),
-        Positioned(
-          top: 37, // Distance from the top
-          left: 21, // Distance from the right
-          child: SvgPicture.asset(
-            'assets/bell_image.svg',
-            width: 28, // Decreased width
-            height: 28, // Decreased height
-          ),
-        ),
-        const Positioned(
-          top: 38, // Distance from the top
-          right: 20, // Distance from the left
-          child: Icon(
-            Icons.search, // Search icon
-            size: 30, // Same size as the previous SVG
-            color: Colors.green, // You can change the color if needed
-          ),
-        ),
+        // Positioned(
+        //   top: 37, // Distance from the top
+        //   left: 21, // Distance from the right
+        //   child: SvgPicture.asset(
+        //     'assets/bell_image.svg',
+        //     width: 28, // Decreased width
+        //     height: 28, // Decreased height
+        //   ),
+        // ),
+        // const Positioned(
+        //   top: 38, // Distance from the top
+        //   right: 20, // Distance from the left
+        //   child: Icon(
+        //     Icons.search, // Search icon
+        //     size: 30, // Same size as the previous SVG
+        //     color: Colors.green, // You can change the color if needed
+        //   ),
+        // ),
 
+        // Positioned(
+        //   bottom: 80, // Adjust this value as needed
+        //   left: 20,
+        //   right: 20,
+        //   child: InstagramStoryProgressBar(
+        //     videos: widget.feed.videos,
+        //     currentController: _controllers[_currentVideoIndex] ?? VideoPlayerController.networkUrl(Uri.parse('')),
+        //     currentIndex: _currentVideoIndex,
+        //   ),
+        // ),
       ],
     );
   }
@@ -1344,7 +1373,7 @@ class _ReportDialogState extends State<ReportDialog> {
                   child: Text(
                     'Report',
                     style: TextStyle(
-                      color: Colors.green,
+                      color: Colors.black,
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1356,22 +1385,22 @@ class _ReportDialogState extends State<ReportDialog> {
                   child: Text(
                     'Why are you reporting this post?',
                     style: TextStyle(
-                      color: Colors.green,
+                      color: Colors.black,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                  child: Text(
-                    'Your report is anonymous. If someone is in immediate danger, call the local emergency services - don\'t wait.',
-                    style: TextStyle(
-                      color: Colors.green,
-                      fontSize: 14,
-                    ),
-                  ),
-                ),
+                // const Padding(
+                //   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                //   child: Text(
+                //     'Your report is anonymous. If someone is in immediate danger, call the local emergency services - don\'t wait.',
+                //     style: TextStyle(
+                //       color: Colors.grey,
+                //       fontSize: 14,
+                //     ),
+                //   ),
+                // ),
                 const SizedBox(height: 8),
                 ...List.generate(
                   questions.length,
@@ -1392,7 +1421,7 @@ class _ReportDialogState extends State<ReportDialog> {
                             child: Text(
                               questions[index],
                               style: TextStyle(
-                                color: Colors.green,
+                                color: Colors.black,
                                 fontSize: 16,
                                 fontWeight: selectedIndex == index
                                     ? FontWeight.w600
@@ -1412,10 +1441,10 @@ class _ReportDialogState extends State<ReportDialog> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: ElevatedButton(
-                    onPressed:_submitReport ,
+                    onPressed: selectedIndex == null ? null : _submitReport, // Disable if no option is selected
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
-                      disabledBackgroundColor: Colors.grey,
+                      disabledBackgroundColor: Colors.grey, // Color when disabled
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
@@ -1428,8 +1457,8 @@ class _ReportDialogState extends State<ReportDialog> {
                       ),
                     ),
                   ),
-
                 ),
+
               ],
             ),
           ),

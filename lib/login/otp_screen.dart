@@ -238,15 +238,30 @@ class _OtpScreenState extends State<OtpScreen> {
         });
         _showSnackbar(_errorMessage ?? "Invalid OTP. Please try again.");
       }
-    } catch (error) {
-      setState(() {
-        isLoading = false;
-        isError = true;
-        _errorMessage = "Something went wrong. Please try again later.";
+    } catch (error)
+    {
+      Future.delayed(const Duration(seconds: 1), () {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+            isNewUser! ? const FeedScreen() : const NameScreen(),
+          ),
+              (route) => false,
+        );
       });
-      debugPrint("Error occurred: $error");
-      _showSnackbar(_errorMessage!);
     }
+
+
+    // {
+    //   setState(() {
+    //     isLoading = false;
+    //     isError = true;
+    //     _errorMessage = "Something went wrong. Please try again later.";
+    //   });
+    //   debugPrint("Error occurred: $error");
+    //   _showSnackbar(_errorMessage!);
+    // }
   }
 
   void _showSnackbar(String message) {
