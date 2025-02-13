@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -6,6 +7,8 @@ import '../Widget/CommentBox.dart';
 import '../common/bottom_navigation.dart';
 import '../services/auth_service.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:share_plus/share_plus.dart';
+//import 'package:uni_links/uni_links.dart';
 
 class FeedScreen extends StatefulWidget {
   const FeedScreen({super.key});
@@ -34,6 +37,7 @@ class _FeedScreenState extends State<FeedScreen>
   @override
   void initState() {
     super.initState();
+    // _handleDeepLink();
     _tabController = TabController(length: 2, vsync: this);
     _loadFeeds();
   }
@@ -79,6 +83,59 @@ class _FeedScreenState extends State<FeedScreen>
       }
     }
   }
+
+  // void _handleDeepLink() async {
+  //   try {
+  //     final initialLink = await getInitialLink();
+  //     if (initialLink != null) {
+  //       _processDeepLink(initialLink);
+  //     }
+  //
+  //     linkStream.listen((String? link) {
+  //       if (link != null) {
+  //         _processDeepLink(link);
+  //       }
+  //     });
+  //   } on PlatformException {
+  //     debugPrint("Error retrieving deep link");
+  //   }
+  // }
+  //
+  // void _processDeepLink(String link) {
+  //   final uri = Uri.parse(link);
+  //   if (uri.pathSegments.contains('user') && uri.pathSegments.contains('videos')) {
+  //     final userId = int.tryParse(uri.pathSegments.last);
+  //     if (userId != null) {
+  //       _loadSpecificFeed(userId);
+  //     }
+  //   }
+  // }
+  //
+  // Future<void> _loadSpecificFeed(int userId) async {
+  //   setState(() => isLoading = true);
+  //   try {
+  //     final validToken = await _getValidToken();
+  //     if (validToken == null) throw Exception('Login required');
+  //
+  //     final response = await http.get(
+  //       Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/user/videos/$userId/'),
+  //       headers: {'Authorization': 'Bearer $validToken'},
+  //     );
+  //
+  //     if (response.statusCode == 200) {
+  //       final data = json.decode(response.body);
+  //       setState(() {
+  //         feeds = (data['results'] as List).map((feed) => UserFeed.fromJson(feed)).toList();
+  //       });
+  //     } else {
+  //       throw Exception('Failed to load feed');
+  //     }
+  //   } catch (e) {
+  //     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+  //   } finally {
+  //     setState(() => isLoading = false);
+  //   }
+  // }
 
   Future<void> reloadFeeds() async {
     setState(() {
@@ -141,14 +198,14 @@ class _FeedScreenState extends State<FeedScreen>
               ),
             )
           else
-          PageView.builder(
-            scrollDirection: Axis.vertical,
-            controller: _pageController,
-            itemCount: filteredFeeds.length,
-            itemBuilder: (context, index) {
-              return FullScreenFeedItem(feed: filteredFeeds[index]);
-            },
-          ),
+            PageView.builder(
+              scrollDirection: Axis.vertical,
+              controller: _pageController,
+              itemCount: filteredFeeds.length,
+              itemBuilder: (context, index) {
+                return FullScreenFeedItem(feed: filteredFeeds[index]);
+              },
+            ),
 
           // Overlay header
           Container(
@@ -163,21 +220,11 @@ class _FeedScreenState extends State<FeedScreen>
               ),
             ),
             padding: const EdgeInsets.only(
-                top: 45, left: 25, right: 32, bottom: 16),
+                top: 52, left: 34, right: 109, bottom: 16),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Positioned(
-                  // top: 37, // Distance from the top
-                  // left: 30, // Distance from the left
-                  child: SvgPicture.asset(
-                    'assets/bell_image.svg',
-                    width: 28, // Decreased width
-                    height: 28, // Decreased height
-                  ),
-                ),
-
-                // const Spacer(), // Pushes content to the center
+                const Spacer(), // Pushes content to the center
                 // Center Content
                 Row(
                   mainAxisSize: MainAxisSize.min,
@@ -216,15 +263,6 @@ class _FeedScreenState extends State<FeedScreen>
                     ),
                   ],
                 ),
-            const Positioned(
-              // top: 38, // Distance from the top
-              right: 30, // Distance from the right
-              child: Icon(
-                Icons.search, // Search icon
-                size: 30, // Same size as the previous SVG
-                color: Colors.green, // You can change the color if needed
-              ),
-            ),
               ],
             ),
           ),
@@ -376,6 +414,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
     }
   }
 
+
   void _registerController(int index, VideoPlayerController controller) {
     _controllers[index] = controller;
     // Force rebuild to update progress bar
@@ -391,11 +430,12 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
     super.dispose();
   }
 
+
   void _initializeControllers() {
     for (int i = 0; i < widget.feed.videos.length; i++) {
       final video = widget.feed.videos[i];
       final controller =
-          VideoPlayerController.networkUrl(Uri.parse(video.videoUrl));
+      VideoPlayerController.networkUrl(Uri.parse(video.videoUrl));
       _controllers[i] = controller;
       controller.initialize();
     }
@@ -420,6 +460,36 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
         return MediaQuery.of(context).size.height * 0.23; // For 3+ lines
     }
   }
+
+
+
+  Future<void> _shareVideo(int userId) async {
+    try {
+      final validToken = await _getValidToken();
+      // if (validToken == null) {
+      //   throw Exception('Unable to authenticate. Please login again.');
+      // }
+
+      final response = await http.post(
+        Uri.parse('https://rrrg77yzmd.ap-south-1.awsapprunner.com/api/share/user/$userId/'),
+        //headers: {'Authorization': 'Bearer $validToken'},
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final shareUrl = data['share_url'];
+        Share.share('Check out this video: $shareUrl');
+      } else {
+        throw Exception('Failed to get share URL');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+
 
   Future<void> _handleSaveUser() async {
     try {
@@ -581,7 +651,7 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                   CircleAvatar(
                     radius: 23,
                     backgroundImage:
-                        NetworkImage(widget.feed.user.profilePictureUrl),
+                    NetworkImage(widget.feed.user.profilePictureUrl),
                   ),
                   const SizedBox(width: 12),
                   Column(
@@ -702,11 +772,11 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
                     alignment: Alignment.center,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.share_outlined,
-                            color: Colors.white),
+                        icon: const Icon(Icons.share_outlined, color: Colors.white),
                         iconSize: 27,
-                        onPressed: () {},
+                        onPressed: () => _shareVideo(widget.feed.user.id),
                       ),
+
                     ],
                   ),
                   Transform.translate(
@@ -753,35 +823,25 @@ class _FullScreenFeedItemState extends State<FullScreenFeedItem> {
             ),
           ),
         ),
-        // Positioned(
-        //   top: 37, // Distance from the top
-        //   left: 21, // Distance from the right
-        //   child: SvgPicture.asset(
-        //     'assets/bell_image.svg',
-        //     width: 28, // Decreased width
-        //     height: 28, // Decreased height
-        //   ),
-        // ),
-        // const Positioned(
-        //   top: 38, // Distance from the top
-        //   right: 20, // Distance from the left
-        //   child: Icon(
-        //     Icons.search, // Search icon
-        //     size: 30, // Same size as the previous SVG
-        //     color: Colors.green, // You can change the color if needed
-        //   ),
-        // ),
+        Positioned(
+          top: 37, // Distance from the top
+          left: 21, // Distance from the right
+          child: SvgPicture.asset(
+            'assets/bell_image.svg',
+            width: 28, // Decreased width
+            height: 28, // Decreased height
+          ),
+        ),
+        const Positioned(
+          top: 38, // Distance from the top
+          right: 20, // Distance from the left
+          child: Icon(
+            Icons.search, // Search icon
+            size: 30, // Same size as the previous SVG
+            color: Colors.green, // You can change the color if needed
+          ),
+        ),
 
-        // Positioned(
-        //   bottom: 80, // Adjust this value as needed
-        //   left: 20,
-        //   right: 20,
-        //   child: InstagramStoryProgressBar(
-        //     videos: widget.feed.videos,
-        //     currentController: _controllers[_currentVideoIndex] ?? VideoPlayerController.networkUrl(Uri.parse('')),
-        //     currentIndex: _currentVideoIndex,
-        //   ),
-        // ),
       ],
     );
   }
@@ -825,7 +885,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
     _initializeVideo();
     _controller.addListener(() {
       setState(
-          () {}); // This will rebuild the widget when video position changes
+              () {}); // This will rebuild the widget when video position changes
     });
   }
   void _showLikeAnimation() {
@@ -862,7 +922,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
         // Register controller with parent
         final parentState =
-            context.findAncestorStateOfType<_FullScreenFeedItemState>();
+        context.findAncestorStateOfType<_FullScreenFeedItemState>();
         if (parentState != null) {
           parentState._registerController(widget.video.id, _controller);
         }
@@ -874,7 +934,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 
   void _onVideoEnd() {
     final parentState =
-        context.findAncestorStateOfType<_FullScreenFeedItemState>();
+    context.findAncestorStateOfType<_FullScreenFeedItemState>();
     if (parentState != null) {
       // Determine the next video index
       final nextVideoIndex = parentState._currentVideoIndex + 1;
@@ -1019,7 +1079,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
                 child: Text(
                   _formatCaption(_currentCaption!),
                   textAlign:
-                      TextAlign.left, // Ensure the text aligns to the left
+                  TextAlign.left, // Ensure the text aligns to the left
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 14,
@@ -1040,7 +1100,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             videos: widget.allVideos,
             currentController: _controller,
             currentIndex:
-                widget.currentIndex, // Use the index passed from parent
+            widget.currentIndex, // Use the index passed from parent
           ),
         ),
       ],
@@ -1128,23 +1188,23 @@ class InstagramStoryProgressBar extends StatelessWidget {
       child: Row(
         children: List.generate(
           videos.length,
-          (index) => Expanded(
+              (index) => Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 5.0),
               child: index == currentIndex
                   ? _ProgressBar(
-                      controller: currentController,
-                      isActive: true,
-                    )
+                controller: currentController,
+                isActive: true,
+              )
                   : Container(
-                      height: 5,
-                      decoration: BoxDecoration(
-                        color: index < currentIndex
-                            ? Colors.green
-                            : Colors.grey.withOpacity(0.5),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
+                height: 5,
+                decoration: BoxDecoration(
+                  color: index < currentIndex
+                      ? Colors.green
+                      : Colors.grey.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
             ),
           ),
         ),
@@ -1373,7 +1433,7 @@ class _ReportDialogState extends State<ReportDialog> {
                   child: Text(
                     'Report',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Colors.green,
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1385,22 +1445,22 @@ class _ReportDialogState extends State<ReportDialog> {
                   child: Text(
                     'Why are you reporting this post?',
                     style: TextStyle(
-                      color: Colors.black,
+                      color: Colors.green,
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
-                // const Padding(
-                //   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                //   child: Text(
-                //     'Your report is anonymous. If someone is in immediate danger, call the local emergency services - don\'t wait.',
-                //     style: TextStyle(
-                //       color: Colors.grey,
-                //       fontSize: 14,
-                //     ),
-                //   ),
-                // ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                  child: Text(
+                    'Your report is anonymous. If someone is in immediate danger, call the local emergency services - don\'t wait.',
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 8),
                 ...List.generate(
                   questions.length,
@@ -1421,7 +1481,7 @@ class _ReportDialogState extends State<ReportDialog> {
                             child: Text(
                               questions[index],
                               style: TextStyle(
-                                color: Colors.black,
+                                color: Colors.green,
                                 fontSize: 16,
                                 fontWeight: selectedIndex == index
                                     ? FontWeight.w600
@@ -1441,10 +1501,10 @@ class _ReportDialogState extends State<ReportDialog> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   child: ElevatedButton(
-                    onPressed: selectedIndex == null ? null : _submitReport, // Disable if no option is selected
+                    onPressed:_submitReport ,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
-                      disabledBackgroundColor: Colors.grey, // Color when disabled
+                      disabledBackgroundColor: Colors.grey,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     ),
@@ -1457,8 +1517,8 @@ class _ReportDialogState extends State<ReportDialog> {
                       ),
                     ),
                   ),
-                ),
 
+                ),
               ],
             ),
           ),

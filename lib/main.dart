@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPhoneScreen(),
         '/otp': (context) {
           final args = ModalRoute.of(context)!.settings.arguments
-              as Map<String, dynamic>;
+          as Map<String, dynamic>;
           return OtpScreen(phoneNumber: args['phoneNumber']);
         },
         '/job': (context) => const JobSearchScreen(),

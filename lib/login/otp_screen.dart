@@ -252,7 +252,6 @@ class _OtpScreenState extends State<OtpScreen> {
       });
     }
 
-
     // {
     //   setState(() {
     //     isLoading = false;
